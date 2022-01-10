@@ -4,7 +4,7 @@
 
 ### Install Tools 
 
-1 - Install openssl for <br />
+1 - Install openssl <br />
 * Windows : https://slproweb.com/products/Win32OpenSSL.html <br /> 
 * Linux   : `apt update && apt install build-essential checkinstall zlib1g-dev openssl libssl-dev -y`
 
