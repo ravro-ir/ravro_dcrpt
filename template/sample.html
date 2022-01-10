@@ -1,0 +1,200 @@
+<html>
+<head>
+  <title>{TITLE}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/samim-font@v4.0.5/dist/font-face.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007fba;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      color: #000;
+      direction: rtl;
+      line-height: 2;
+      font-family: Samim,Tahoma,"DejaVu Sans",helvetica,arial,freesans,sans-serif;
+    }
+
+    header, .sample, footer {
+      margin: auto;
+      padding: 30px 50px;
+    }
+
+    header {
+      text-align: center;
+      background-color: #fff;
+      color: #222;
+    }
+
+    header h1 {
+      color: #6f6f91;
+      font-size: 3rem;
+      font-weight: 500;
+    }
+
+    header h1 span {
+      color: #6c5367;
+    }
+
+    header .version {
+      color: #000000;
+      font-weight: bold;
+    }
+
+    header .get {
+      margin: 10px 0;
+      font-size: 1.5rem;
+    }
+
+    header .get a {
+      display: inline-block;
+      border-bottom: 1px solid #d5d5d5;
+      color: #007fba;
+      margin: 0 5px;
+    }
+
+    header .info{
+      color: #999;
+    }
+
+    .infobox {
+      background-color: #f4f7ff;
+      border: 1px solid #e2e2e2;
+      border-radius: 5px;
+      color: #284559;
+      font-weight: 900;
+      line-height: 2;
+      margin: 0 auto;
+      max-width: 600px;
+      padding: 5px;
+    }
+    .sample {
+      background-color: #f5f8fa;
+      color: #181b1d;
+      border-top: 1px solid #eee;
+    }
+    .sample h2 {
+      font-weight: normal;
+      color: #00727b;
+    }
+    .sample p {
+      margin-bottom: 30px;
+    }
+    .sample a { color: #0b6db3; }
+    footer {
+      background-color: #1d2b2a;
+      /*background-image: url("paint.jpg");*/
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+    }
+    footer a {
+      color: #FEAF3A;
+    }
+    .clear { clear: both; }
+    @media all and (max-width: 480px){
+      html {
+        font-size: 15px;
+      }
+      header, .sample, footer {
+        padding: 30px 20px;
+      }
+
+      .sample {
+        text-align: right;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+      }
+    }
+    table {
+      font-family: Samim,Tahoma,"DejaVu Sans",helvetica,arial,freesans,sans-serif;
+      border-collapse: collapse;
+      /*width: 60%;*/
+      /*margin-right: 50px;*/
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      padding: 8px;
+      text-align: center;
+    }
+    .center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+    .img-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<img class="img-center" src="https://www.ravro.ir/api/api/avatar?code=e7ac6b7ca8218721d6f69fbff5a1881e5dc85457f3d7b" alt="image" />
+<header>
+  <h1>{{.Title}}</h1>
+  <br />
+</header>
+<br />
+<table class="center">
+  <tr>
+    <th>شکارچی</th>
+    <th>شناسه گزارش</th>
+    <th>تاریخ ثبت</th>
+    <th>ویدیو / عکس</th>
+  </tr>
+  <tr>
+    <td>TODO</td>
+    <td>TODO</td>
+    <td>{{.DateFrom}}</td>
+    <td>TODO</td>
+  </tr>
+</table>
+<br />
+<hr>
+<br />
+<h1>شرح آسیب پذیری (شکارچی) </h1>
+<div>{{.PoC}} </div>
+<br />
+<h1>چگونه می‌توان آسیب‌پذیری را رفع کرد ؟ ( شکارچی ) </h1>
+<div>{{.Reproduce}}</div>
+<hr>
+<br />
+<br />
+<h1>تماس با راورو : </h1>
+<p>
+  دفتر مرکزی
+  تهران، خيابان مطهری، نبش سهروردی، پلاك ۹۴ ، طبقه دوم، واحد ۲۵۰
+</p>
+<br />
+<p>
+  شماره تماس
+  1553-9103-021
+  <br />
+  شماره فکس
+  1553-9103-021
+  <br />
+  آدرس ایمیل
+  support[at]Ravro[dot]ir
+</p>
+</body>
+</html>
