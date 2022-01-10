@@ -38,11 +38,17 @@ func ReadCurrentDir() {
 	}
 	lstFileDecrypt, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstFileDecrypt {
+		newName := strings.ReplaceAll(name, " ", "")
+		err := os.Rename(name, newName)
+		if err != nil {
+			return
+		}
+		name = newName
 		filename := filepath.Base(name)
 		filename = strings.Replace(filename, ".ravro", "", 1)
-		_, err := SslDecrypt(name, filename)
+		_, err = SslDecrypt(name, filename)
 		if err != nil {
-			fmt.Println("We have error in for decode")
+			fmt.Println(err.Error())
 			os.Exit(0)
 		}
 	}

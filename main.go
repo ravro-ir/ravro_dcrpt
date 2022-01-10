@@ -20,18 +20,24 @@ type Report struct {
 	CVSS        string `json:"cvss"`
 }
 
-func main() {
-	var report Report
-	var templatePath string
-	var outputPath string
-	var jsonVulPath string
-	r := NewRequestPdf("")
-	pt := ptime.Now()
-	if err := ensureDir("datadecrypt"); err != nil {
+func AddDir(name string) {
+	if err := ensureDir(name); err != nil {
 		fmt.Println("Directory creation failed with error: " + err.Error())
 		os.Exit(1)
 	}
+}
 
+func main() {
+	var (
+		report       Report
+		templatePath string
+		outputPath   string
+		jsonVulPath  string
+	)
+	r := NewRequestPdf("")
+	pt := ptime.Now()
+	AddDir("pdfs")
+	AddDir("datadecrypt")
 	if runtime.GOOS == "windows" {
 		templatePath = "template\\sample.html"
 		outputPath = "pdfs\\reports.pdf"
