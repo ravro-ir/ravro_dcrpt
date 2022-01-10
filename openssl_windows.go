@@ -8,12 +8,6 @@ import (
 
 func SslDecrypt(name, filename string) (out string, errOut error) {
 
-	//path, err := exec.LookPath("openssl")
-	//if err != nil {
-	//	log.Fatal("LookPath: ", err)
-	//}
-	//fmt.Println(path)
-
 	command := fmt.Sprintf(`openssl smime -decrypt -in %s -inform DER -inkey key/key.private -out datadecrypt/%s -binary`,
 		name, filename)
 
