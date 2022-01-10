@@ -1,4 +1,4 @@
-### ravro_dcrpt - Decrypt secret report files
+### ravro_dcrpt - Decrypt secret report files revor
 
 (Written in Go because, you know, "write once, run anywhere.")
 
@@ -24,6 +24,23 @@
 [++++] Starting report to pdf . . .
 [++++] pdf generated successfully
 ```
+
+# Building from source
+
+Install a [Go compiler](https://golang.org/dl).
+
+Run the following commands in the checked-out repository:
+```
+go run main.go
+Or
+go build -o main
+```
+(Add the appropriate `.exe` extension on Windows systems, of course.)
+
+# License
+GNU General Public License, version 3
+# Author
+Ramin Farajpour Cami <<ramin.blackhat@gmail.com>>
 
 
 
