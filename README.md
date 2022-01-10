@@ -6,7 +6,7 @@
 
 1 - Install openssl for <br />
 * Windows : https://slproweb.com/products/Win32OpenSSL.html <br /> 
-* Linux   : `apt-get install wkhtmltopdf`
+* Linux   : `apt update && apt install build-essential checkinstall zlib1g-dev openssl libssl-dev -y`
 
 2 - Install wkhtmltopdf 
 * Windows : https://wkhtmltopdf.org/downloads.html and add environment variable `C:\Program Files\wkhtmltopdf`
