@@ -6,8 +6,7 @@ import (
 	"os/exec"
 )
 
-
-func SslDecrypt(name, filename string) (out string, err_out error) {
+func SslDecrypt(name, filename string) (out string, errOut error) {
 
 	command := fmt.Sprintf("openssl smime -decrypt -in %s -inform DER -inkey key/key.private -out datadecrypt/%s -binary", name, filename)
 	stdout := &bytes.Buffer{}
