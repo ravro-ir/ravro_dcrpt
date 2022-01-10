@@ -27,6 +27,10 @@ func main() {
 	var jsonVulPath string
 	r := NewRequestPdf("")
 	pt := ptime.Now()
+	if err := ensureDir("datadecrypt"); err != nil {
+		fmt.Println("Directory creation failed with error: " + err.Error())
+		os.Exit(1)
+	}
 
 	if runtime.GOOS == "windows" {
 		templatePath = "template\\sample.html"
@@ -37,7 +41,10 @@ func main() {
 		outputPath = "pdfs/reports.pdf"
 		jsonVulPath = "datadecrypt/data"
 	}
+	fmt.Println("[++++] Starting for decrypting . . . ")
 	ReadCurrentDir()
+	fmt.Println("[++++] decrypted successfully ")
+	fmt.Println("[++++] Starting report to pdf . . . ")
 	jsonFile, err := os.Open(jsonVulPath)
 	byteValueReport, _ := ioutil.ReadAll(jsonFile)
 	err = json.Unmarshal(byteValueReport, &report)
