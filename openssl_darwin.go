@@ -11,7 +11,7 @@ func SslDecrypt(name, filename string) (out string, err_out error) {
 	command := fmt.Sprintf("openssl smime -decrypt -in %s -inform DER -inkey key/key.private -out datadecrypt/%s -binary", name, filename)
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
-	name := "bash"
+	name = "bash"
 	arg := []string{"-c", command}
 	cmd := exec.Command(name, arg...)
 	cmd.Stderr = stderr
