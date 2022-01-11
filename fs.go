@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"golang.org/x/exp/utf8string"
 	"log"
 	"os"
 	"path/filepath"
@@ -41,11 +42,20 @@ func ReadCurrentDir() {
 		newName := strings.ReplaceAll(name, " ", "")
 		err := os.Rename(name, newName)
 		if err != nil {
-			return
+			log.Fatalf("We have error in %s", err)
 		}
 		name = newName
 		filename := filepath.Base(name)
+		asciiCheck := utf8string.NewString(filename).IsASCII()
+		if !asciiCheck {
+			fmt.Println(asciiCheck)
+		}
+		fmt.Println(asciiCheck)
 		filename = strings.Replace(filename, ".ravro", "", 1)
+		getFileName := fileNameWithoutExtension(filename)
+		fileExt := filepath.Ext(filename)
+		fmt.Println(getFileName)
+		fmt.Println(fileExt)
 		_, err = SslDecrypt(name, filename)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -71,4 +81,8 @@ func ensureDir(dirName string) error {
 		return nil
 	}
 	return err
+}
+
+func fileNameWithoutExtension(fileName string) string {
+	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }
