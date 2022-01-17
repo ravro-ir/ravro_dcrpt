@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -50,6 +51,9 @@ func ReadCurrentDir() {
 	}
 	lstFileDecrypt, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstFileDecrypt {
+		var NewPathFile string
+		var oldNamePath string
+		var newNamePath string
 		newName := strings.ReplaceAll(name, " ", "")
 		err := os.Rename(name, newName)
 		if err != nil {
@@ -64,7 +68,11 @@ func ReadCurrentDir() {
 		asciiCheck := utf8string.NewString(filename).IsASCII()
 		if !asciiCheck {
 			newNameRand := randSeq(10)
-			NewPathFile := basePath + "\\" + newNameRand + fileExt + ".ravro"
+			if runtime.GOOS == "windows" {
+				NewPathFile = basePath + "\\" + newNameRand + fileExt + ".ravro"
+			} else {
+				NewPathFile = basePath + "/" + newNameRand + fileExt + ".ravro"
+			}
 			err := os.Rename(name, NewPathFile)
 			if err != nil {
 				return
@@ -77,8 +85,13 @@ func ReadCurrentDir() {
 			fmt.Println(err.Error())
 			os.Exit(0)
 		}
-		oldNamePath := "datadecrypt" + "\\" + oldName + fileExt
-		newNamePath := "datadecrypt" + "\\" + filename
+		if runtime.GOOS == "windows" {
+			oldNamePath = "datadecrypt" + "\\" + oldName + fileExt
+			newNamePath = "datadecrypt" + "\\" + filename
+		} else {
+			oldNamePath = "datadecrypt" + "/" + oldName + fileExt
+			newNamePath = "datadecrypt" + "/" + filename
+		}
 		err = os.Remove(name)
 		if err != nil {
 			return
