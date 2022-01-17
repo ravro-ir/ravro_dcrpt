@@ -13,11 +13,15 @@ import (
 )
 
 type Report struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Reproduce   string `json:"reproduce"`
-	DateFrom    string `json:"dateFrom"`
-	CVSS        string `json:"cvss"`
+	Title           string `json:"title"`
+	Description     string `json:"description"`
+	Reproduce       string `json:"reproduce"`
+	DateFrom        string `json:"dateFrom"`
+	CVSS            string `json:"cvss"`
+	HunterUsername  string `json:"hunterUsername"`
+	CompanyUsername string `json:"companyUsername"`
+	Slug            string `json:"slug"`
+	Attachment      int    `json:"attachmentsCount"`
 }
 
 func AddDir(name string) {
@@ -72,12 +76,18 @@ func main() {
 		DateFrom    string
 		CVSS        string
 		Reproduce   string
+		Hunter      string
+		ReportID    string
+		Attachment  int
 	}{
-		Title:     report.Title,
-		PoC:       report.Description,
-		CVSS:      report.CVSS,
-		Reproduce: report.Reproduce,
-		DateFrom:  report.DateFrom,
+		Title:      report.Title,
+		PoC:        report.Description,
+		CVSS:       report.CVSS,
+		Reproduce:  report.Reproduce,
+		DateFrom:   report.DateFrom,
+		Hunter:     report.HunterUsername,
+		ReportID:   report.Slug,
+		Attachment: report.Attachment,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)
