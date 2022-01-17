@@ -5,10 +5,21 @@ import (
 	"fmt"
 	"golang.org/x/exp/utf8string"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
 
 func WalkMatch(root, pattern string) ([]string, error) {
 	var matches []string
@@ -46,20 +57,35 @@ func ReadCurrentDir() {
 		}
 		name = newName
 		filename := filepath.Base(name)
+		basePath := filepath.Dir(name)
+		filename = strings.Replace(filename, ".ravro", "", 1)
+		fileExt := filepath.Ext(filename)
+		oldName := fileNameWithoutExtension(filename)
 		asciiCheck := utf8string.NewString(filename).IsASCII()
 		if !asciiCheck {
-			fmt.Println(asciiCheck)
+			newNameRand := randSeq(10)
+			NewPathFile := basePath + "\\" + newNameRand + fileExt + ".ravro"
+			err := os.Rename(name, NewPathFile)
+			if err != nil {
+				return
+			}
+			filename = newNameRand + fileExt
+			name = NewPathFile
 		}
-		fmt.Println(asciiCheck)
-		filename = strings.Replace(filename, ".ravro", "", 1)
-		getFileName := fileNameWithoutExtension(filename)
-		fileExt := filepath.Ext(filename)
-		fmt.Println(getFileName)
-		fmt.Println(fileExt)
 		_, err = SslDecrypt(name, filename)
 		if err != nil {
 			fmt.Println(err.Error())
 			os.Exit(0)
+		}
+		oldNamePath := "datadecrypt" + "\\" + oldName + fileExt
+		newNamePath := "datadecrypt" + "\\" + filename
+		err = os.Remove(name)
+		if err != nil {
+			return
+		}
+		err = os.Rename(newNamePath, oldNamePath)
+		if err != nil {
+			return
 		}
 	}
 }
@@ -70,7 +96,6 @@ func ensureDir(dirName string) error {
 		return nil
 	}
 	if os.IsExist(err) {
-		// check that the existing path is a directory
 		info, err := os.Stat(dirName)
 		if err != nil {
 			return err
