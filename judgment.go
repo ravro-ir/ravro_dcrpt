@@ -11,10 +11,16 @@ import (
 	"strings"
 )
 
+type JudgeCvss struct {
+	Value  string `json:"value"`
+	Rating string `json:"rating"`
+}
+
 type Judgment struct {
 	Score       int    `json:"score"`
 	Reward      int    `json:"reward"`
 	Description string `json:"description"`
+	Cvss        JudgeCvss
 }
 
 func DcrptJudgment() (Judgment, error) {
@@ -73,12 +79,15 @@ func DcrptJudgment() (Judgment, error) {
 			return judgment, err
 		}
 		jsonFile, err := os.Open(oldNamePath)
-		byteValueReport, _ := ioutil.ReadAll(jsonFile)
-		err = json.Unmarshal(byteValueReport, &judgment)
+		judgmentValue, _ := ioutil.ReadAll(jsonFile)
+		err = json.Unmarshal(judgmentValue, &judgment)
 		if err != nil {
 			return judgment, err
 		}
-		jsonFile.Close()
+		err = jsonFile.Close()
+		if err != nil {
+			return Judgment{}, err
+		}
 		if err = os.Remove(oldNamePath); err != nil {
 			log.Fatal(err)
 		}

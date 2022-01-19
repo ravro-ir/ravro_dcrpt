@@ -81,12 +81,15 @@ func DcrptReport() (Report, error) {
 			continue
 		}
 		jsonFile, err := os.Open(oldNamePath)
-		byteValueReport, _ := ioutil.ReadAll(jsonFile)
-		err = json.Unmarshal(byteValueReport, &report)
+		reportValue, _ := ioutil.ReadAll(jsonFile)
+		err = json.Unmarshal(reportValue, &report)
 		if err != nil {
 			return report, err
 		}
-		jsonFile.Close()
+		err = jsonFile.Close()
+		if err != nil {
+			return Report{}, err
+		}
 		if err = os.Remove(oldNamePath); err != nil {
 			log.Fatal(err)
 		}

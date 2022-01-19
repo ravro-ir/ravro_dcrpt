@@ -40,6 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error report")
 	}
+	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
 	fmt.Println("[++++] decrypted successfully ")
 	fmt.Println("[++++] Starting report to pdf . . . ")
@@ -60,15 +61,21 @@ func main() {
 		Reproduce   string
 		Hunter      string
 		ReportID    string
-		Attachment  int
+		Amount      int
+		Score       int
+		JudgeInfo   string
+		DateTo      string
 	}{
 		Title:     pdf.report.Title,
 		PoC:       pdf.report.Description,
-		CVSS:      pdf.report.CVSS,
+		CVSS:      pdf.judge.Cvss.Value,
 		Reproduce: pdf.report.Reproduce,
 		DateFrom:  pdf.report.DateFrom,
 		Hunter:    pdf.report.HunterUsername,
 		ReportID:  pdf.report.Slug,
+		Amount:    pdf.judge.Reward,
+		JudgeInfo: pdf.judge.Description,
+		DateTo:    dateTo,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)

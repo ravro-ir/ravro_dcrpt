@@ -160,13 +160,11 @@
     <th>شکارچی</th>
     <th>شناسه گزارش</th>
     <th>تاریخ ثبت</th>
-    <th>ویدیو / عکس</th>
   </tr>
   <tr>
     <td>{{.Hunter}}</td>
     <td>{{.ReportID}}</td>
     <td>{{.DateFrom}}</td>
-    <td>{{.Attachment}}</td>
   </tr>
 </table>
 <br />
@@ -177,7 +175,29 @@
 <br />
 <h1>چگونه می‌توان آسیب‌پذیری را رفع کرد ؟ ( شکارچی ) </h1>
 <div>{{.Reproduce}}</div>
+<br />
+<br />
+<br />
+<br />
 <hr>
+<br />
+<table class="center">
+  <tr>
+    <th>CVSS</th>
+    <th>پاداش پیشنهادی</th>
+    <th>تاریخ بررسی</th>
+  </tr>
+  <tr>
+    <td>{{.CVSS}}</td>
+    <td>{{.Amount}} ریال</td>
+    <td>{{.DateTo}}</td>
+  </tr>
+</table>
+<br />
+<hr>
+<h1>بررسی تیم داوری </h1>
+<div>{{.JudgeInfo}} </div>
+<br />
 <br />
 <br />
 <h1>تماس با راورو : </h1>
