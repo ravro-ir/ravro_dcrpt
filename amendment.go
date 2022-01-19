@@ -19,11 +19,12 @@ type Amendment struct {
 	SubmissionDate   string `json:"submissionDate"`
 }
 
-func DcrptAmendment() (Amendment, error) {
+func DcrptAmendment() ([]string, error) {
 	var amendment Amendment
+	var lstMore []string
 	path, err := os.Getwd()
 	if err != nil {
-		return amendment, err
+		return lstMore, err
 	}
 	lstAmendment, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstAmendment {
@@ -36,7 +37,7 @@ func DcrptAmendment() (Amendment, error) {
 		newName := strings.ReplaceAll(name, " ", "")
 		err := os.Rename(name, newName)
 		if err != nil {
-			return amendment, err
+			return lstMore, err
 		}
 		name = newName
 		filename := filepath.Base(name)
@@ -54,14 +55,14 @@ func DcrptAmendment() (Amendment, error) {
 			}
 			err := os.Rename(name, NewPathFile)
 			if err != nil {
-				return amendment, err
+				return lstMore, err
 			}
 			filename = newNameRand + fileExt
 			name = NewPathFile
 		}
 		_, err = SslDecrypt(name, filename)
 		if err != nil {
-			return amendment, err
+			return lstMore, err
 		}
 		if runtime.GOOS == "windows" {
 			oldNamePath = "decrypt" + "\\" + oldName + fileExt
@@ -72,25 +73,27 @@ func DcrptAmendment() (Amendment, error) {
 		}
 		err = os.Rename(newNamePath, oldNamePath)
 		if err != nil {
-			return amendment, err
+			return lstMore, err
 		}
 		if !strings.Contains(oldNamePath, "data") {
 			continue
 		}
+
 		jsonFile, err := os.Open(oldNamePath)
 		reportValue, _ := ioutil.ReadAll(jsonFile)
 		err = json.Unmarshal(reportValue, &amendment)
 		if err != nil {
-			return amendment, err
+			return lstMore, err
 		}
 		err = jsonFile.Close()
 		if err != nil {
-			return Amendment{}, err
+			return lstMore, err
 		}
 		if err = os.Remove(oldNamePath); err != nil {
 			log.Fatal(err)
 		}
-		return amendment, nil
+		lstMore = append(lstMore, amendment.Description)
+		//return lstMore, nil
 	}
-	return amendment, nil
+	return lstMore, nil
 }

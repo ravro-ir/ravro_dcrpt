@@ -45,6 +45,7 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error amendment")
 	}
+	moreinfo := strings.Join(amendment[:], ",")
 	//if (Amendment{}) != amendment  {
 	//	fmt.Println("is zero value")
 	//}
@@ -85,7 +86,7 @@ func main() {
 		Amount:    pdf.judge.Reward,
 		JudgeInfo: pdf.judge.Description,
 		DateTo:    dateTo,
-		MoreInfo:  amendment.Description,
+		MoreInfo:  moreinfo,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)
