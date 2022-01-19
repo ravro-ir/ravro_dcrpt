@@ -11,8 +11,9 @@ import (
 )
 
 type Pdf struct {
-	report Report
-	judge  Judgment
+	report    Report
+	judge     Judgment
+	amendment Amendment
 }
 
 func main() {
@@ -40,6 +41,13 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error report")
 	}
+	amendment, err := DcrptAmendment()
+	if err != nil {
+		log.Fatalln("Error amendment")
+	}
+	//if (Amendment{}) != amendment  {
+	//	fmt.Println("is zero value")
+	//}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
 	fmt.Println("[++++] decrypted successfully ")
@@ -65,6 +73,7 @@ func main() {
 		Score       int
 		JudgeInfo   string
 		DateTo      string
+		MoreInfo    string
 	}{
 		Title:     pdf.report.Title,
 		PoC:       pdf.report.Description,
@@ -76,6 +85,7 @@ func main() {
 		Amount:    pdf.judge.Reward,
 		JudgeInfo: pdf.judge.Description,
 		DateTo:    dateTo,
+		MoreInfo:  amendment.Description,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)
