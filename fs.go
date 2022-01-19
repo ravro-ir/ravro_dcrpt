@@ -3,12 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/exp/utf8string"
-	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -44,65 +41,6 @@ func WalkMatch(root, pattern string) ([]string, error) {
 	return matches, nil
 }
 
-func ReadCurrentDir() {
-	path, err := os.Getwd()
-	if err != nil {
-		log.Println(err)
-	}
-	lstFileDecrypt, _ := WalkMatch(path, "*.ravro")
-	for _, name := range lstFileDecrypt {
-		var NewPathFile string
-		var oldNamePath string
-		var newNamePath string
-		newName := strings.ReplaceAll(name, " ", "")
-		err := os.Rename(name, newName)
-		if err != nil {
-			log.Fatalf("We have error in %s", err)
-		}
-		name = newName
-		filename := filepath.Base(name)
-		basePath := filepath.Dir(name)
-		filename = strings.Replace(filename, ".ravro", "", 1)
-		fileExt := filepath.Ext(filename)
-		oldName := fileNameWithoutExtension(filename)
-		asciiCheck := utf8string.NewString(filename).IsASCII()
-		if !asciiCheck {
-			newNameRand := randSeq(10)
-			if runtime.GOOS == "windows" {
-				NewPathFile = basePath + "\\" + newNameRand + fileExt + ".ravro"
-			} else {
-				NewPathFile = basePath + "/" + newNameRand + fileExt + ".ravro"
-			}
-			err := os.Rename(name, NewPathFile)
-			if err != nil {
-				return
-			}
-			filename = newNameRand + fileExt
-			name = NewPathFile
-		}
-		_, err = SslDecrypt(name, filename)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(0)
-		}
-		if runtime.GOOS == "windows" {
-			oldNamePath = "datadecrypt" + "\\" + oldName + fileExt
-			newNamePath = "datadecrypt" + "\\" + filename
-		} else {
-			oldNamePath = "datadecrypt" + "/" + oldName + fileExt
-			newNamePath = "datadecrypt" + "/" + filename
-		}
-		err = os.Remove(name)
-		if err != nil {
-			return
-		}
-		err = os.Rename(newNamePath, oldNamePath)
-		if err != nil {
-			return
-		}
-	}
-}
-
 func ensureDir(dirName string) error {
 	err := os.Mkdir(dirName, os.ModeDir)
 	if err == nil {
@@ -123,4 +61,11 @@ func ensureDir(dirName string) error {
 
 func fileNameWithoutExtension(fileName string) string {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
+}
+
+func AddDir(name string) {
+	if err := ensureDir(name); err != nil {
+		fmt.Println("Directory creation failed with error: " + err.Error())
+		os.Exit(1)
+	}
 }

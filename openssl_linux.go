@@ -8,7 +8,7 @@ import (
 
 func SslDecrypt(name, filename string) (out string, errOut error) {
 
-	command := fmt.Sprintf("openssl smime -decrypt -in %s -inform DER -inkey key/key.private -out datadecrypt/%s -binary", name, filename)
+	command := fmt.Sprintf("openssl smime -decrypt -in %s -inform DER -inkey key/key.private -out decrypt/%s -binary", name, filename)
 	stdout := &bytes.Buffer{}
 	stderr := &bytes.Buffer{}
 	name = "bash"
