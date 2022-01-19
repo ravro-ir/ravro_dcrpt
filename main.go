@@ -23,14 +23,13 @@ func main() {
 	)
 	r := NewRequestPdf("")
 	pt := ptime.Now()
-	AddDir("pdfs")
 	AddDir("decrypt")
 	if runtime.GOOS == "windows" {
 		templatePath = "template\\sample.html"
-		outputPath = "pdfs\\reports.pdf"
+		outputPath = "decrypt\\reports.pdf"
 	} else {
 		templatePath = "template/sample.html"
-		outputPath = "pdfs/reports.pdf"
+		outputPath = "decrypt/reports.pdf"
 	}
 	fmt.Println("[++++] Starting for decrypting . . . ")
 	judge, err := DcrptJudgment()
