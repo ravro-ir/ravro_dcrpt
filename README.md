@@ -34,10 +34,10 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 Install a [Go compiler](https://golang.org/dl).
 
 Run the following commands in the checked-out repository:
-```
-go run main.go
-Or
-go build -o main
+```bash
+$ git clone https://github.com/ravro-ir/ravro_dcrp.git
+$ go build ravro_dcrpt
+$ go run ravro_dcrpt
 ```
 (Add the appropriate `.exe` extension on Windows systems)
 
