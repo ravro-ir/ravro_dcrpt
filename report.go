@@ -1,13 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"golang.org/x/exp/utf8string"
-	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -24,73 +19,33 @@ type Report struct {
 
 func DcrptReport() (Report, error) {
 	var report Report
-	path, err := os.Getwd()
+	path, err := projectpath()
 	if err != nil {
 		return report, err
 	}
 	lstReport, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstReport {
-		var NewPathFile string
-		var oldNamePath string
-		var newNamePath string
 		if !strings.Contains(name, "\\report\\") {
 			continue
 		}
-		newName := strings.ReplaceAll(name, " ", "")
-		err := os.Rename(name, newName)
+		Process, err := fileProccessing(name)
 		if err != nil {
 			return report, err
 		}
-		name = newName
-		filename := filepath.Base(name)
-		basePath := filepath.Dir(name)
-		filename = strings.Replace(filename, ".ravro", "", 1)
-		fileExt := filepath.Ext(filename)
-		oldName := fileNameWithoutExtension(filename)
-		asciiCheck := utf8string.NewString(filename).IsASCII()
-		if !asciiCheck {
-			newNameRand := randSeq(10)
-			if runtime.GOOS == "windows" {
-				NewPathFile = basePath + "\\" + newNameRand + fileExt + ".ravro"
-			} else {
-				NewPathFile = basePath + "/" + newNameRand + fileExt + ".ravro"
-			}
-			err := os.Rename(name, NewPathFile)
-			if err != nil {
-				return report, err
-			}
-			filename = newNameRand + fileExt
-			name = NewPathFile
-		}
-		_, err = SslDecrypt(name, filename)
+		_, err = SslDecrypt(name, Process.filename)
 		if err != nil {
 			return report, err
 		}
-		if runtime.GOOS == "windows" {
-			oldNamePath = "decrypt" + "\\" + oldName + fileExt
-			newNamePath = "decrypt" + "\\" + filename
-		} else {
-			oldNamePath = "decrypt" + "/" + oldName + fileExt
-			newNamePath = "decrypt" + "/" + filename
-		}
-		err = os.Rename(newNamePath, oldNamePath)
+		process := CheckPlatform(Process)
+		err = os.Rename(process.newNamePath, process.oldNamePath)
 		if err != nil {
 			return report, err
 		}
-		if !strings.Contains(oldNamePath, "data") {
+		if !strings.Contains(process.oldNamePath, "data") {
 			continue
 		}
-		jsonFile, err := os.Open(oldNamePath)
-		reportValue, _ := ioutil.ReadAll(jsonFile)
-		err = json.Unmarshal(reportValue, &report)
-		if err != nil {
-			return report, err
-		}
-		err = jsonFile.Close()
-		if err != nil {
-			return Report{}, err
-		}
-		if err = os.Remove(oldNamePath); err != nil {
+		_, err = JsonParser(process, &report)
+		if err = os.Remove(process.oldNamePath); err != nil {
 			log.Fatal(err)
 		}
 		return report, nil

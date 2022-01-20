@@ -36,6 +36,8 @@
 
 key/key.private
 key/key.prv
+decrypt
+encrypt
 
 # AWS User-specific
 .idea/**/aws.xml
