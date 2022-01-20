@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -26,8 +27,14 @@ func DcrptJudgment() (Judgment, error) {
 	}
 	lstJudge, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstJudge {
-		if !strings.Contains(name, "\\judgment\\") {
-			continue
+		if runtime.GOOS == "windows" {
+			if !strings.Contains(name, "\\judgment\\") {
+				continue
+			}
+		} else {
+			if !strings.Contains(name, "/judgment/") {
+				continue
+			}
 		}
 		Process, err := fileProccessing(name)
 		if err != nil {

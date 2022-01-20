@@ -18,7 +18,7 @@ func SslDecrypt(name, filename string) (out string, errOut error) {
 	cmd.Stdout = stdout
 	err := cmd.Run()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf(stderr.String())
 	}
 	return cmd.String(), nil
 }

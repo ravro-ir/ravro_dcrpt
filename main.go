@@ -34,20 +34,17 @@ func main() {
 	fmt.Println("[++++] Starting for decrypting . . . ")
 	judge, err := DcrptJudgment()
 	if err != nil {
-		log.Fatalln("Error judge")
+		log.Fatalln(err)
 	}
 	report, err := DcrptReport()
 	if err != nil {
-		log.Fatalln("Error report")
+		log.Fatalln(err)
 	}
 	amendment, err := DcrptAmendment()
 	if err != nil {
-		log.Fatalln("Error amendment")
+		log.Fatalln(err)
 	}
 	moreinfo := strings.Join(amendment[:], ",")
-	//if (Amendment{}) != amendment  {
-	//	fmt.Println("is zero value")
-	//}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
 	fmt.Println("[++++] decrypted successfully ")
