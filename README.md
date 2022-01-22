@@ -38,6 +38,7 @@ Install a [Go compiler](https://golang.org/dl).
 Run the following commands in the checked-out repository:
 ```bash
 $ git clone https://github.com/ravro-ir/ravro_dcrp.git
+$ cd ravro_dcrpt
 $ go build ravro_dcrpt
 $ go run ravro_dcrpt
 ```
