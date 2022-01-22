@@ -8,13 +8,14 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 # Install Tools 
 
 1 - Install openssl <br />
-* Windows : https://slproweb.com/products/Win32OpenSSL.html <br /> 
-* Linux (Ubuntu) : `apt update && apt install build-essential checkinstall zlib1g-dev openssl libssl-dev -y`
-* Mac OS : `brew install openssl` <br />
+  * Windows : https://slproweb.com/products/Win32OpenSSL.html <br /> 
+  * Linux (Ubuntu) : `apt update && apt install build-essential checkinstall zlib1g-dev openssl libssl-dev -y`
+  * Mac OS : `brew install openssl`<br />
+
 2 - Install wkhtmltopdf 
-* Windows : https://wkhtmltopdf.org/downloads.html and add environment variable `C:\Program Files\wkhtmltopdf`
-* Linux (Ubuntu) : `apt-get install wkhtmltopdf`
-* Mac OS : `brew install wkhtmltopdf` <br />
+  * Windows : https://wkhtmltopdf.org/downloads.html and add environment variable `C:\Program Files\wkhtmltopdf`
+  * Linux (Ubuntu) : `apt-get install wkhtmltopdf`
+  * Mac OS : `brew install wkhtmltopdf` <br />
 
 3 - Rename your private `key` name to `key.private` and copy to `key` folder <br />
 4 - Copy `.zip` report and copy `zip` file in in the `encrypt` folder and extract it <br />
