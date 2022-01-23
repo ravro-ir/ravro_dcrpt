@@ -45,8 +45,14 @@ func main() {
 		log.Fatalln(err)
 	}
 	moreinfo := strings.Join(amendment[:], ",")
+	if moreinfo == "" {
+		moreinfo = "شرح داده نشد است"
+	}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
+	if pdf.report.Reproduce == "" {
+		pdf.report.Reproduce = "شرح داده نشد است"
+	}
 	fmt.Println("[++++] decrypted successfully ")
 	fmt.Println("[++++] Starting report to pdf . . . ")
 	dataFrom := pdf.report.DateFrom
