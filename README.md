@@ -18,7 +18,7 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
   * Mac OS : `brew install wkhtmltopdf` <br />
 
 3 - Rename your private `key` name to `key.private` and copy to `key` folder <br />
-4 - Copy `.zip` report and copy `zip` file in in the `encrypt` folder and extract it <br />
+4 - Download `.zip` file report, Copy `zip` file in the `encrypt` folder and extract it <br />
 5 - Run `ravro_dcrpt.exe` /  `ravro_dcrpt` <br />
 
 
@@ -38,6 +38,7 @@ Install a [Go compiler](https://golang.org/dl).
 Run the following commands in the checked-out repository:
 ```bash
 $ git clone https://github.com/ravro-ir/ravro_dcrp.git
+$ cd ravro_dcrpt
 $ go build ravro_dcrpt
 $ go run ravro_dcrpt
 ```
