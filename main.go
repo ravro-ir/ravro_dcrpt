@@ -64,31 +64,33 @@ func main() {
 	pt = ptime.New(t)
 	dataFrom = pt.Format("yyyy/MM/dd")
 	templateData := struct {
-		Title       string
-		Description string
-		PoC         string
-		DateFrom    string
-		CVSS        string
-		Reproduce   string
-		Hunter      string
-		ReportID    string
-		Amount      int
-		Score       int
-		JudgeInfo   string
-		DateTo      string
-		MoreInfo    string
+		Title           string
+		Description     string
+		PoC             string
+		DateFrom        string
+		CVSS            string
+		Reproduce       string
+		Hunter          string
+		ReportID        string
+		Amount          int
+		Score           int
+		JudgeInfo       string
+		DateTo          string
+		MoreInfo        string
+		CompanyUserName string
 	}{
-		Title:     pdf.report.Title,
-		PoC:       pdf.report.Description,
-		CVSS:      pdf.judge.Cvss.Value,
-		Reproduce: pdf.report.Reproduce,
-		DateFrom:  pdf.report.DateFrom,
-		Hunter:    pdf.report.HunterUsername,
-		ReportID:  pdf.report.Slug,
-		Amount:    pdf.judge.Reward,
-		JudgeInfo: pdf.judge.Description,
-		DateTo:    dateTo,
-		MoreInfo:  moreinfo,
+		Title:           pdf.report.Title,
+		PoC:             pdf.report.Description,
+		CVSS:            pdf.judge.Cvss.Value,
+		Reproduce:       pdf.report.Reproduce,
+		DateFrom:        pdf.report.DateFrom,
+		Hunter:          pdf.report.HunterUsername,
+		ReportID:        pdf.report.Slug,
+		Amount:          pdf.judge.Reward,
+		JudgeInfo:       pdf.judge.Description,
+		DateTo:          dateTo,
+		MoreInfo:        moreinfo,
+		CompanyUserName: pdf.report.CompanyUsername,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)

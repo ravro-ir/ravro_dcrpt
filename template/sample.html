@@ -313,6 +313,7 @@
 <header>
   <h1>{{.Title}}</h1>
   <br />
+  <h3><a href="https://www.ravro.ir/company/{{.CompanyUserName}}">{{.CompanyUserName}}</a></h3>
 </header>
 <br />
 <table class="center">
@@ -325,8 +326,8 @@
     <th>تاریخ بررسی</th>
   </tr>
   <tr>
-    <td>{{.Hunter}}</td>
-    <td>{{.ReportID}}</td>
+    <td><a href="https://ravro.ir/hunter/{{.Hunter}}">{{.Hunter}}</a></td>
+    <td><a href="https://www.ravro.ir/report/{{.ReportID}}">{{.ReportID}}</a></td>
     <td>{{.DateFrom}}</td>
     <td>{{.CVSS}}</td>
     <td>{{.Amount}} ریال</td>
@@ -338,7 +339,7 @@
 <h1>شرح آسیب پذیری (شکارچی) </h1>
 <div>{{.PoC}} </div>
 <h1>چگونه می‌توان آسیب‌پذیری را رفع کرد ؟ ( شکارچی ) </h1>
-<div>{{.Reproduce}}</div>
+<div>{{.Reproduce}} </div>
 <h1>اطلاعات بیشتر ( شکارچی ) </h1>
 <div>{{.MoreInfo}}</div>
 <h1>بررسی تیم داوری </h1>
