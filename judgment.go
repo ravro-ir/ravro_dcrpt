@@ -40,7 +40,7 @@ func DcrptJudgment() (Judgment, error) {
 		if err != nil {
 			return judgment, err
 		}
-		_, err = SslDecrypt(name, Process.filename)
+		_, err = SslDecrypt(Process.name, Process.filename)
 		if err != nil {
 			return judgment, err
 		}

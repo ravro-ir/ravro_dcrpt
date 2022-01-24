@@ -23,6 +23,7 @@ type ProccesFile struct {
 	oldName     string
 	filename    string
 	basePath    string
+	name        string
 }
 
 func randSeq(n int) string {
@@ -101,9 +102,9 @@ func fileProccessing(name string) (ProccesFile, error) {
 	if err != nil {
 		return processFile, err
 	}
-	name = newName
-	processFile.filename = filepath.Base(name)
-	processFile.basePath = filepath.Dir(name)
+	processFile.name = newName
+	processFile.filename = filepath.Base(processFile.name)
+	processFile.basePath = filepath.Dir(processFile.name)
 	processFile.filename = strings.Replace(processFile.filename, ".ravro", "", 1)
 	processFile.fileExt = filepath.Ext(processFile.filename)
 	processFile.oldName = fileNameWithoutExtension(processFile.filename)

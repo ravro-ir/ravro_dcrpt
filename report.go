@@ -39,7 +39,7 @@ func DcrptReport() (Report, error) {
 		if err != nil {
 			return report, err
 		}
-		_, err = SslDecrypt(name, Process.filename)
+		_, err = SslDecrypt(Process.name, Process.filename)
 		if err != nil {
 			return report, err
 		}

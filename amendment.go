@@ -30,7 +30,7 @@ func DcrptAmendment() ([]string, error) {
 		if err != nil {
 			return lstMore, err
 		}
-		_, err = SslDecrypt(name, Process.filename)
+		_, err = SslDecrypt(Process.name, Process.filename)
 		if err != nil {
 			return lstMore, err
 		}
