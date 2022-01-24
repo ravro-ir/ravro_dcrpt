@@ -56,14 +56,15 @@ func main() {
 	}
 	fmt.Println("[++++] decrypted successfully ")
 	fmt.Println("[++++] Starting report to pdf . . . ")
-	dataFrom := pdf.report.DateFrom
-	date := strings.Split(dataFrom, "-")
-	year, _ := strconv.Atoi(date[0])
-	month, _ := strconv.Atoi(date[1])
-	day, _ := strconv.Atoi(date[2])
+	dateSubmit := pdf.report.SubmissionDate
+	dateSubmited := strings.Split(dateSubmit, " ")
+	dateReport := strings.Split(string(dateSubmited[0]), "-")
+	year, _ := strconv.Atoi(dateReport[0])
+	month, _ := strconv.Atoi(dateReport[1])
+	day, _ := strconv.Atoi(dateReport[2])
 	var t time.Time = time.Date(year, time.Month(month), day, 12, 1, 1, 0, ptime.Iran())
 	pt = ptime.New(t)
-	dataFrom = pt.Format("yyyy/MM/dd")
+	dataFrom := pt.Format("yyyy/MM/dd")
 	templateData := struct {
 		Title           string
 		Description     string
@@ -84,7 +85,7 @@ func main() {
 		PoC:             pdf.report.Description,
 		CVSS:            pdf.judge.Cvss.Value,
 		Reproduce:       pdf.report.Reproduce,
-		DateFrom:        pdf.report.DateFrom,
+		DateFrom:        dataFrom,
 		Hunter:          pdf.report.HunterUsername,
 		ReportID:        pdf.report.Slug,
 		Amount:          pdf.judge.Reward,

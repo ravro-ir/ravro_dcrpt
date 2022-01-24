@@ -16,6 +16,7 @@ type Report struct {
 	HunterUsername  string `json:"hunterUsername"`
 	CompanyUsername string `json:"companyUsername"`
 	Slug            string `json:"slug"`
+	SubmissionDate  string `json:"submissionDate"`
 }
 
 func DcrptReport() (Report, error) {
