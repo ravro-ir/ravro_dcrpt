@@ -50,6 +50,7 @@ func main() {
 	}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
+	outputPath = strings.Replace(outputPath, "reports", report.CompanyUsername+"__"+report.Slug+"__"+report.HunterUsername, 1)
 	if pdf.report.Reproduce == "" {
 		pdf.report.Reproduce = "شرح داده نشد است"
 	}
