@@ -21,6 +21,11 @@ func main() {
 		templatePath string
 		outputPath   string
 	)
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("Error, please check your input encrypt file Or report the issue in the github.")
+		}
+	}()
 	r := NewRequestPdf("")
 	pt := ptime.Now()
 	AddDir("decrypt")
@@ -55,8 +60,8 @@ func main() {
 		pdf.report.Reproduce = "شرح داده نشد است"
 	}
 	fmt.Println("[++++] decrypted successfully ")
-	fmt.Println("[++++] Starting report to pdf . . . ")
 	dateSubmit := pdf.report.SubmissionDate
+
 	dateSubmited := strings.Split(dateSubmit, " ")
 	dateReport := strings.Split(string(dateSubmited[0]), "-")
 	year, _ := strconv.Atoi(dateReport[0])
@@ -65,6 +70,7 @@ func main() {
 	var t time.Time = time.Date(year, time.Month(month), day, 12, 1, 1, 0, ptime.Iran())
 	pt = ptime.New(t)
 	dataFrom := pt.Format("yyyy/MM/dd")
+	fmt.Println("[++++] Starting report to pdf . . . ")
 	templateData := struct {
 		Title           string
 		Description     string
