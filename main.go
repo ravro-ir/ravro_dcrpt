@@ -90,6 +90,7 @@ func main() {
 		DateTo          string
 		MoreInfo        string
 		CompanyUserName string
+		Ips             string
 	}{
 		Title:           pdf.report.Title,
 		PoC:             pdf.report.Description,
@@ -103,6 +104,7 @@ func main() {
 		DateTo:          dateTo,
 		MoreInfo:        moreInfo,
 		CompanyUserName: pdf.report.CompanyUsername,
+		Ips:             pdf.report.Ips,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)
