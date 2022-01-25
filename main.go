@@ -21,6 +21,7 @@ func main() {
 		templatePath string
 		outputPath   string
 	)
+	publicMessage := "شرح داده نشد است"
 	defer func() {
 		if err := recover(); err != nil {
 			log.Println("Error, please check your input encrypt file Or report the issue in the github.")
@@ -49,15 +50,18 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	moreinfo := strings.Join(amendment[:], ",")
-	if moreinfo == "" {
-		moreinfo = "شرح داده نشد است"
+	moreInfo := strings.Join(amendment[:], ",")
+	if moreInfo == "" {
+		moreInfo = publicMessage
 	}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
 	outputPath = strings.Replace(outputPath, "reports", report.CompanyUsername+"__"+report.Slug+"__"+report.HunterUsername, 1)
 	if pdf.report.Reproduce == "" {
-		pdf.report.Reproduce = "شرح داده نشد است"
+		pdf.report.Reproduce = publicMessage
+	}
+	if pdf.judge.Description == "" {
+		pdf.judge.Description = publicMessage
 	}
 	fmt.Println("[++++] decrypted successfully ")
 	dateSubmit := pdf.report.SubmissionDate
@@ -97,7 +101,7 @@ func main() {
 		Amount:          pdf.judge.Reward,
 		JudgeInfo:       pdf.judge.Description,
 		DateTo:          dateTo,
-		MoreInfo:        moreinfo,
+		MoreInfo:        moreInfo,
 		CompanyUserName: pdf.report.CompanyUsername,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
