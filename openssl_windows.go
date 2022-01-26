@@ -1,26 +1,31 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 func SslDecrypt(name, filename string) (out string, errOut error) {
-
-	command := fmt.Sprintf(`openssl smime -decrypt -in %s -inform DER -inkey key/key.private -out decrypt/%s -binary`,
-		name, filename)
-
-	stdout := &bytes.Buffer{}
-	stderr := &bytes.Buffer{}
-	cmdPromp := "cmd.exe"
-	arg := []string{"/c", command}
-	cmd := exec.Command(cmdPromp, arg...)
-	cmd.Stderr = stderr
-	cmd.Stdout = stdout
-	err := cmd.Run()
-	if err != nil {
-		return "", fmt.Errorf(stderr.String())
+	args := []string{"smime", "-decrypt", "-in", name, "-inform", "DER", "-inkey", "key\\key.private", "-out", "decrypt/" + filename, "-binary"}
+	output, err_ := RunCMD("openssl", args, true)
+	if err_ != nil {
+		return "", fmt.Errorf(output)
 	}
-	return cmd.String(), nil
+	return output, nil
+}
+
+func RunCMD(path string, args []string, debug bool) (out string, err error) {
+
+	cmd := exec.Command(path, args...)
+	var b []byte
+	b, err = cmd.CombinedOutput()
+	out = string(b)
+	if debug {
+		errMsg := strings.Join(cmd.Args[:], " ")
+		if err != nil {
+			return "", fmt.Errorf(errMsg)
+		}
+	}
+	return out, nil
 }

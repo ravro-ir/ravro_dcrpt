@@ -97,12 +97,7 @@ func fileProccessing(name string) (ProccesFile, error) {
 
 	var processFile ProccesFile
 
-	newName := strings.ReplaceAll(name, " ", "")
-	err := os.Rename(name, newName)
-	if err != nil {
-		return processFile, err
-	}
-	processFile.name = newName
+	processFile.name = name
 	processFile.filename = filepath.Base(processFile.name)
 	processFile.basePath = filepath.Dir(processFile.name)
 	processFile.filename = strings.Replace(processFile.filename, ".ravro", "", 1)
