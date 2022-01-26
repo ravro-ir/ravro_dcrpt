@@ -65,7 +65,6 @@ func main() {
 	}
 	fmt.Println("[++++] decrypted successfully ")
 	dateSubmit := pdf.report.SubmissionDate
-
 	dateSubmited := strings.Split(dateSubmit, " ")
 	dateReport := strings.Split(string(dateSubmited[0]), "-")
 	year, _ := strconv.Atoi(dateReport[0])

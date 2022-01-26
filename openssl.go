@@ -21,7 +21,7 @@ func RunCMD(path string, args []string, debug bool) (out string, err error) {
 	b, err = cmd.CombinedOutput()
 	out = string(b)
 	if err != nil {
-		return "", fmt.Errorf("The private key is incorrect")
+		return "", fmt.Errorf(out)
 	}
 	return out, nil
 }
