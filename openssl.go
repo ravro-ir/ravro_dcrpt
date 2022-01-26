@@ -7,7 +7,7 @@ import (
 )
 
 func SslDecrypt(name, filename string) (out string, errOut error) {
-	args := []string{"smime", "-decrypt", "-in", name, "-inform", "DER", "-inkey", "key\\key.private", "-out", "decrypt/" + filename, "-binary"}
+	args := []string{"smime", "-decrypt", "-in", name, "-inform", "DER", "-inkey", "key/key.private", "-out", "decrypt/" + filename, "-binary"}
 	output, err_ := RunCMD("openssl", args, true)
 	if err_ != nil {
 		return "", fmt.Errorf(output)
