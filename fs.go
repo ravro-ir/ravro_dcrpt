@@ -111,12 +111,12 @@ func fileProccessing(name string) (ProccesFile, error) {
 		} else {
 			processFile.NewPathFile = processFile.basePath + "/" + newNameRand + processFile.fileExt + ".ravro"
 		}
-		err := os.Rename(name, processFile.NewPathFile)
+		err := os.Rename(processFile.name, processFile.NewPathFile)
 		if err != nil {
 			return processFile, err
 		}
 		processFile.filename = newNameRand + processFile.fileExt
-		name = processFile.NewPathFile
+		processFile.name = processFile.NewPathFile
 	}
 	return processFile, nil
 }

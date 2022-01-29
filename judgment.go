@@ -53,7 +53,6 @@ func DcrptJudgment() (Judgment, error) {
 		if err = os.Remove(process.oldNamePath); err != nil {
 			log.Fatal(err)
 		}
-		return judgment, nil
 	}
 	return judgment, nil
 }

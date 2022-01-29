@@ -57,7 +57,6 @@ func DcrptReport() (Report, error) {
 		if err = os.Remove(process.oldNamePath); err != nil {
 			log.Fatal(err)
 		}
-		return report, nil
 	}
 	return report, nil
 }
