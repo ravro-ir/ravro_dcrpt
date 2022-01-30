@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -13,13 +14,20 @@ type Amendment struct {
 	SubmissionDate   string `json:"submissionDate"`
 }
 
-func DcrptAmendment() ([]string, error) {
+func DcrptAmendment(currentPath, keyFixPath, outFixPath string) ([]string, error) {
 	var amendment Amendment
-	var lstMore []string
-	path, err := projectpath()
-	if err != nil {
-		return lstMore, err
+	var (
+		path    string
+		err     error
+		lstMore []string
+	)
+	if currentPath == "" {
+		path, err = projectpath()
+		if err != nil {
+			return lstMore, err
+		}
 	}
+
 	lstAmendment, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstAmendment {
 
@@ -30,11 +38,15 @@ func DcrptAmendment() ([]string, error) {
 		if err != nil {
 			return lstMore, err
 		}
-		_, err = SslDecrypt(Process.name, Process.filename)
+		if runtime.GOOS == "windows" {
+			_, err = SslDecrypt(Process.name, outFixPath+"\\"+Process.filename, keyFixPath)
+		} else {
+			_, err = SslDecrypt(Process.name, outFixPath+"/"+Process.filename, keyFixPath)
+		}
 		if err != nil {
 			return lstMore, err
 		}
-		process := CheckPlatform(Process)
+		process := CheckPlatform(outFixPath, Process)
 		err = os.Rename(process.newNamePath, process.oldNamePath)
 		if err != nil {
 			return lstMore, err

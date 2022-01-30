@@ -5,8 +5,8 @@ import (
 	"os/exec"
 )
 
-func SslDecrypt(name, filename string) (out string, errOut error) {
-	args := []string{"smime", "-decrypt", "-in", name, "-inform", "DER", "-inkey", "key/key.private", "-out", "decrypt/" + filename, "-binary"}
+func SslDecrypt(name, filename, keyFixPath string) (out string, errOut error) {
+	args := []string{"smime", "-decrypt", "-in", name, "-inform", "DER", "-inkey", keyFixPath, "-out", filename, "-binary"}
 	output, err_ := RunCMD("openssl", args, true)
 	if err_ != nil {
 		return "", err_

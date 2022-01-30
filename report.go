@@ -20,13 +20,22 @@ type Report struct {
 	Ips             string `json:"ips"`
 }
 
-func DcrptReport() (Report, error) {
+func DcrptReport(currentPath, keyFixPath, outFixpath string) (Report, error) {
 	var report Report
-	path, err := projectpath()
-	if err != nil {
-		return report, err
+	var (
+		path      string
+		err       error
+		lstReport []string
+	)
+	if currentPath == "" {
+		path, err = projectpath()
+		if err != nil {
+			return report, err
+		}
+		lstReport, _ = WalkMatch(path, "*.ravro")
+	} else {
+		lstReport, _ = WalkMatch(currentPath, "*.ravro")
 	}
-	lstReport, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstReport {
 		if runtime.GOOS == "windows" {
 			if !strings.Contains(name, "\\report\\") {
@@ -41,11 +50,15 @@ func DcrptReport() (Report, error) {
 		if err != nil {
 			return report, err
 		}
-		_, err = SslDecrypt(Process.name, Process.filename)
+		if runtime.GOOS == "windows" {
+			_, err = SslDecrypt(Process.name, outFixpath+"\\"+Process.filename, keyFixPath)
+		} else {
+			_, err = SslDecrypt(Process.name, outFixpath+"/"+Process.filename, keyFixPath)
+		}
 		if err != nil {
 			return report, err
 		}
-		process := CheckPlatform(Process)
+		process := CheckPlatform(outFixpath, Process)
 		err = os.Rename(process.newNamePath, process.oldNamePath)
 		if err != nil {
 			return report, err

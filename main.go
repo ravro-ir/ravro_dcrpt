@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	ptime "github.com/yaa110/go-persian-calendar"
 	"log"
@@ -20,6 +21,10 @@ func main() {
 	var (
 		templatePath string
 		outputPath   string
+		keyFixPath   string
+		outFixpath   string
+		curretnPath  string
+		status       bool
 	)
 	publicMessage := "شرح داده نشد است"
 	defer func() {
@@ -27,26 +32,53 @@ func main() {
 			log.Println("Error, please check your input encrypt file Or report the issue in the github.")
 		}
 	}()
+	inputDir := flag.String("in", "in", "please enter ")
+	outputDir := flag.String("out", "out", "please usage ")
+	key := flag.String("key", "key", "please usage")
+	flag.Parse()
+	status = false
+	if *inputDir != "in" {
+		status = true
+		curretnPath = *inputDir
+	}
+	if *outputDir != "out" {
+		status = true
+		outputPath = *outputDir + "\\" + "reports.pdf"
+		outFixpath = *outputDir
+	}
+	if *key != "key" {
+		status = true
+		keyFixPath = *key
+	}
+	if !status {
+		if runtime.GOOS == "windows" {
+			templatePath = "template\\sample.html"
+			outputPath = "decrypt\\reports.pdf"
+			keyFixPath = "key/key.private"
+			outFixpath = "decrypt"
+		} else {
+			templatePath = "template/sample.html"
+			outputPath = "decrypt/reports.pdf"
+			keyFixPath = "key/key.private"
+			outFixpath = "decrypt"
+		}
+	}
+	templatePath = "template\\sample.html"
 	r := NewRequestPdf("")
 	pt := ptime.Now()
 	AddDir("decrypt")
-	if runtime.GOOS == "windows" {
-		templatePath = "template\\sample.html"
-		outputPath = "decrypt\\reports.pdf"
-	} else {
-		templatePath = "template/sample.html"
-		outputPath = "decrypt/reports.pdf"
-	}
-	fmt.Println("[++++] Starting for decrypting . . . ")
-	judge, err := DcrptJudgment()
+	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
+	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	report, err := DcrptReport()
+	fmt.Println("[++++] Starting for decrypting Report . . . ")
+	report, err := DcrptReport(curretnPath, keyFixPath, outFixpath)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	amendment, err := DcrptAmendment()
+	fmt.Println("[++++] Starting for decrypting Amendment . . . ")
+	amendment, err := DcrptAmendment(curretnPath, keyFixPath, outFixpath)
 	if err != nil {
 		log.Fatalln(err)
 	}

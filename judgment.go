@@ -19,13 +19,22 @@ type Judgment struct {
 	Cvss        JudgeCvss
 }
 
-func DcrptJudgment() (Judgment, error) {
+func DcrptJudgment(currentPath, keyFixPath, outFixpath string) (Judgment, error) {
 	var judgment Judgment
-	path, err := projectpath()
-	if err != nil {
-		return judgment, err
+	var (
+		path     string
+		err      error
+		lstJudge []string
+	)
+	if currentPath == "" {
+		path, err = projectpath()
+		if err != nil {
+			return judgment, err
+		}
+		lstJudge, _ = WalkMatch(path, "*.ravro")
+	} else {
+		lstJudge, _ = WalkMatch(currentPath, "*.ravro")
 	}
-	lstJudge, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstJudge {
 		if runtime.GOOS == "windows" {
 			if !strings.Contains(name, "\\judgment\\") {
@@ -40,11 +49,15 @@ func DcrptJudgment() (Judgment, error) {
 		if err != nil {
 			return judgment, err
 		}
-		_, err = SslDecrypt(Process.name, Process.filename)
+		if runtime.GOOS == "windows" {
+			_, err = SslDecrypt(Process.name, outFixpath+"\\"+Process.filename, keyFixPath)
+		} else {
+			_, err = SslDecrypt(Process.name, outFixpath+"/"+Process.filename, keyFixPath)
+		}
 		if err != nil {
 			return judgment, err
 		}
-		process := CheckPlatform(Process)
+		process := CheckPlatform(outFixpath, Process)
 		err = os.Rename(process.newNamePath, process.oldNamePath)
 		if err != nil {
 			return judgment, err

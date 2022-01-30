@@ -121,13 +121,13 @@ func fileProccessing(name string) (ProccesFile, error) {
 	return processFile, nil
 }
 
-func CheckPlatform(process ProccesFile) ProccesFile {
+func CheckPlatform(outFixpath string, process ProccesFile) ProccesFile {
 	if runtime.GOOS == "windows" {
-		process.oldNamePath = "decrypt" + "\\" + process.oldName + process.fileExt
-		process.newNamePath = "decrypt" + "\\" + process.filename
+		process.oldNamePath = outFixpath + "\\" + process.oldName + process.fileExt
+		process.newNamePath = outFixpath + "\\" + process.filename
 	} else {
-		process.oldNamePath = "decrypt" + "/" + process.oldName + process.fileExt
-		process.newNamePath = "decrypt" + "/" + process.filename
+		process.oldNamePath = outFixpath + "/" + process.oldName + process.fileExt
+		process.newNamePath = outFixpath + "/" + process.filename
 	}
 	return process
 }
