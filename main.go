@@ -32,9 +32,9 @@ func main() {
 			log.Println("Error, please check your input encrypt file Or report the issue in the github.")
 		}
 	}()
-	inputDir := flag.String("in", "in", "please enter ")
-	outputDir := flag.String("out", "out", "please usage ")
-	key := flag.String("key", "key", "please usage")
+	inputDir := flag.String("in", "in", "input directory of report encrypt file")
+	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
+	key := flag.String("key", "key", "private key")
 	flag.Parse()
 	status = false
 	if *inputDir != "in" {
