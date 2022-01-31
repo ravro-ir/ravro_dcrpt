@@ -23,8 +23,9 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 
 
 # Usage :
+Use without command line :
 ```bash
-# ./ravro_dcrpt
+$ ./ravro_dcrpt
 [++++] Starting for decrypting Judgment . . . 
 [++++] Starting for decrypting Report . . . 
 [++++] Starting for decrypting Amendment . . . 
@@ -35,7 +36,7 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 
 Use with command line :
 ```bash
-# ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
+$ ./ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
 [++++] Starting for decrypting Judgment . . . 
 [++++] Starting for decrypting Report . . . 
 [++++] Starting for decrypting Amendment . . . 
