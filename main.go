@@ -122,6 +122,10 @@ func main() {
 		MoreInfo        string
 		CompanyUserName string
 		Ips             string
+		VulDefine       string
+		VulType         string
+		VulFix          string
+		VulWriteup      string
 	}{
 		Title:           pdf.report.Title,
 		PoC:             pdf.report.Description,
@@ -132,6 +136,10 @@ func main() {
 		ReportID:        pdf.report.Slug,
 		Amount:          pdf.judge.Reward,
 		JudgeInfo:       pdf.judge.Description,
+		VulDefine:       pdf.judge.Vulnerability.Define,
+		VulType:         pdf.judge.Vulnerability.Name,
+		VulWriteup:      pdf.judge.Vulnerability.Writeup,
+		VulFix:          pdf.judge.Vulnerability.Fix,
 		DateTo:          dateTo,
 		MoreInfo:        moreInfo,
 		CompanyUserName: pdf.report.CompanyUsername,
