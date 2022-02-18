@@ -27,11 +27,11 @@ func main() {
 		status       bool
 	)
 	publicMessage := "شرح داده نشد است"
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println("Error, please check your input encrypt file Or report the issue in the github.")
-		}
-	}()
+	//defer func() {
+	//	if err := recover(); err != nil {
+	//		log.Println("Error, please check your input encrypt file Or report the issue in the github.")
+	//	}
+	//}()
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "private key")
@@ -63,7 +63,6 @@ func main() {
 			outFixpath = "decrypt"
 		}
 	}
-	templatePath = "template\\sample.html"
 	r := NewRequestPdf("")
 	pt := ptime.Now()
 	AddDir("decrypt")
