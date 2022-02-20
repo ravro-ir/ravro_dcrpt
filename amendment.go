@@ -30,7 +30,6 @@ func DcrptAmendment(currentPath, keyFixPath, outFixPath string) ([]string, error
 
 	lstAmendment, _ := WalkMatch(path, "*.ravro")
 	for _, name := range lstAmendment {
-
 		if !strings.Contains(name, "amendment-") {
 			continue
 		}

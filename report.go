@@ -38,10 +38,16 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string) (Report, error) {
 	}
 	for _, name := range lstReport {
 		if runtime.GOOS == "windows" {
+			if !strings.Contains(name, "\\encrypt\\") {
+				continue
+			}
 			if !strings.Contains(name, "\\report\\") {
 				continue
 			}
 		} else {
+			if !strings.Contains(name, "/encrypt/") {
+				continue
+			}
 			if !strings.Contains(name, "/report/") {
 				continue
 			}

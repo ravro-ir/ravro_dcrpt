@@ -45,10 +45,16 @@ func DcrptJudgment(currentPath, keyFixPath, outFixpath string) (Judgment, error)
 	}
 	for _, name := range lstJudge {
 		if runtime.GOOS == "windows" {
+			if !strings.Contains(name, "\\encrypt\\") {
+				continue
+			}
 			if !strings.Contains(name, "\\judgment\\") {
 				continue
 			}
 		} else {
+			if !strings.Contains(name, "/encrypt/") {
+				continue
+			}
 			if !strings.Contains(name, "/judgment/") {
 				continue
 			}
