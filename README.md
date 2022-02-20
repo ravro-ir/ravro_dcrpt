@@ -13,8 +13,22 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
   * Mac OS : `brew install openssl`<br />
 
 2 - Install wkhtmltopdf 
-  * Windows : https://wkhtmltopdf.org/downloads.html and add environment variable `C:\Program Files\wkhtmltopdf`
-  * Linux (Ubuntu) : `apt-get install wkhtmltopdf`
+  * Windows : https://wkhtmltopdf.org/downloads.html and add environment variable `C:\ProgramFiles\wkhtmltopdf`
+  * Linux : <br />
+        
+        $ apt install libssl1.0-dev
+        $ apt --fix-broken install
+        $ apt install libssl1.0-dev
+        $ cd ~
+        $ wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
+        $ tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
+        $ cp wkhtmltox/bin/wk* /usr/local/bin/
+    
+    And you can confirm with:
+    
+        $ wkhtmltopdf --version
+        wkhtmltopdf 0.12.3 (with patched qt)
+
   * Mac OS : `brew install wkhtmltopdf` <br />
 
 3 - Rename your private `key` name to `key.private` and copy to `key` folder <br />
