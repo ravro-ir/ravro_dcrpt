@@ -26,6 +26,17 @@ func main() {
 		curretnPath  string
 		status       bool
 	)
+	if runtime.GOOS == "windows" {
+		templatePath = "template\\sample.html"
+		outputPath = "decrypt\\reports.pdf"
+		keyFixPath = "key/key.private"
+		outFixpath = "decrypt"
+	} else {
+		templatePath = "template/sample.html"
+		outputPath = "decrypt/reports.pdf"
+		keyFixPath = "key/key.private"
+		outFixpath = "decrypt"
+	}
 	publicMessage := "شرح داده نشد است"
 	defer func() {
 		if err := recover(); err != nil {
@@ -50,29 +61,16 @@ func main() {
 		status = true
 		keyFixPath = *key
 	}
-	if !status {
-		if runtime.GOOS == "windows" {
-			templatePath = "template\\sample.html"
-			outputPath = "decrypt\\reports.pdf"
-			keyFixPath = "key/key.private"
-			outFixpath = "decrypt"
-		} else {
-			templatePath = "template/sample.html"
-			outputPath = "decrypt/reports.pdf"
-			keyFixPath = "key/key.private"
-			outFixpath = "decrypt"
-		}
-	}
 	r := NewRequestPdf("")
 	pt := ptime.Now()
 	AddDir("decrypt")
 	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
-	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath)
+	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	fmt.Println("[++++] Starting for decrypting Report . . . ")
-	report, err := DcrptReport(curretnPath, keyFixPath, outFixpath)
+	report, err := DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
 		log.Fatalln(err)
 	}

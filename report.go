@@ -20,7 +20,7 @@ type Report struct {
 	Ips             string `json:"ips"`
 }
 
-func DcrptReport(currentPath, keyFixPath, outFixpath string) (Report, error) {
+func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (Report, error) {
 	var report Report
 	var (
 		path      string
@@ -38,8 +38,10 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string) (Report, error) {
 	}
 	for _, name := range lstReport {
 		if runtime.GOOS == "windows" {
-			if !strings.Contains(name, "\\encrypt\\") {
-				continue
+			if !checkStatus {
+				if !strings.Contains(name, "\\encrypt\\") {
+					continue
+				}
 			}
 			if !strings.Contains(name, "\\report\\") {
 				continue
