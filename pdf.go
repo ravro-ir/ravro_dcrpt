@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -35,6 +36,12 @@ func (r *RequestPdf) ParseTemplate(templateFileName string, data interface{}) er
 		return err
 	}
 	r.body = buf.String()
+	r.body = strings.ReplaceAll(r.body, "&#34;&lt;", "<")
+	r.body = strings.ReplaceAll(r.body, "&gt;", ">")
+	r.body = strings.ReplaceAll(r.body, "&lt;", "<")
+	r.body = strings.ReplaceAll(r.body, "&gt;", ">")
+	r.body = strings.ReplaceAll(r.body, "&#34;", "")
+
 	return nil
 }
 

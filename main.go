@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/gomarkdown/markdown"
 	ptime "github.com/yaa110/go-persian-calendar"
 	"log"
 	"runtime"
@@ -18,6 +19,7 @@ type Pdf struct {
 }
 
 func main() {
+
 	var (
 		templatePath string
 		outputPath   string
@@ -40,13 +42,21 @@ func main() {
 	publicMessage := "شرح داده نشد است"
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("Error, please check your input encrypt file Or report the issue in the github.")
+			log.Println("Error, Check your input encrypt file Or report the issue in the github.")
 		}
 	}()
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "private key")
+	init := flag.String("init", "init", "input directory of report encrypt file")
 	flag.Parse()
+	if *init == "init" {
+		AddDir("decrypt")
+		AddDir("encrypt")
+		AddDir("key")
+
+	}
+	AddDir("template")
 	status = false
 	if *inputDir != "in" {
 		status = true
@@ -63,7 +73,7 @@ func main() {
 	}
 	r := NewRequestPdf("")
 	pt := ptime.Now()
-	AddDir("decrypt")
+	HtmlTemplate(templatePath)
 	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
 	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
@@ -103,6 +113,9 @@ func main() {
 	pt = ptime.New(t)
 	dataFrom := pt.Format("yyyy/MM/dd")
 	fmt.Println("[++++] Starting report to pdf . . . ")
+
+	md := []byte(pdf.report.Description)
+	output := markdown.ToHTML(md, nil, nil)
 	templateData := struct {
 		Title           string
 		Description     string
@@ -125,7 +138,7 @@ func main() {
 		VulWriteup      string
 	}{
 		Title:           pdf.report.Title,
-		PoC:             pdf.report.Description,
+		PoC:             string(output),
 		CVSS:            pdf.judge.Cvss.Value,
 		Reproduce:       pdf.report.Reproduce,
 		DateFrom:        dataFrom,
@@ -144,6 +157,11 @@ func main() {
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)
+
+		//err := os.RemoveAll("template")
+		//if err != nil {
+		//	fmt.Println("[----] failed to remove html template,")
+		//}
 		fmt.Println("[++++] pdf generated successfully")
 	} else {
 		fmt.Println(err)
