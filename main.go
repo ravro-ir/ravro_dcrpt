@@ -6,6 +6,7 @@ import (
 	"github.com/gomarkdown/markdown"
 	ptime "github.com/yaa110/go-persian-calendar"
 	"log"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -27,6 +28,7 @@ func main() {
 		outFixpath   string
 		curretnPath  string
 		status       bool
+		dateSubmit   string
 	)
 	if runtime.GOOS == "windows" {
 		templatePath = "template\\sample.html"
@@ -95,7 +97,11 @@ func main() {
 	}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
-	outputPath = strings.Replace(outputPath, "reports", report.CompanyUsername+"__"+report.Slug+"__"+report.HunterUsername, 1)
+	if report.CompanyUsername == "" {
+		outputPath = strings.Replace(outputPath, "reports", randSeq(8), 1)
+	} else {
+		outputPath = strings.Replace(outputPath, "reports", report.CompanyUsername+"__"+report.Slug+"__"+report.HunterUsername, 1)
+	}
 	if pdf.report.Reproduce == "" {
 		pdf.report.Reproduce = publicMessage
 	}
@@ -103,7 +109,11 @@ func main() {
 		pdf.judge.Description = publicMessage
 	}
 	fmt.Println("[++++] decrypted successfully ")
-	dateSubmit := pdf.report.SubmissionDate
+	if pdf.report.SubmissionDate == "" {
+		dateSubmit = pdf.report.DateFrom
+	} else {
+		dateSubmit = pdf.report.SubmissionDate
+	}
 	dateSubmited := strings.Split(dateSubmit, " ")
 	dateReport := strings.Split(string(dateSubmited[0]), "-")
 	year, _ := strconv.Atoi(dateReport[0])
@@ -157,11 +167,10 @@ func main() {
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)
-
-		//err := os.RemoveAll("template")
-		//if err != nil {
-		//	fmt.Println("[----] failed to remove html template,")
-		//}
+		err := os.RemoveAll("template")
+		if err != nil {
+			fmt.Println("[----] failed to remove html template,")
+		}
 		fmt.Println("[++++] pdf generated successfully")
 	} else {
 		fmt.Println(err)
