@@ -39,6 +39,7 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 # Usage :
 Use without command line :
 ```bash
+$ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt
 [++++] Starting for decrypting Judgment . . . 
 [++++] Starting for decrypting Report . . . 
