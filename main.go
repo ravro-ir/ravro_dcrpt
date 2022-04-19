@@ -50,13 +50,14 @@ func main() {
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "private key")
-	init := flag.String("init", "init", "input directory of report encrypt file")
+	init := flag.String("init", "", "input directory of report encrypt file")
 	flag.Parse()
 	if *init == "init" {
 		AddDir("decrypt")
 		AddDir("encrypt")
 		AddDir("key")
-
+		fmt.Println("[++] Created directory decrypt, encrypt, key")
+		return
 	}
 	AddDir("template")
 	status = false
