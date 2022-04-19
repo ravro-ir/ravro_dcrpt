@@ -51,6 +51,7 @@ $ ./ravro_dcrpt
 
 Use with command line :
 ```bash
+$ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
 [++++] Starting for decrypting Judgment . . . 
 [++++] Starting for decrypting Report . . . 
