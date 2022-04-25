@@ -71,7 +71,7 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if err != nil {
 			return report, err
 		}
-		if !strings.Contains(process.oldNamePath, "data") {
+		if strings.Index(process.oldName, "data") != 0 {
 			continue
 		}
 		_, err = JsonParser(process, &report)

@@ -50,7 +50,7 @@ func DcrptAmendment(currentPath, keyFixPath, outFixPath string) ([]string, error
 		if err != nil {
 			return lstMore, err
 		}
-		if !strings.Contains(process.oldNamePath, "data") {
+		if strings.Index(process.oldName, "data") != 0 {
 			continue
 		}
 		_, err = JsonParser(process, &amendment)
