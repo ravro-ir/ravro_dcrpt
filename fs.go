@@ -120,6 +120,13 @@ func fileProccessing(name string) (ProccesFile, error) {
 	}
 	return processFile, nil
 }
+func CheckDir(dirName string) bool {
+	_, err := os.Stat(dirName)
+	if os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
 
 func CheckPlatform(outFixpath string, process ProccesFile) ProccesFile {
 	if runtime.GOOS == "windows" {

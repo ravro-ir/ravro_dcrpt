@@ -30,6 +30,7 @@ func main() {
 		status       bool
 		dateSubmit   string
 	)
+	lstDir := []string{"encrypt", "decrypt", "key"}
 	if runtime.GOOS == "windows" {
 		templatePath = "template\\sample.html"
 		outputPath = "decrypt\\reports.pdf"
@@ -43,18 +44,39 @@ func main() {
 	}
 	publicMessage := "شرح داده نشد است"
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
+	version := flag.String("version", ">> Version : ravro_dcrpt/1.0.0", "")
+	homePage := flag.String("homepage", ">> HomePage: https://github.com/ravro-ir/ravro_dcrp", "")
+	issue := flag.String("issue", ">> Issue: https://github.com/ravro-ir/ravro_dcrp/issues", "")
+	author := flag.String("author", ">> Author : Ramin Farajpour Cami", "")
+	help := flag.String("help", ">> Help : ravro_dcrpt --help \n\n", "")
+
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "private key")
 	init := flag.String("init", "", "input directory of report encrypt file")
 	flag.Parse()
+	fmt.Println(*version)
+	fmt.Println(*homePage)
+	fmt.Println(*issue)
+	fmt.Println(*author)
+	fmt.Println(*help)
+
 	if *init == "init" {
 		AddDir("decrypt")
 		AddDir("encrypt")
 		AddDir("key")
 		fmt.Println("[++] Created directory decrypt, encrypt, key")
 		return
-	}
+	} else {
+		for i := range lstDir {
+			out := CheckDir(lstDir[i])
+			if out {
+				fmt.Println("[---] encrypt, decrypt, key is not exist.")
+				fmt.Println("[+++] Usage : ravro_dcrpt --init=init")
+				return
+			}
+		}
 
+	}
 	status = false
 	if *inputDir != "in" {
 		status = true
