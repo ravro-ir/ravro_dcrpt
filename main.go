@@ -42,11 +42,6 @@ func main() {
 		outFixpath = "decrypt"
 	}
 	publicMessage := "شرح داده نشد است"
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println("Error, Check your input encrypt file Or report the issue in the github.")
-		}
-	}()
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "private key")
@@ -59,7 +54,7 @@ func main() {
 		fmt.Println("[++] Created directory decrypt, encrypt, key")
 		return
 	}
-	AddDir("template")
+
 	status = false
 	if *inputDir != "in" {
 		status = true
@@ -76,7 +71,7 @@ func main() {
 	}
 	r := NewRequestPdf("")
 	pt := ptime.Now()
-	HtmlTemplate(templatePath)
+
 	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
 	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
@@ -92,6 +87,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	AddDir("template")
+	HtmlTemplate(templatePath)
 	moreInfo := strings.Join(amendment[:], ",")
 	if moreInfo == "" {
 		moreInfo = publicMessage

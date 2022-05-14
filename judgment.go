@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 	"runtime"
@@ -39,9 +40,15 @@ func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool)
 		if err != nil {
 			return judgment, err
 		}
-		lstJudge, _ = WalkMatch(path, "*.ravro")
+		lstJudge, err = WalkMatch(path, "*.ravro")
+		if len(lstJudge) == 0 {
+			return judgment, errors.New("does not exist encrypt Judgment")
+		}
 	} else {
-		lstJudge, _ = WalkMatch(currentPath, "*.ravro")
+		lstJudge, err = WalkMatch(currentPath, "*.ravro")
+		if len(lstJudge) == 0 {
+			return judgment, errors.New("does not exist encrypt Judgment")
+		}
 	}
 	for _, name := range lstJudge {
 		if runtime.GOOS == "windows" {
