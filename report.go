@@ -19,6 +19,7 @@ type Report struct {
 	Slug            string `json:"slug"`
 	SubmissionDate  string `json:"submissionDate"`
 	Ips             string `json:"ips"`
+	Attachment      bool
 }
 
 func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (Report, error) {
@@ -34,13 +35,21 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 			return report, err
 		}
 		lstReport, _ = WalkMatch(path, "*.ravro")
-		if len(lstReport) == 0 {
+		lstReportLen := len(lstReport)
+		if lstReportLen == 0 {
 			return report, errors.New("does not exist encrypt report")
+		}
+		if lstReportLen > 1 {
+			report.Attachment = true
 		}
 	} else {
 		lstReport, _ = WalkMatch(currentPath, "*.ravro")
-		if len(lstReport) == 0 {
+		lstReportLen := len(lstReport)
+		if lstReportLen == 0 {
 			return report, errors.New("does not exist encrypt report")
+		}
+		if lstReportLen > 1 {
+			report.Attachment = true
 		}
 	}
 	for _, name := range lstReport {

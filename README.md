@@ -41,24 +41,40 @@ Use without command line :
 ```bash
 $ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt
+>> Version : ravro_dcrpt/1.0.0
+>> HomePage: https://github.com/ravro-ir/ravro_dcrp
+>> Issue: https://github.com/ravro-ir/ravro_dcrp/issues
+>> Author : Ramin Farajpour Cami
+>> Help : ravro_dcrpt --help
+
+
+[++++] Starting for decrypting Report . . .
 [++++] Starting for decrypting Judgment . . . 
-[++++] Starting for decrypting Report . . . 
 [++++] Starting for decrypting Amendment . . . 
 [++++] decrypted successfully 
 [++++] Starting report to pdf . . . 
 [++++] pdf generated successfully
+
 ```
 
 Use with command line :
 ```bash
 $ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
+>> Version : ravro_dcrpt/1.0.0
+>> HomePage: https://github.com/ravro-ir/ravro_dcrp
+>> Issue: https://github.com/ravro-ir/ravro_dcrp/issues
+>> Author : Ramin Farajpour Cami
+>> Help : ravro_dcrpt --help
+
+
+[++++] Starting for decrypting Report . . .
 [++++] Starting for decrypting Judgment . . . 
-[++++] Starting for decrypting Report . . . 
 [++++] Starting for decrypting Amendment . . . 
 [++++] decrypted successfully 
 [++++] Starting report to pdf . . . 
 [++++] pdf generated successfully
+
 ```
 
 # Building from source

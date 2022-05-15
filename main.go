@@ -29,6 +29,7 @@ func main() {
 		curretnPath  string
 		status       bool
 		dateSubmit   string
+		AttachStatus string
 	)
 	lstDir := []string{"encrypt", "decrypt", "key"}
 	if runtime.GOOS == "windows" {
@@ -99,7 +100,11 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
+	if report.Attachment {
+		AttachStatus = "دارد"
+	} else {
+		AttachStatus = "ندارد"
+	}
 	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
 	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
@@ -162,6 +167,7 @@ func main() {
 		VulType         string
 		VulFix          string
 		VulWriteup      string
+		Attachment      string
 	}{
 		Title:           pdf.report.Title,
 		PoC:             string(output),
@@ -180,6 +186,7 @@ func main() {
 		MoreInfo:        moreInfo,
 		CompanyUserName: pdf.report.CompanyUsername,
 		Ips:             pdf.report.Ips,
+		Attachment:      AttachStatus,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)

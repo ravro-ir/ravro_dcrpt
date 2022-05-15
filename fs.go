@@ -202,5 +202,6 @@ func CheckIsEmpty(pdf Pdf) Pdf {
 	if pdf.judge.Vulnerability.Name == "" {
 		pdf.judge.Vulnerability.Name = publicMessage
 	}
+
 	return pdf
 }
