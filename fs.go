@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"golang.org/x/exp/utf8string"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -152,4 +153,30 @@ func JsonParser(process ProccesFile, AnyStruct interface{}) (interface{}, error)
 		return AnyStruct, err
 	}
 	return AnyStruct, nil
+}
+
+func ChangeDirName(reportId string, dirName string) {
+	AddDir(reportId)
+	var oldPath string
+	var newPath string
+	files, err := ioutil.ReadDir("decrypt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, file := range files {
+		if !file.IsDir() {
+			if runtime.GOOS == "windows" {
+				oldPath = dirName + "\\" + file.Name()
+				newPath = reportId + "\\" + file.Name()
+			} else {
+				oldPath = dirName + "/" + file.Name()
+				newPath = reportId + "/" + file.Name()
+			}
+			err := os.Rename(oldPath, newPath)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+
 }

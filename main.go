@@ -51,7 +51,7 @@ func main() {
 	help := flag.String("help", ">> Help : ravro_dcrpt --help \n\n", "")
 
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
-	key := flag.String("key", "key", "private key")
+	key := flag.String("key", "key", "key.private")
 	init := flag.String("init", "", "input directory of report encrypt file")
 	flag.Parse()
 	fmt.Println(*version)
@@ -71,7 +71,7 @@ func main() {
 			out := CheckDir(lstDir[i])
 			if out {
 				fmt.Println("[---] encrypt, decrypt, key is not exist.")
-				fmt.Println("[+++] Usage : ravro_dcrpt --init=init")
+				fmt.Println("[+++] Usage : ravro_dcrpt -init=init")
 				return
 			}
 		}
@@ -94,13 +94,14 @@ func main() {
 	r := NewRequestPdf("")
 	pt := ptime.Now()
 
-	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
-	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
+	fmt.Println("[++++] Starting for decrypting Report . . . ")
+	report, err := DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("[++++] Starting for decrypting Report . . . ")
-	report, err := DcrptReport(curretnPath, keyFixPath, outFixpath, status)
+
+	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
+	judge, err := DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -192,6 +193,7 @@ func main() {
 			fmt.Println("[----] failed to remove html template,")
 		}
 		fmt.Println("[++++] pdf generated successfully")
+		ChangeDirName(report.Slug, outFixpath)
 	} else {
 		fmt.Println(err)
 	}
