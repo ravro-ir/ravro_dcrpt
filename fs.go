@@ -180,5 +180,27 @@ func ChangeDirName(reportId string, dirName string) {
 			}
 		}
 	}
+}
 
+func CheckIsEmpty(pdf Pdf) Pdf {
+	publicMessage := "شرح داده نشد است"
+	if pdf.report.Reproduce == "" {
+		pdf.report.Reproduce = publicMessage
+	}
+	if pdf.judge.Description == "" {
+		pdf.judge.Description = publicMessage
+	}
+	if pdf.judge.Vulnerability.Writeup == "" {
+		pdf.judge.Vulnerability.Writeup = publicMessage
+	}
+	if pdf.judge.Vulnerability.Fix == "" {
+		pdf.judge.Vulnerability.Fix = publicMessage
+	}
+	if pdf.judge.Vulnerability.Define == "" {
+		pdf.judge.Vulnerability.Define = publicMessage
+	}
+	if pdf.judge.Vulnerability.Name == "" {
+		pdf.judge.Vulnerability.Name = publicMessage
+	}
+	return pdf
 }

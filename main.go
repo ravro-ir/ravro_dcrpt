@@ -123,12 +123,7 @@ func main() {
 	} else {
 		outputPath = strings.Replace(outputPath, "reports", report.CompanyUsername+"__"+report.Slug+"__"+report.HunterUsername, 1)
 	}
-	if pdf.report.Reproduce == "" {
-		pdf.report.Reproduce = publicMessage
-	}
-	if pdf.judge.Description == "" {
-		pdf.judge.Description = publicMessage
-	}
+	pdf = CheckIsEmpty(pdf)
 	fmt.Println("[++++] decrypted successfully ")
 	if pdf.report.SubmissionDate == "" {
 		dateSubmit = pdf.report.DateFrom
