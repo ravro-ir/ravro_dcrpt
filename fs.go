@@ -156,25 +156,27 @@ func JsonParser(process ProccesFile, AnyStruct interface{}) (interface{}, error)
 }
 
 func ChangeDirName(reportId string, dirName string) {
-	AddDir(reportId)
+
 	var oldPath string
 	var newPath string
-	files, err := ioutil.ReadDir("decrypt")
+	files, err := ioutil.ReadDir(dirName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, file := range files {
 		if !file.IsDir() {
 			if runtime.GOOS == "windows" {
+				AddDir(dirName + "\\" + reportId)
 				oldPath = dirName + "\\" + file.Name()
-				newPath = reportId + "\\" + file.Name()
+				newPath = dirName + "\\" + reportId + "\\" + file.Name()
 			} else {
+				AddDir(dirName + "/" + reportId)
 				oldPath = dirName + "/" + file.Name()
-				newPath = reportId + "/" + file.Name()
+				newPath = dirName + "/" + reportId + "/" + file.Name()
 			}
 			err := os.Rename(oldPath, newPath)
 			if err != nil {
-				fmt.Println(err)
+				log.Fatal(err)
 			}
 		}
 	}
