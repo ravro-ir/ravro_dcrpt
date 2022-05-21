@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"os"
 	"runtime"
@@ -42,12 +41,12 @@ func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool)
 		}
 		lstJudge, err = WalkMatch(path, "*.ravro")
 		if len(lstJudge) == 0 {
-			return judgment, errors.New("does not exist encrypt Judgment")
+			return judgment, err
 		}
 	} else {
 		lstJudge, err = WalkMatch(currentPath, "*.ravro")
 		if len(lstJudge) == 0 {
-			return judgment, errors.New("does not exist encrypt Judgment")
+			return judgment, err
 		}
 	}
 	for _, name := range lstJudge {

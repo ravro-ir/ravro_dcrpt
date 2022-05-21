@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 	"os"
 	"runtime"
@@ -34,23 +33,24 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if err != nil {
 			return report, err
 		}
-		lstReport, _ = WalkMatch(path, "*.ravro")
+		lstReport, err = WalkMatch(path, "*.ravro")
 		lstReportLen := len(lstReport)
 		if lstReportLen == 0 {
-			return report, errors.New("does not exist encrypt report")
+			return report, err
 		}
 		if lstReportLen > 1 {
 			report.Attachment = true
 		}
 	} else {
-		lstReport, _ = WalkMatch(currentPath, "*.ravro")
+		lstReport, err = WalkMatch(currentPath, "*.ravro")
 		lstReportLen := len(lstReport)
 		if lstReportLen == 0 {
-			return report, errors.New("does not exist encrypt report")
+			return report, err
 		}
 		if lstReportLen > 1 {
 			report.Attachment = true
 		}
+
 	}
 	for _, name := range lstReport {
 		if runtime.GOOS == "windows" {
