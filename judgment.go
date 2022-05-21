@@ -40,11 +40,17 @@ func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool)
 			return judgment, err
 		}
 		lstJudge, err = WalkMatch(path, "*.ravro")
+		if err != nil {
+			return judgment, err
+		}
 		if len(lstJudge) == 0 {
 			return judgment, err
 		}
 	} else {
 		lstJudge, err = WalkMatch(currentPath, "*.ravro")
+		if err != nil {
+			return judgment, err
+		}
 		if len(lstJudge) == 0 {
 			return judgment, err
 		}

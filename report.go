@@ -34,6 +34,9 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 			return report, err
 		}
 		lstReport, err = WalkMatch(path, "*.ravro")
+		if err != nil {
+			return report, err
+		}
 		lstReportLen := len(lstReport)
 		if lstReportLen == 0 {
 			return report, err
@@ -43,6 +46,9 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		}
 	} else {
 		lstReport, err = WalkMatch(currentPath, "*.ravro")
+		if err != nil {
+			return report, err
+		}
 		lstReportLen := len(lstReport)
 		if lstReportLen == 0 {
 			return report, err
