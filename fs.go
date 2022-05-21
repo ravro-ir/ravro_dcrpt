@@ -58,7 +58,8 @@ func WalkMatch(root, pattern string) ([]string, error) {
 }
 
 func ensureDir(dirName string) error {
-	err := os.Mkdir(dirName, os.ModeDir)
+	err := os.Mkdir(dirName, 0775)
+
 	if err == nil {
 		return nil
 	}
