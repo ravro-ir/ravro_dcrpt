@@ -69,6 +69,9 @@ func main() {
 		return
 	} else {
 		for i := range lstDir {
+			if *inputDir != "in" && *outputDir != "out" && *key != "key" {
+				break
+			}
 			out := CheckDir(lstDir[i])
 			if out {
 				fmt.Println("[---] encrypt, decrypt, key is not exist.")
@@ -137,9 +140,18 @@ func main() {
 	}
 	dateSubmited := strings.Split(dateSubmit, " ")
 	dateReport := strings.Split(string(dateSubmited[0]), "-")
-	year, _ := strconv.Atoi(dateReport[0])
-	month, _ := strconv.Atoi(dateReport[1])
-	day, _ := strconv.Atoi(dateReport[2])
+	year, err := strconv.Atoi(dateReport[0])
+	if err != nil {
+		log.Fatalln(err)
+	}
+	month, err := strconv.Atoi(dateReport[1])
+	if err != nil {
+		log.Fatalln(err)
+	}
+	day, err := strconv.Atoi(dateReport[2])
+	if err != nil {
+		log.Fatal(err)
+	}
 	var t time.Time = time.Date(year, time.Month(month), day, 12, 1, 1, 0, ptime.Iran())
 	pt = ptime.New(t)
 	dataFrom := pt.Format("yyyy/MM/dd")
