@@ -140,6 +140,7 @@ func main() {
 	}
 	dateSubmited := strings.Split(dateSubmit, " ")
 	dateReport := strings.Split(string(dateSubmited[0]), "-")
+
 	year, err := strconv.Atoi(dateReport[0])
 	if err != nil {
 		log.Fatalln(err)
