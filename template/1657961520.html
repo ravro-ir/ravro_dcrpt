@@ -1,0 +1,518 @@
+<html>
+<head>
+  <title>{TITLE}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+  <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/samim-font@v4.0.5/dist/font-face.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    a {
+      text-decoration: none;
+      color: #007fba;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      color: #000;
+      direction: rtl;
+      line-height: 2;
+      font-family: Samim,Tahoma,"DejaVu Sans",helvetica,arial,freesans,sans-serif;
+    }
+
+    header, .sample, footer {
+      margin: auto;
+      padding: 30px 50px;
+    }
+
+    header {
+      text-align: center;
+      background-color: #fff;
+      color: #222;
+    }
+
+    header h1 {
+      color: #6f6f91;
+      font-size: 3rem;
+      font-weight: 500;
+    }
+
+    header h1 span {
+      color: #6c5367;
+    }
+
+    header .version {
+      color: #000000;
+      font-weight: bold;
+    }
+
+    header .get {
+      margin: 10px 0;
+      font-size: 1.5rem;
+    }
+
+    header .get a {
+      display: inline-block;
+      border-bottom: 1px solid #d5d5d5;
+      color: #007fba;
+      margin: 0 5px;
+    }
+
+    header .info{
+      color: #999;
+    }
+
+    .infobox {
+      background-color: #f4f7ff;
+      border: 1px solid #e2e2e2;
+      border-radius: 5px;
+      color: #284559;
+      font-weight: 900;
+      line-height: 2;
+      margin: 0 auto;
+      max-width: 600px;
+      padding: 5px;
+    }
+    .sample {
+      background-color: #f5f8fa;
+      color: #181b1d;
+      border-top: 1px solid #eee;
+    }
+    .sample h2 {
+      font-weight: normal;
+      color: #00727b;
+    }
+    .sample p {
+      margin-bottom: 30px;
+    }
+    .sample a { color: #0b6db3; }
+    footer {
+      background-color: #1d2b2a;
+       
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+    }
+    footer a {
+      color: #FEAF3A;
+    }
+    .clear { clear: both; }
+    @media all and (max-width: 480px){
+      html {
+        font-size: 15px;
+      }
+      header, .sample, footer {
+        padding: 30px 20px;
+      }
+
+      .sample {
+        text-align: right;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+      }
+    }
+    table {
+      font-family: Samim,Tahoma,"DejaVu Sans",helvetica,arial,freesans,sans-serif;
+      border-collapse: collapse;
+       
+       
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      padding: 8px;
+      text-align: center;
+    }
+    .center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+    .img-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 10px;
+    }
+    ul {
+      margin: 0px;
+      padding: 0px;
+    }
+    .footer-section {
+      background: #ffc000;
+      position: relative;
+    }
+    .footer-cta {
+      border-bottom: 1px solid #373636;
+    }
+    .single-cta i {
+      color: #ff5e14;
+      font-size: 30px;
+      float: left;
+      margin-top: 8px;
+    }
+    .cta-text {
+      padding-left: 15px;
+      display: inline-block;
+    }
+    .cta-text h4 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .cta-text span {
+      color: #757575;
+      font-size: 15px;
+    }
+    .footer-content {
+      position: relative;
+      z-index: 2;
+    }
+    .footer-pattern img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 330px;
+      background-size: cover;
+      background-position: 100% 100%;
+    }
+    .footer-logo {
+      margin-bottom: 30px;
+    }
+    .footer-logo img {
+      max-width: 200px;
+    }
+    .footer-text p {
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: #7e7e7e;
+      line-height: 28px;
+    }
+    .footer-social-icon span {
+      color: #fff;
+      display: block;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Poppins', sans-serif;
+      margin-bottom: 20px;
+    }
+    .footer-social-icon a {
+      color: #fff;
+      font-size: 16px;
+      margin-right: 15px;
+    }
+    .footer-social-icon i {
+      height: 40px;
+      width: 40px;
+      text-align: center;
+      line-height: 38px;
+      border-radius: 50%;
+    }
+    .facebook-bg{
+      background: #3B5998;
+    }
+    .twitter-bg{
+      background: #55ACEE;
+    }
+    .google-bg{
+      background: #DD4B39;
+    }
+    .footer-widget-heading h3 {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    .footer-widget-heading h3::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -15px;
+      height: 2px;
+      width: 50px;
+      background: #ff5e14;
+    }
+    .footer-widget ul li {
+      display: inline-block;
+      float: left;
+      width: 50%;
+      margin-bottom: 12px;
+    }
+    .footer-widget ul li a:hover{
+      color: #ff5e14;
+    }
+    .footer-widget ul li a {
+      color: #878787;
+      text-transform: capitalize;
+    }
+    .subscribe-form {
+      position: relative;
+      overflow: hidden;
+    }
+    .subscribe-form input {
+      width: 100%;
+      padding: 14px 28px;
+      background: #2E2E2E;
+      border: 1px solid #2E2E2E;
+      color: #fff;
+    }
+    .subscribe-form button {
+      position: absolute;
+      right: 0;
+      background: #ff5e14;
+      padding: 13px 20px;
+      border: 1px solid #ff5e14;
+      top: 0;
+    }
+    .subscribe-form button i {
+      color: #fff;
+      font-size: 22px;
+      transform: rotate(-6deg);
+    }
+    .copyright-area{
+      background: #202020;
+      padding: 25px 0;
+    }
+    .copyright-text p {
+      margin: 0;
+      font-size: 14px;
+      color: #878787;
+    }
+    .copyright-text p a{
+      color: #ff5e14;
+    }
+    .footer-menu li {
+      display: inline-block;
+      margin-left: 20px;
+    }
+    .footer-menu li:hover a{
+      color: #ff5e14;
+    }
+    .footer-menu li a {
+      font-size: 14px;
+      color: #878787;
+    }
+    .card {
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+      transition: 0.3s;
+       
+      border-radius: 5px;
+      margin-right: 50px;
+      margin-left: 50px;
+    }
+    .card:hover {
+      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+    img {
+      border-radius: 5px 5px 0 0;
+    }
+    .container {
+      padding: 2px 16px;
+    }
+    .text-align {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+<body>
+<img class="img-center" width="400px" height="200px" src="https://www.ravro.ir/api/files/documents/image-1645346580017.png" alt="image" />
+<header>
+  <h1>asdasdasdadasddsad</h1>
+  <br />
+  <h3><a href="https://www.ravro.ir/company/spara">spara</a></h3>
+</header>
+<br />
+<table class="center">
+  <tr>
+    <th>شکارچی</th>
+    <th>شناسه گزارش</th>
+    <th>تاریخ ثبت</th>
+    <th>CVSS</th>
+    <th>پاداش پیشنهادی</th>
+    <th>تاریخ بررسی</th>
+    <th>ای پی شکارچی</th>
+    <th>پیوست</th>
+  </tr>
+  <tr>
+    <td><a href="https://ravro.ir/hunter/user3">user3</a></td>
+    <td><a href="https://www.ravro.ir/report/ir2022-07-16-0002">ir2022-07-16-0002</a></td>
+    <td>1401/04/25</td>
+    <td>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N</td>
+    <td>60000000 ریال</td>
+    <td>1401/4/25</td>
+    <td>1.1.1.1</td>
+    <td>دارد</td>
+  </tr>
+</table>
+<br />
+<hr>
+<h1 class="text-align">شرح آسیب پذیری (شکارچی) </h1>
+<div class="card">
+  <div class="container">
+    <p>
+      <h2>توضیحات و شرح آسیب پذیری</h2>
+
+<p>توضیحات خود را درباره‌ی آسیب‌پذیری اینجا بنوپیامد آسیب پذیری امنیتی در سامانه هدف چیستپیامد آسیب پذیری امنیتی در سامانه هدف چیستپیامد آسیب پذیری امنیتی در سامانه هدف چیستپیامد آسیب پذیری امنیتی در سامانه هدف چیستیسید</p>
+
+<h2>روش اجرا و باز تولید آسیب پذیری</h2>
+
+<p>برای بازتولید و اجرای این آسیب‌پذیری چه مراحلی بایستی انجام پذیرد</p>
+
+<h2>راه حل</h2>
+
+<p>راه‌حل پیشنهادی شما برای رفع این آسیب‌پذیری چیست؟</p>
+
+    </p>
+  </div>
+</div>
+<h1 class="text-align">چگونه می‌توان آسیب‌پذیری را رفع کرد ؟ ( شکارچی ) </h1>
+<div class="card">
+  <div class="container">
+    <p>
+      شرح داده نشد است
+    </p>
+  </div>
+</div>
+<h1 class="text-align">اطلاعات بیشتر ( شکارچی ) </h1>
+<div class="card">
+  <div class="container">
+    <p>
+      شرح داده نشد است
+    </p>
+  </div>
+</div>
+<br />
+<h1 class="text-align">بررسی تیم داوری ( راورو )</h1>
+<div class="card">
+  <div class="container">
+    <p>
+      adsa
+    </p>
+  </div>
+</div>
+<br />
+<h1 class="text-align"> نوع آسیب پذیری ( راورو )</h1>
+<div class="card">
+  <div class="container">
+    <p>
+      شرح داده نشد است
+    </p>
+  </div>
+</div>
+<br />
+<h1 class="text-align"> شرح آسیب پذیری ( راورو )</h1>
+<div class="card">
+  <div class="container">
+    <p>
+      شرح داده نشد است
+    </p>
+  </div>
+</div>
+<br />
+<h1 class="text-align"> رفع آسیب پذیری ( راورو )</h1>
+<div class="card">
+  <div class="container">
+    <p>
+      شرح داده نشد است
+    </p>
+  </div>
+</div>
+<br />
+<h1 class="text-align"> مطالعه بیشتر از این آسیب پذیری ( راورو )</h1>
+<div class="card">
+  <div class="container">
+    <p>
+      شرح داده نشد است
+    </p>
+  </div>
+</div>
+<br />
+
+<footer class="footer-section" style="border-radius: 45px;">
+  <div class="container">
+    <div class="footer-cta pt-5 pb-5">
+      <div class="row">
+        <div class="col-xl-4 col-md-4 mb-30">
+          <div class="single-cta">
+            <i class="fas fa-map-marker-alt"></i>
+            <div class="cta-text">
+              <h4>دفتر مرکزی</h4>
+              <span>  تهران، خيابان مطهری، نبش سهروردی، پلاك ۹۴ ، طبقه دوم، واحد ۲۵۰</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-4 col-md-4 mb-30">
+          <div class="single-cta">
+            <i class="fas fa-phone"></i>
+            <div class="cta-text">
+              <h4>شماره تماس</h4>
+              <span>021-9103-1553</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-4 col-md-4 mb-30">
+          <div class="single-cta">
+            <i class="far fa-envelope-open"></i>
+            <div class="cta-text">
+              <h4>آدرس ایمیل</h4>
+              <span>support[at]Ravro[dot]ir</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-4 col-md-4 mb-30">
+          <div class="single-cta">
+            <i class="far fa-envelope-open"></i>
+            <div class="cta-text">
+              <h4>شبکه اجتماعی</h4>
+              <a href="https://linkedin.com/company/ravro"
+              ><img
+                      src="https://www.ravro.ir/api/files/documents/image-1643712266463.png"
+                      height="30"
+              /></a>
+              <a href="https://instagram.com/ravro_ir"
+              ><img
+                      src="https://www.ravro.ir/api/files/documents/image-1643712340297.png"
+                      height="30"
+              /></a>
+              <a href="https://youtube.com/ch/ravro"
+              ><img
+                      src="https://www.ravro.ir/api/files/documents/image-1643712346843.png"
+                      height="30"
+              /></a>
+              <a href="https://twitter.com/ravro_ir"
+              ><img
+                      src="https://www.ravro.ir/api/files/documents/image-1643712216888.png"
+                      height="30"
+              /></a>
+              <a href="https://t.me/ravro_ir"
+              ><img
+                      src="https://www.ravro.ir/api/files/documents/image-1643712255232.png"
+                      height="30"
+              /></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

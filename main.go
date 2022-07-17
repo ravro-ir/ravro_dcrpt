@@ -88,7 +88,7 @@ func main() {
 	}
 	if *outputDir != "out" {
 		status = true
-		outputPath = *outputDir + "\\" + "reports.pdf"
+		outputPath = *outputDir + "reports.pdf"
 		outFixpath = *outputDir
 	}
 	if *key != "key" {

@@ -69,7 +69,7 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 				continue
 			}
 		} else {
-			if !strings.Contains(name, "/encrypt/") {
+			if !strings.Contains(name, "encrypt/") {
 				continue
 			}
 			if !strings.Contains(name, "/report/") {
@@ -83,7 +83,11 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if runtime.GOOS == "windows" {
 			_, err = SslDecrypt(Process.name, outFixpath+"\\"+Process.filename, keyFixPath)
 		} else {
-			_, err = SslDecrypt(Process.name, outFixpath+"/"+Process.filename, keyFixPath)
+			if strings.Contains(outFixpath, "/") {
+				_, err = SslDecrypt(Process.name, outFixpath+Process.filename, keyFixPath)
+			} else {
+				_, err = SslDecrypt(Process.name, outFixpath+"/"+Process.filename, keyFixPath)
+			}
 		}
 		if err != nil {
 			return report, err
