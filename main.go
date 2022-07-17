@@ -103,6 +103,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	if report == (Report{}) {
+		fmt.Println("[---] The input file for decryption is not correct.")
+		return
+	}
 	if report.Attachment {
 		AttachStatus = "دارد"
 	} else {
