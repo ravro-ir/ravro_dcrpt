@@ -90,6 +90,18 @@ $ go run ravro_dcrpt
 ```
 (Add the appropriate `.exe` extension on Windows systems)
 
+## Install on Arch Linux
+
+You can use this package which compiles and installs from latest commit of main branch:
+
+https://aur.archlinux.org/packages/ravro_dcrpt-git/
+
+```
+git clone https://aur.archlinux.org/ravro_dcrpt-git.git
+cd ravro_dcrpt-git
+makepkg -sri
+```
+
 # Bugs
 Please use github issues to [report](https://github.com/ravro-ir/ravro_dcrp/issues) bugs.
 
