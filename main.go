@@ -143,7 +143,7 @@ func main() {
 	}
 	dateSubmited := strings.Split(dateSubmit, " ")
 	if len(dateSubmited) == 0 {
-		log.Fatalln("[----] Error : The submit date is empty, we think your report path is incorrect, (Valid Path: (encrypt/ir2022-01-10-0001)")
+		log.Fatalln("[----] Error : The submit date is empty, we think your report path is incorrect, (Valid Path: (encrypt/ir2022-01-10-0001))")
 	}
 	dateReport := strings.Split(string(dateSubmited[0]), "-")
 	year, err := strconv.Atoi(dateReport[0])
