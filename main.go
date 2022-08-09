@@ -79,7 +79,6 @@ func main() {
 				return
 			}
 		}
-
 	}
 	status = false
 	if *inputDir != "in" {
@@ -101,10 +100,10 @@ func main() {
 	fmt.Println("[++++] Starting for decrypting Report . . . ")
 	report, err := DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("[----] Error : The private key is incorrect")
 	}
 	if report == (Report{}) {
-		fmt.Println("[---] The input file for decryption is not correct.")
+		fmt.Println("[----] The input file for decryption is not correct.")
 		return
 	}
 	if report.Attachment {
@@ -143,8 +142,10 @@ func main() {
 		dateSubmit = pdf.report.SubmissionDate
 	}
 	dateSubmited := strings.Split(dateSubmit, " ")
+	if len(dateSubmited) == 0 {
+		log.Fatalln("[----] Error : The submit date is empty, we think your report path is incorrect, (Valid Path: (encrypt/ir2022-01-10-0001)")
+	}
 	dateReport := strings.Split(string(dateSubmited[0]), "-")
-
 	year, err := strconv.Atoi(dateReport[0])
 	if err != nil {
 		log.Fatalln(err)
