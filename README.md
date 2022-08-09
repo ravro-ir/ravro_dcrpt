@@ -42,8 +42,8 @@ Use without command line :
 $ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt
 >> Version : ravro_dcrpt/1.0.0
->> HomePage: https://github.com/ravro-ir/ravro_dcrp
->> Issue: https://github.com/ravro-ir/ravro_dcrp/issues
+>> HomePage: https://github.com/ravro-ir/ravro_dcrpt
+>> Issue: https://github.com/ravro-ir/ravro_dcrpt/issues
 >> Author : Ramin Farajpour Cami
 >> Help : ravro_dcrpt --help
 
@@ -62,8 +62,8 @@ Use with command line :
 $ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
 >> Version : ravro_dcrpt/1.0.0
->> HomePage: https://github.com/ravro-ir/ravro_dcrp
->> Issue: https://github.com/ravro-ir/ravro_dcrp/issues
+>> HomePage: https://github.com/ravro-ir/ravro_dcrpt
+>> Issue: https://github.com/ravro-ir/ravro_dcrpt/issues
 >> Author : Ramin Farajpour Cami
 >> Help : ravro_dcrpt --help
 
@@ -83,7 +83,7 @@ Install a [Go compiler](https://golang.org/dl).
 
 Run the following commands in the checked-out repository:
 ```bash
-$ git clone https://github.com/ravro-ir/ravro_dcrp.git
+$ git clone https://github.com/ravro-ir/ravro_dcrpt.git
 $ cd ravro_dcrpt
 $ go build ravro_dcrpt
 $ go run ravro_dcrpt
@@ -103,7 +103,7 @@ makepkg -sri
 ```
 
 # Bugs
-Please use github issues to [report](https://github.com/ravro-ir/ravro_dcrp/issues) bugs.
+Please use github issues to [report](https://github.com/ravro-ir/ravro_dcrpt/issues) bugs.
 
 # License
 GNU General Public License, version 3
