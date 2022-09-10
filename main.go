@@ -88,6 +88,10 @@ func main() {
 	if *outputDir != "out" {
 		status = true
 		outputPath = *outputDir + "reports.pdf"
+		//path, err := os.Getwd()
+		//if err != nil {
+		//	log.Println(err)
+		//}
 		outFixpath = *outputDir
 	}
 	if *key != "key" {
@@ -186,6 +190,7 @@ func main() {
 		VulFix          string
 		VulWriteup      string
 		Attachment      string
+		Scenario        string
 	}{
 		Title:           pdf.report.Title,
 		PoC:             string(output),
@@ -205,6 +210,7 @@ func main() {
 		CompanyUserName: pdf.report.CompanyUsername,
 		Ips:             pdf.report.Ips,
 		Attachment:      AttachStatus,
+		Scenario:        pdf.report.Scenario,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)

@@ -19,6 +19,7 @@ type Report struct {
 	SubmissionDate  string `json:"submissionDate"`
 	Ips             string `json:"ips"`
 	Attachment      bool
+	Scenario        string `json:"scenario"`
 }
 
 func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (Report, error) {
