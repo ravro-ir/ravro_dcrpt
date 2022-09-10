@@ -35,6 +35,23 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 4 - Download `.zip` file report, Copy `zip` file in the `encrypt` folder and extract it <br />
 5 - Run `ravro_dcrpt.exe` /  `ravro_dcrpt` <br />
 
+### Schema 
+
+```bash
+
+.
+├── decrypt
+│   └── ir2020-07-16-0002
+│       └── test__ir2020-07-16-0002__user3.pdf
+├── encrypt
+│   └── report-ir2020-07-16-0002
+│       ├── judgment
+│       │   └── data.ravro
+│       └── report
+│           └── data.ravro
+│   └── key.private
+
+```
 
 # Usage :
 Use without command line :
