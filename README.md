@@ -49,6 +49,7 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 │       │   └── data.ravro
 │       └── report
 │           └── data.ravro
+├── key
 │   └── key.private
 
 ```
