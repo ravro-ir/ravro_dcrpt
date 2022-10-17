@@ -5,7 +5,7 @@
 # Introduction
 This is a tool to decrypt reports submitted by a hunter from the Ravro platform bug bounty.
 
-# Install Tools 
+# Manual Install Tools 
 
 1 - Install openssl <br />
   * Windows : https://slproweb.com/products/Win32OpenSSL.html <br /> 
@@ -34,6 +34,25 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 3 - Rename your private `key` name to `key.private` and copy to `key` folder <br />
 4 - Download `.zip` file report, Copy `zip` file in the `encrypt` folder and extract it <br />
 5 - Run `ravro_dcrpt.exe` /  `ravro_dcrpt` <br />
+
+
+
+# Automation Install Tools 
+
+#### Linux 
+```bash
+root# chmod +x linux.sh
+root# ./linux.sh
+```
+#### Windows
+```bash
+C:\Users\ravro> win64.bat
+```
+
+#### MacOS
+```bash
+root# ./darwin.sh
+```
 
 ### Schema 
 
