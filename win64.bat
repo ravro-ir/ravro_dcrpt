@@ -27,7 +27,7 @@ if exist "C:\Program Files\wkhtmltopdf\bin\" (
 setx PATH ^%PATH^%;"C:\Program Files\wkhtmltopdf\bin"
 
 // Download ravro_dcrpt
-echo [+++] Ravro Decrypt wkhtmltox ....
+echo [+++] Ravro Decrypt Tools ....
 powershell -command "Invoke-WebRequest -OutFile ravro_dcrpt.zip -Uri https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.1/win_x64_ravro_dcrpt.zip"
 
 // Extract zip file
