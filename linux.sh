@@ -11,4 +11,4 @@ tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
 cp wkhtmltox/bin/wk* /usr/local/bin/
 ## Download ravro_dcrpt
 wget https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.1/linux_x64_ravro_dcrpt.zip
-unzip xvf linux_x64_ravro_dcrpt.zip
+unzip linux_x64_ravro_dcrpt.zip
