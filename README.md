@@ -39,17 +39,17 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 
 # Automation Install Tools 
 
-#### Linux 
+#### [Linux](https://github.com/ravro-ir/ravro_dcrpt/blob/main/linux.sh)
 ```bash
 root# chmod +x linux.sh
 root# ./linux.sh
 ```
-#### Windows
+#### [Windows](https://github.com/ravro-ir/ravro_dcrpt/blob/main/win64.bat)
 ```bash
 C:\Users\ravro> win64.bat
 ```
 
-#### MacOS
+#### [MacOS](https://github.com/ravro-ir/ravro_dcrpt/blob/main/darwin.sh)
 ```bash
 root# ./darwin.sh
 ```
