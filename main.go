@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gomarkdown/markdown"
-	ptime "github.com/yaa110/go-persian-calendar"
 	"log"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gomarkdown/markdown"
+	ptime "github.com/yaa110/go-persian-calendar"
 )
 
 type Pdf struct {
@@ -20,8 +21,7 @@ type Pdf struct {
 }
 
 func main() {
-
-	var (
+  var (
 		templatePath string
 		outputPath   string
 		keyFixPath   string
