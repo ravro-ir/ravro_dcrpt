@@ -21,7 +21,7 @@ type Pdf struct {
 }
 
 func main() {
-  var (
+	var (
 		templatePath string
 		outputPath   string
 		keyFixPath   string
@@ -104,9 +104,10 @@ func main() {
 	fmt.Println("[++++] Starting for decrypting Report . . . ")
 	report, err := DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
+		fmt.Println(err)
 		log.Fatalln("[----] Error : The private key is incorrect")
 	}
-	if report == (Report{}) {
+	if report.Title == "" {
 		fmt.Println("[----] The input file for decryption is not correct.")
 		return
 	}
@@ -125,6 +126,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	AddDir("template")
 	HtmlTemplate(templatePath)
 	moreInfo := strings.Join(amendment[:], ",")
@@ -166,6 +168,21 @@ func main() {
 	pt = ptime.New(t)
 	dataFrom := pt.Format("yyyy/MM/dd")
 	fmt.Println("[++++] Starting report to pdf . . . ")
+	//var infoMore string
+	infoMore := ""
+	//var sulotion string
+	sulotion := ""
+	//var title string
+	title := ""
+	//var descript string
+	descript := ""
+
+	for _, content := range report.ReportInfo {
+		infoMore += "<br />" + content.MoreInfo
+		sulotion += "<br />" + content.InfoSolution
+		title += "<br />" + content.InfoTitle
+		descript += "<br />" + content.InfoDescription
+	}
 
 	md := []byte(pdf.report.Description)
 	output := markdown.ToHTML(md, nil, nil)
@@ -191,6 +208,10 @@ func main() {
 		VulWriteup      string
 		Attachment      string
 		Scenario        string
+		InfoTitle       string
+		InfoSulotion    string
+		InfoDesc        string
+		LinkMoreInfo    string
 	}{
 		Title:           pdf.report.Title,
 		PoC:             string(output),
@@ -211,6 +232,10 @@ func main() {
 		Ips:             pdf.report.Ips,
 		Attachment:      AttachStatus,
 		Scenario:        pdf.report.Scenario,
+		InfoTitle:       title,
+		InfoSulotion:    sulotion,
+		InfoDesc:        descript,
+		LinkMoreInfo:    infoMore,
 	}
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)

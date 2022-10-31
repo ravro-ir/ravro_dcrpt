@@ -1,11 +1,20 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
 	"strings"
 )
+
+type InfoReport []struct {
+  InfoDescription string `json:"infoDescription"`
+  InfoTitle       string `json:"infoTitle"`
+  InfoSolution    string `json:"infoSolution"`
+  MoreInfo        string `json:"infoMore"`
+}
 
 type Report struct {
 	Title           string `json:"title"`
@@ -20,15 +29,18 @@ type Report struct {
 	Ips             string `json:"ips"`
 	Attachment      bool
 	Scenario        string `json:"scenario"`
+  ReportInfo      InfoReport
 }
 
 func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (Report, error) {
 	var report Report
-	var (
+  var infoReport InfoReport
+ 	var (
 		path      string
 		err       error
 		lstReport []string
 	)
+  
 	if currentPath == "" {
 		path, err = projectpath()
 		if err != nil {
@@ -45,6 +57,19 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if lstReportLen > 1 {
 			report.Attachment = true
 		}
+    lstInfo, _ := WalkMatch(path, "*.json")
+    
+    jsonFile, err := os.Open(lstInfo[0])
+	  reportValue, _ := ioutil.ReadAll(jsonFile)
+ 	  err = json.Unmarshal(reportValue, &infoReport)
+    if err != nil {
+		  return report, err
+	  }
+	  err = jsonFile.Close()
+	  if err != nil {
+		  return report, err
+    }
+    report.ReportInfo = infoReport
 	} else {
 		lstReport, err = WalkMatch(currentPath, "*.ravro")
 		if err != nil {
@@ -105,6 +130,16 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if err = os.Remove(process.oldNamePath); err != nil {
 			log.Fatal(err)
 		}
+    //jsonFile, err := os.Open(currentPath + "report_info.json")
+	  //reportValue, _ := ioutil.ReadAll(jsonFile)
+	  //err = json.Unmarshal(reportValue, &report)
+    //if err != nil {
+		// return report, err
+	  //}
+	  //err = jsonFile.Close()
+	  //if err != nil {
+		//return report, err
+	  //}
 	}
 	return report, nil
 }
