@@ -20,7 +20,10 @@ type Pdf struct {
 	amendment Amendment
 }
 
+const rvrVersion = "v1.0.2"
+
 func main() {
+
 	var (
 		templatePath string
 		outputPath   string
@@ -28,7 +31,6 @@ func main() {
 		outFixpath   string
 		curretnPath  string
 		status       bool
-		dateSubmit   string
 		AttachStatus string
 	)
 	lstDir := []string{"encrypt", "decrypt", "key"}
@@ -43,9 +45,10 @@ func main() {
 		keyFixPath = "key/key.private"
 		outFixpath = "decrypt"
 	}
-	publicMessage := "شرح داده نشد است"
+	// تاریخ بررسی - اعضای تیم داوری - تگ
+	publicMessage := "شرح داده نشده است."
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
-	version := flag.String("version", ">> Version : ravro_dcrpt/1.0.0", "")
+	version := flag.String("version", ">> Version : ravro_dcrpt/1.0.1", "")
 	homePage := flag.String("homepage", ">> HomePage: https://github.com/ravro-ir/ravro_dcrp", "")
 	issue := flag.String("issue", ">> Issue: https://github.com/ravro-ir/ravro_dcrp/issues", "")
 	author := flag.String("author", ">> Author : Ramin Farajpour Cami", "")
@@ -54,6 +57,8 @@ func main() {
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "key.private")
 	init := flag.String("init", "", "input directory of report encrypt file")
+	update := flag.String("update", "", "Update ravro decryptor: update=yes")
+
 	flag.Parse()
 	fmt.Println(*version)
 	fmt.Println(*homePage)
@@ -61,6 +66,11 @@ func main() {
 	fmt.Println(*author)
 	fmt.Println(*help)
 
+	if *update == "yes" {
+		fmt.Println("[++++] Downloading latest version")
+		HttpGet()
+		return
+	}
 	if *init == "init" {
 		AddDir("decrypt")
 		AddDir("encrypt")
@@ -135,12 +145,47 @@ func main() {
 	}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := Pdf{judge: judge, report: report}
+
+	dateFrom, outputPath := Validate(report, outputPath, pdf)
+	fmt.Println("[++++] Starting report to pdf . . . ")
+
+	md := []byte(pdf.report.Description)
+	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, AttachStatus, report)
+	if err := r.ParseTemplate(templatePath, templateData); err == nil {
+		_, _ = r.GeneratePDF(outputPath)
+		err := os.RemoveAll("template")
+		if err != nil {
+			fmt.Println("[----] failed to remove html template,")
+		}
+		fmt.Println("[++++] pdf generated successfully")
+		ChangeDirName(report.Slug, outFixpath)
+	} else {
+		fmt.Println(err)
+	}
+}
+
+func ConString(info InfoReport) string {
+	var infoMore string
+	for _, content := range info {
+		infoMore += " عنوان گزارش : " + content.InfoTitle + "<br />"
+		infoMore += " توضیحات گزارش : " + "<br />" + content.InfoDescription + "<br />"
+		infoMore += "راه حل : " + "<br />" + content.InfoSolution + "<br />"
+		infoMore += "اطلاعات بیشتر : " + "<br />" + content.MoreInfo + "<br />"
+		infoMore += "<hr>"
+	}
+	return infoMore
+}
+
+func Validate(report Report, outputPath string, pdf Pdf) (string, string) {
+	var dateSubmit string
+	pt := ptime.Now()
 	if report.CompanyUsername == "" {
 		outputPath = strings.Replace(outputPath, "reports", randSeq(8), 1)
 	} else {
 		outputPath = strings.Replace(outputPath, "reports", report.CompanyUsername+"__"+report.Slug+"__"+report.HunterUsername, 1)
 	}
 	pdf = CheckIsEmpty(pdf)
+
 	fmt.Println("[++++] decrypted successfully ")
 	if pdf.report.SubmissionDate == "" {
 		dateSubmit = pdf.report.DateFrom
@@ -151,7 +196,7 @@ func main() {
 	if len(dateSubmited) == 0 {
 		log.Fatalln("[----] Error : The submit date is empty, we think your report path is incorrect, (Valid Path: (encrypt/ir2022-01-10-0001))")
 	}
-	dateReport := strings.Split(string(dateSubmited[0]), "-")
+	dateReport := strings.Split(dateSubmited[0], "-")
 	year, err := strconv.Atoi(dateReport[0])
 	if err != nil {
 		log.Fatalln(err)
@@ -164,27 +209,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var t time.Time = time.Date(year, time.Month(month), day, 12, 1, 1, 0, ptime.Iran())
+	var t = time.Date(year, time.Month(month), day, 12, 1, 1, 0, ptime.Iran())
 	pt = ptime.New(t)
-	dataFrom := pt.Format("yyyy/MM/dd")
-	fmt.Println("[++++] Starting report to pdf . . . ")
-	//var infoMore string
-	infoMore := ""
-	//var sulotion string
-	sulotion := ""
-	//var title string
-	title := ""
-	//var descript string
-	descript := ""
+	dateFrom := pt.Format("yyyy/MM/dd")
 
-	for _, content := range report.ReportInfo {
-		infoMore += "<br />" + content.MoreInfo
-		sulotion += "<br />" + content.InfoSolution
-		title += "<br />" + content.InfoTitle
-		descript += "<br />" + content.InfoDescription
-	}
+	return dateFrom, outputPath
+}
 
-	md := []byte(pdf.report.Description)
+func TemplateStruct(md []byte, pdf Pdf, dateFrom, dateTo, moreInfo, AttachStatus string, report Report) any {
 	output := markdown.ToHTML(md, nil, nil)
 	templateData := struct {
 		Title           string
@@ -208,16 +240,14 @@ func main() {
 		VulWriteup      string
 		Attachment      string
 		Scenario        string
-		InfoTitle       string
-		InfoSulotion    string
-		InfoDesc        string
 		LinkMoreInfo    string
+		RavroVer        string
 	}{
 		Title:           pdf.report.Title,
 		PoC:             string(output),
 		CVSS:            pdf.judge.Cvss.Value,
 		Reproduce:       pdf.report.Reproduce,
-		DateFrom:        dataFrom,
+		DateFrom:        dateFrom,
 		Hunter:          pdf.report.HunterUsername,
 		ReportID:        pdf.report.Slug,
 		Amount:          pdf.judge.Reward,
@@ -232,20 +262,8 @@ func main() {
 		Ips:             pdf.report.Ips,
 		Attachment:      AttachStatus,
 		Scenario:        pdf.report.Scenario,
-		InfoTitle:       title,
-		InfoSulotion:    sulotion,
-		InfoDesc:        descript,
-		LinkMoreInfo:    infoMore,
+		LinkMoreInfo:    ConString(report.ReportInfo),
+		RavroVer:        rvrVersion,
 	}
-	if err := r.ParseTemplate(templatePath, templateData); err == nil {
-		_, _ = r.GeneratePDF(outputPath)
-		err := os.RemoveAll("template")
-		if err != nil {
-			fmt.Println("[----] failed to remove html template,")
-		}
-		fmt.Println("[++++] pdf generated successfully")
-		ChangeDirName(report.Slug, outFixpath)
-	} else {
-		fmt.Println(err)
-	}
+	return templateData
 }
