@@ -102,12 +102,10 @@ func downloadFileLessMemory(uri string) {
 		panic(err)
 	}
 	defer fileHandle.Close()
-
 	_, err = io.Copy(fileHandle, resp.Body)
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 func HttpGet() {

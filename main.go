@@ -1,17 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/gomarkdown/markdown"
+	ptime "github.com/yaa110/go-persian-calendar"
+	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/gomarkdown/markdown"
-	ptime "github.com/yaa110/go-persian-calendar"
 )
 
 type Pdf struct {
@@ -58,7 +59,6 @@ func main() {
 	key := flag.String("key", "key", "key.private")
 	init := flag.String("init", "", "input directory of report encrypt file")
 	update := flag.String("update", "", "Update ravro decryptor: update=yes")
-
 	flag.Parse()
 	fmt.Println(*version)
 	fmt.Println(*homePage)
@@ -98,10 +98,6 @@ func main() {
 	if *outputDir != "out" {
 		status = true
 		outputPath = *outputDir + "reports.pdf"
-		//path, err := os.Getwd()
-		//if err != nil {
-		//	log.Println(err)
-		//}
 		outFixpath = *outputDir
 	}
 	if *key != "key" {
@@ -148,6 +144,25 @@ func main() {
 
 	dateFrom, outputPath := Validate(report, outputPath, pdf)
 	fmt.Println("[++++] Starting report to pdf . . . ")
+
+	file, _ := json.MarshalIndent(pdf.judge, "", " ")
+	if runtime.GOOS == "linux" {
+		_ = ioutil.WriteFile("decrypt//juror.json", file, 0644)
+	} else {
+		_ = ioutil.WriteFile("decrypt\\juror.json", file, 0644)
+	}
+	reportd, _ := json.MarshalIndent(pdf.report, "", " ")
+	if runtime.GOOS == "linux" {
+		_ = ioutil.WriteFile("decrypt//repo.json", reportd, 0644)
+	} else {
+		_ = ioutil.WriteFile("decrypt\\repo.json", reportd, 0644)
+	}
+	amendments, _ := json.MarshalIndent(pdf.amendment, "", " ")
+	if runtime.GOOS == "linux" {
+		_ = ioutil.WriteFile("decrypt//moreinfo.json", amendments, 0644)
+	} else {
+		_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
+	}
 
 	md := []byte(pdf.report.Description)
 	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, AttachStatus, report)
