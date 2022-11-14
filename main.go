@@ -65,13 +65,17 @@ func main() {
 	fmt.Println(*help)
 
 	if *latest {
-		ver := utils.LatestVersion()
-		newVer := fmt.Sprintf("ravro_dcrpt/%s", ver)
-		if rvrVersion != ver {
-			fmt.Println(fmt.Sprintf("\n New version (%s) released, "+
-				"Please use command : ./ravro_dcrpt -u \n", newVer))
-			return
+		ver, err := utils.LatestVersion()
+		if err != nil {
+		} else {
+			newVer := fmt.Sprintf("ravro_dcrpt/%s", ver)
+			if rvrVersion != ver {
+				fmt.Println(fmt.Sprintf("\n New version (%s) released, "+
+					"Please use command : ./ravro_dcrpt -u \n", newVer))
+				return
+			}
 		}
+
 	}
 	if *update {
 		fmt.Println("[++++] Downloading latest version")

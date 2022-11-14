@@ -63,11 +63,11 @@ func HttpGet() {
 	fmt.Println("[++++] The latest version file downloaded ")
 }
 
-func LatestVersion() string {
-	// Get request
+func LatestVersion() (string, error) {
+
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Println("No response from request")
+		return "", err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body) // response body is []byte
@@ -77,5 +77,5 @@ func LatestVersion() string {
 		fmt.Println("Can not unmarshal JSON")
 		log.Fatalln(err)
 	}
-	return result.TagName
+	return result.TagName, nil
 }
