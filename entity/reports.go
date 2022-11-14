@@ -1,12 +1,5 @@
 package entity
 
-//type InfoReport []struct {
-//	InfoDescription string `json:"infoDescription"`
-//	InfoTitle       string `json:"infoTitle"`
-//	InfoSolution    string `json:"infoSolution"`
-//	MoreInfo        string `json:"infoMore"`
-//}
-
 type InfoReport struct {
 	Tags []struct {
 		Title       string `json:"title"`
@@ -25,33 +18,56 @@ type InfoReport struct {
 		} `json:"attachments"`
 		Cvss struct {
 			Hunter struct {
-				Vector string      `json:"vector"`
-				Score  interface{} `json:"score"`
+				Vector string `json:"vector"`
+				Score  string `json:"score"`
 			} `json:"hunter"`
 			Judge struct {
-				Vector interface{} `json:"vector"`
-				Score  interface{} `json:"score"`
+				Vector string `json:"vector"`
+				Score  string `json:"score"`
 			} `json:"judge"`
 			Final struct {
-				Vector interface{} `json:"vector"`
-				Score  interface{} `json:"score"`
+				Vector string `json:"vector"`
+				Score  string `json:"score"`
 			} `json:"final"`
 		} `json:"cvss"`
 	} `json:"details"`
 }
 
+//
+//type Report struct {
+//	Title           string `json:"title"`
+//	Description     string `json:"description"`
+//	Reproduce       string `json:"reproduce"`
+//	DateFrom        string `json:"dateFrom"`
+//	CVSS            string `json:"cvss"`
+//	HunterUsername  string `json:"hunterUsername"`
+//	CompanyUsername string `json:"companyUsername"`
+//	Slug            string `json:"slug"`
+//	SubmissionDate  string `json:"submissionDate"`
+//	Ips             string `json:"ips"`
+//	Attachment      bool
+//	Scenario        string `json:"scenario"`
+//	ReportInfo      InfoReport
+//}
+
 type Report struct {
-	Title           string `json:"title"`
-	Description     string `json:"description"`
-	Reproduce       string `json:"reproduce"`
-	DateFrom        string `json:"dateFrom"`
-	CVSS            string `json:"cvss"`
-	HunterUsername  string `json:"hunterUsername"`
-	CompanyUsername string `json:"companyUsername"`
-	Slug            string `json:"slug"`
-	SubmissionDate  string `json:"submissionDate"`
-	Ips             string `json:"ips"`
-	Attachment      bool
-	Scenario        string `json:"scenario"`
-	ReportInfo      InfoReport
+	Title            string `json:"title"`
+	Description      string `json:"description"`
+	Reproduce        string `json:"reproduce"`
+	Scenario         string `json:"scenario"`
+	SubmissionDate   string `json:"submissionDate"`
+	HunterUsername   string `json:"hunterUsername"`
+	CompanyUsername  string `json:"companyUsername"`
+	AttachmentsCount int    `json:"attachmentsCount"`
+	Slug             string `json:"slug"`
+	Category         struct {
+		Title  string `json:"title"`
+		Impact string `json:"impact"`
+	} `json:"category"`
+	Ips        string `json:"ips"`
+	Cvss       string `json:"cvss"`
+	Urls       string `json:"urls"`
+	DateFrom   string `json:"dateFrom"`
+	DateTo     string `json:"dateTo"`
+	ReportInfo InfoReport
 }

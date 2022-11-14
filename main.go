@@ -29,7 +29,6 @@ func main() {
 		outFixpath   string
 		curretnPath  string
 		status       bool
-		AttachStatus string
 	)
 	lstDir := []string{"encrypt", "decrypt", "key"}
 	if runtime.GOOS == "windows" {
@@ -125,11 +124,6 @@ func main() {
 		fmt.Println("[----] The input file for decryption is not correct.")
 		return
 	}
-	if report.Attachment {
-		AttachStatus = "دارد"
-	} else {
-		AttachStatus = "ندارد"
-	}
 	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
 	judge, err := core.DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
@@ -173,7 +167,7 @@ func main() {
 	}
 
 	md := []byte(pdf.Report.Description)
-	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, AttachStatus, report)
+	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, _ = r.GeneratePDF(outputPath)
 		err := os.RemoveAll("template")
@@ -185,6 +179,22 @@ func main() {
 	} else {
 		fmt.Println(err)
 	}
+}
+
+func AttachmentFiles(info entity.InfoReport) string {
+	var attach string
+	for _, content := range info.Details.Attachments {
+		attach += fmt.Sprintf("<tr>\n<td>%s</td>\n</tr>", content.Filename)
+	}
+	return attach
+}
+
+func JugmentUser(info entity.InfoReport) string {
+	var judge string
+	for _, content := range info.Details.Judges {
+		judge += content.Name + "  "
+	}
+	return judge
 }
 
 func ConString(info entity.InfoReport) string {
@@ -239,14 +249,14 @@ func Validate(report entity.Report, outputPath string, pdf entity.Pdf) (string, 
 	return dateFrom, outputPath
 }
 
-func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo, AttachStatus string, report entity.Report) any {
+func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string, report entity.Report) any {
 	output := markdown.ToHTML(md, nil, nil)
 	templateData := struct {
 		Title           string
 		Description     string
 		PoC             string
 		DateFrom        string
-		CVSS            string
+		CVSSJudge       string
 		Reproduce       string
 		Hunter          string
 		ReportID        string
@@ -265,10 +275,15 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo, Attac
 		Scenario        string
 		LinkMoreInfo    string
 		RavroVer        string
+		JudgeUser       string
+		ScoreJudge      string
+		ScoreHunter     string
+		CVSSHunter      string
+		RangeDate       string
 	}{
 		Title:           pdf.Report.Title,
 		PoC:             string(output),
-		CVSS:            pdf.Judge.Cvss.Value,
+		CVSSJudge:       report.ReportInfo.Details.Cvss.Judge.Vector,
 		Reproduce:       pdf.Report.Reproduce,
 		DateFrom:        dateFrom,
 		Hunter:          pdf.Report.HunterUsername,
@@ -283,10 +298,15 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo, Attac
 		MoreInfo:        moreInfo,
 		CompanyUserName: pdf.Report.CompanyUsername,
 		Ips:             pdf.Report.Ips,
-		Attachment:      AttachStatus,
+		Attachment:      AttachmentFiles(report.ReportInfo),
 		Scenario:        pdf.Report.Scenario,
 		LinkMoreInfo:    ConString(report.ReportInfo),
 		RavroVer:        rvrVersion,
+		JudgeUser:       JugmentUser(report.ReportInfo),
+		ScoreJudge:      report.ReportInfo.Details.Cvss.Judge.Score,
+		ScoreHunter:     report.ReportInfo.Details.Cvss.Hunter.Score,
+		CVSSHunter:      report.ReportInfo.Details.Cvss.Hunter.Vector,
+		RangeDate:       report.DateFrom + " " + report.DateFrom,
 	}
 	return templateData
 }

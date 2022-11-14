@@ -33,9 +33,7 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if lstReportLen == 0 {
 			return report, err
 		}
-		if lstReportLen > 1 {
-			report.Attachment = true
-		}
+
 		lstInfo, _ := utils.WalkMatch(path, "report_info.json")
 		jsonFile, err := os.Open(lstInfo[0])
 		reportValue, _ := ioutil.ReadAll(jsonFile)
@@ -57,9 +55,7 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if lstReportLen == 0 {
 			return report, err
 		}
-		if lstReportLen > 1 {
-			report.Attachment = true
-		}
+		
 	}
 	for _, name := range lstReport {
 		if runtime.GOOS == "windows" {
