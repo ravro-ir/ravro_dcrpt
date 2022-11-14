@@ -144,6 +144,9 @@ func main() {
 	if moreInfo == "" {
 		moreInfo = publicMessage
 	}
+	if report.Reproduce == "" {
+		report.Reproduce = publicMessage
+	}
 	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
 	pdf := entity.Pdf{Judge: judge, Report: report}
 
@@ -310,7 +313,7 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		ScoreJudge:      report.ReportInfo.Details.Cvss.Judge.Score,
 		ScoreHunter:     report.ReportInfo.Details.Cvss.Hunter.Score,
 		CVSSHunter:      report.ReportInfo.Details.Cvss.Hunter.Vector,
-		RangeDate:       report.DateFrom + " " + report.DateFrom,
+		RangeDate:       report.DateFrom,
 	}
 	return templateData
 }
