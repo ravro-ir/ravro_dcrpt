@@ -18,13 +18,7 @@ import (
 	"time"
 )
 
-//type Pdf struct {
-//	report    entity.Report
-//	judge     entity.Judgment
-//	amendment entity.Amendment
-//}
-
-const rvrVersion = "v1.0.2"
+const rvrVersion = "v1.0.1"
 
 func main() {
 
@@ -49,19 +43,21 @@ func main() {
 		keyFixPath = "key/key.private"
 		outFixpath = "decrypt"
 	}
-	// تاریخ بررسی - اعضای تیم داوری - تگ
 	publicMessage := "شرح داده نشده است."
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
-	version := flag.String("version", ">> Version : ravro_dcrpt/1.0.2", "")
-	homePage := flag.String("homepage", ">> HomePage: https://github.com/ravro-ir/ravro_dcrp", "")
-	issue := flag.String("issue", ">> Issue: https://github.com/ravro-ir/ravro_dcrp/issues", "")
-	author := flag.String("author", ">> Author : Ramin Farajpour Cami", "")
+	version := flag.String("version", ">> Current Version : ravro_dcrpt/1.0.2", "")
+	homePage := flag.String("homepage", ">> Github : https://github.com/ravro-ir/ravro_dcrp", "")
+	issue := flag.String("issue", ">> Issue : https://github.com/ravro-ir/ravro_dcrp/issues", "")
+	author := flag.String("author", ">> Author : Ravro Development Team (RDT)", "")
 	help := flag.String("help", ">> Help : ravro_dcrpt --help \n\n", "")
+	latest := flag.Bool("latest", true, "")
 
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "key.private")
 	init := flag.String("init", "", "input directory of report encrypt file")
-	update := flag.String("update", "", "Update ravro decryptor: update=yes")
+	update := flag.Bool("u", false, "Update ravro decryptor")
+	format := flag.Bool("j", false, "Convert report to json")
+
 	flag.Parse()
 	fmt.Println(*version)
 	fmt.Println(*homePage)
@@ -69,7 +65,16 @@ func main() {
 	fmt.Println(*author)
 	fmt.Println(*help)
 
-	if *update == "yes" {
+	if *latest {
+		ver := utils.LatestVersion()
+		newVer := fmt.Sprintf("ravro_dcrpt/%s", ver)
+		if rvrVersion != ver {
+			fmt.Println(fmt.Sprintf("\n New version (%s) released, "+
+				"Please use command : ./ravro_dcrpt -u \n", newVer))
+			return
+		}
+	}
+	if *update {
 		fmt.Println("[++++] Downloading latest version")
 		utils.HttpGet()
 		return
@@ -135,7 +140,6 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	utils.AddDir("template")
 	utils.HtmlTemplate(templatePath)
 	moreInfo := strings.Join(amendment[:], ",")
@@ -147,24 +151,25 @@ func main() {
 
 	dateFrom, outputPath := Validate(report, outputPath, pdf)
 	fmt.Println("[++++] Starting report to pdf . . . ")
-
-	file, _ := json.MarshalIndent(pdf.Judge, "", " ")
-	if runtime.GOOS == "linux" {
-		_ = ioutil.WriteFile("decrypt//juror.json", file, 0644)
-	} else {
-		_ = ioutil.WriteFile("decrypt\\juror.json", file, 0644)
-	}
-	reportd, _ := json.MarshalIndent(pdf.Report, "", " ")
-	if runtime.GOOS == "linux" {
-		_ = ioutil.WriteFile("decrypt//repo.json", reportd, 0644)
-	} else {
-		_ = ioutil.WriteFile("decrypt\\repo.json", reportd, 0644)
-	}
-	amendments, _ := json.MarshalIndent(pdf.Amendment, "", " ")
-	if runtime.GOOS == "linux" {
-		_ = ioutil.WriteFile("decrypt//moreinfo.json", amendments, 0644)
-	} else {
-		_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
+	if *format {
+		file, _ := json.MarshalIndent(pdf.Judge, "", " ")
+		if runtime.GOOS == "linux" {
+			_ = ioutil.WriteFile("decrypt//juror.json", file, 0644)
+		} else {
+			_ = ioutil.WriteFile("decrypt\\juror.json", file, 0644)
+		}
+		reportd, _ := json.MarshalIndent(pdf.Report, "", " ")
+		if runtime.GOOS == "linux" {
+			_ = ioutil.WriteFile("decrypt//repo.json", reportd, 0644)
+		} else {
+			_ = ioutil.WriteFile("decrypt\\repo.json", reportd, 0644)
+		}
+		amendments, _ := json.MarshalIndent(pdf.Amendment, "", " ")
+		if runtime.GOOS == "linux" {
+			_ = ioutil.WriteFile("decrypt//moreinfo.json", amendments, 0644)
+		} else {
+			_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
+		}
 	}
 
 	md := []byte(pdf.Report.Description)
@@ -175,7 +180,7 @@ func main() {
 		if err != nil {
 			fmt.Println("[----] failed to remove html template,")
 		}
-		fmt.Println("[++++] pdf generated successfully")
+		fmt.Println("[++++] PDF generated successfully")
 		utils.ChangeDirName(report.Slug, outFixpath)
 	} else {
 		fmt.Println(err)
@@ -184,10 +189,10 @@ func main() {
 
 func ConString(info entity.InfoReport) string {
 	var infoMore string
-	for _, content := range info {
-		infoMore += " عنوان گزارش : " + content.InfoTitle + "<br />"
-		infoMore += " توضیحات گزارش : " + "<br />" + content.InfoDescription + "<br />"
-		infoMore += "راه حل : " + "<br />" + content.InfoSolution + "<br />"
+	for _, content := range info.Tags {
+		infoMore += " عنوان گزارش : " + content.Title + "<br />"
+		infoMore += " توضیحات گزارش : " + "<br />" + content.Description + "<br />"
+		infoMore += "راه حل : " + "<br />" + content.Solution + "<br />"
 		infoMore += "اطلاعات بیشتر : " + "<br />" + content.MoreInfo + "<br />"
 		infoMore += "<hr>"
 	}
@@ -204,7 +209,7 @@ func Validate(report entity.Report, outputPath string, pdf entity.Pdf) (string, 
 	}
 	pdf = utils.CheckIsEmpty(pdf)
 
-	fmt.Println("[++++] decrypted successfully ")
+	fmt.Println("[++++] Decrypted successfully ")
 	if pdf.Report.SubmissionDate == "" {
 		dateSubmit = pdf.Report.DateFrom
 	} else {

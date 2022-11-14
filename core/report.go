@@ -37,7 +37,6 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 			report.Attachment = true
 		}
 		lstInfo, _ := utils.WalkMatch(path, "report_info.json")
-
 		jsonFile, err := os.Open(lstInfo[0])
 		reportValue, _ := ioutil.ReadAll(jsonFile)
 		err = json.Unmarshal(reportValue, &infoReport)

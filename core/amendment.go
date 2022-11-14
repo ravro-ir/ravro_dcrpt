@@ -40,7 +40,7 @@ func DcrptAmendment(currentPath, keyFixPath, outFixPath string) ([]string, error
 			return lstMore, err
 		}
 		process := utils.CheckPlatform(outFixPath, Process)
-		err = os.Rename(process.NewPathFile, process.OldNamePath)
+		err = os.Rename(process.NewNamePath, process.OldNamePath)
 		if err != nil {
 			return lstMore, err
 		}

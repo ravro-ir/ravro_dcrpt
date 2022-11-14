@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -60,4 +61,21 @@ func HttpGet() {
 	}
 	downloadFileLessMemory(osUrl)
 	fmt.Println("[++++] The latest version file downloaded ")
+}
+
+func LatestVersion() string {
+	// Get request
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("No response from request")
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body) // response body is []byte
+
+	var result entity.DownloadGithub
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+		log.Fatalln(err)
+	}
+	return result.TagName
 }
