@@ -125,6 +125,13 @@ $ cd ravro_dcrpt
 $ go build ravro_dcrpt
 $ go run ravro_dcrpt
 ```
+Building other platform:
+
+```bash
+$ env GOOS=windows GOARCH=amd64 go build .
+
+```
+
 (Add the appropriate `.exe` extension on Windows systems)
 
 ## Install on Arch Linux
