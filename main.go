@@ -18,7 +18,11 @@ import (
 	"time"
 )
 
-const rvrVersion = "v1.0.1"
+const (
+	rvrVersion    = "v1.0.1"
+	publicMessage = "شرح داده نشده است."
+	noMsg         = "ثبت نشد"
+)
 
 func main() {
 
@@ -42,7 +46,6 @@ func main() {
 		keyFixPath = "key/key.private"
 		outFixpath = "decrypt"
 	}
-	publicMessage := "شرح داده نشده است."
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
 	version := flag.String("version", ">> Current Version : ravro_dcrpt/1.0.2", "")
 	homePage := flag.String("homepage", ">> Github : https://github.com/ravro-ir/ravro_dcrp", "")
@@ -75,7 +78,6 @@ func main() {
 				return
 			}
 		}
-
 	}
 	if *update {
 		fmt.Println("[++++] Downloading latest version")
@@ -154,19 +156,19 @@ func main() {
 	fmt.Println("[++++] Starting report to pdf . . . ")
 	if *format {
 		file, _ := json.MarshalIndent(pdf.Judge, "", " ")
-		if runtime.GOOS == "linux" {
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 			_ = ioutil.WriteFile("decrypt//juror.json", file, 0644)
 		} else {
 			_ = ioutil.WriteFile("decrypt\\juror.json", file, 0644)
 		}
 		reportd, _ := json.MarshalIndent(pdf.Report, "", " ")
-		if runtime.GOOS == "linux" {
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 			_ = ioutil.WriteFile("decrypt//repo.json", reportd, 0644)
 		} else {
 			_ = ioutil.WriteFile("decrypt\\repo.json", reportd, 0644)
 		}
 		amendments, _ := json.MarshalIndent(pdf.Amendment, "", " ")
-		if runtime.GOOS == "linux" {
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 			_ = ioutil.WriteFile("decrypt//moreinfo.json", amendments, 0644)
 		} else {
 			_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
@@ -190,6 +192,9 @@ func main() {
 
 func AttachmentFiles(info entity.InfoReport) string {
 	var attach string
+	if len(info.Details.Attachments) == 0 {
+		return "<tr>\n<td>فایلی توسط شکارچی پیوست نشده است</td>\n</tr>"
+	}
 	for _, content := range info.Details.Attachments {
 		attach += fmt.Sprintf("<tr>\n<td>%s</td>\n</tr>", content.Filename)
 	}
@@ -218,7 +223,6 @@ func ConString(info entity.InfoReport) string {
 
 func Validate(report entity.Report, outputPath string, pdf entity.Pdf) (string, string) {
 	var dateSubmit string
-	pt := ptime.Now()
 	if report.CompanyUsername == "" {
 		outputPath = strings.Replace(outputPath, "reports", utils.RandSeq(8), 1)
 	} else {
@@ -237,27 +241,55 @@ func Validate(report entity.Report, outputPath string, pdf entity.Pdf) (string, 
 		log.Fatalln("[----] Error : The submit date is empty, we think your report path is incorrect, (Valid Path: (encrypt/ir2022-01-10-0001))")
 	}
 	dateReport := strings.Split(dateSubmited[0], "-")
-	year, err := strconv.Atoi(dateReport[0])
-	if err != nil {
-		log.Fatalln(err)
-	}
-	month, err := strconv.Atoi(dateReport[1])
-	if err != nil {
-		log.Fatalln(err)
-	}
-	day, err := strconv.Atoi(dateReport[2])
+	dateFrom := MiladiToShamsi(ArrayStringToInt(dateReport[0]), ArrayStringToInt(dateReport[1]), ArrayStringToInt(dateReport[2]))
+	return dateFrom, outputPath
+}
+
+func ArrayStringToInt(date string) int {
+	newData, err := strconv.Atoi(date)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return newData
+}
+
+func MiladiToShamsi(year, month, day int) string {
+	pt := ptime.Now()
 	var t = time.Date(year, time.Month(month), day, 12, 1, 1, 0, ptime.Iran())
 	pt = ptime.New(t)
-	dateFrom := pt.Format("yyyy/MM/dd")
-
-	return dateFrom, outputPath
+	shamsiDate := pt.Format("yyyy/MM/dd")
+	return shamsiDate
 }
 
 func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string, report entity.Report) any {
 	output := markdown.ToHTML(md, nil, nil)
+	infoTrain := ConString(report.ReportInfo)
+	dateOf := strings.Split(report.DateFrom, "-")
+	if len(dateOf) == 0 {
+		log.Fatalln("[----] Error : The datefrom is invalid,")
+	}
+	report.DateFrom = MiladiToShamsi(ArrayStringToInt(dateOf[0]), ArrayStringToInt(dateOf[1]), ArrayStringToInt(dateOf[2]))
+
+	dateTwo := strings.Split(report.DateTo, "-")
+	if len(dateTwo) == 0 {
+		log.Fatalln("[----] Error : The datefrom is invalid,")
+	}
+	report.DateTo = MiladiToShamsi(ArrayStringToInt(dateTwo[0]), ArrayStringToInt(dateTwo[1]), ArrayStringToInt(dateTwo[2]))
+	if infoTrain == "" {
+		infoTrain = publicMessage
+	}
+	if report.ReportInfo.Details.Cvss.Judge.Score == "" {
+		report.ReportInfo.Details.Cvss.Judge.Score = noMsg
+	}
+	if report.ReportInfo.Details.Cvss.Hunter.Score == "" {
+		report.ReportInfo.Details.Cvss.Hunter.Score = noMsg
+	}
+	if report.ReportInfo.Details.Cvss.Hunter.Vector == "" {
+		report.ReportInfo.Details.Cvss.Hunter.Vector = noMsg
+	}
+	if report.ReportInfo.Details.Cvss.Judge.Vector == "" {
+		report.ReportInfo.Details.Cvss.Judge.Vector = noMsg
+	}
 	templateData := struct {
 		Title           string
 		Description     string
@@ -287,6 +319,7 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		ScoreHunter     string
 		CVSSHunter      string
 		RangeDate       string
+		Targets         string
 	}{
 		Title:           pdf.Report.Title,
 		PoC:             string(output),
@@ -307,13 +340,14 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		Ips:             pdf.Report.Ips,
 		Attachment:      AttachmentFiles(report.ReportInfo),
 		Scenario:        pdf.Report.Scenario,
-		LinkMoreInfo:    ConString(report.ReportInfo),
+		LinkMoreInfo:    infoTrain,
 		RavroVer:        rvrVersion,
 		JudgeUser:       JugmentUser(report.ReportInfo),
 		ScoreJudge:      report.ReportInfo.Details.Cvss.Judge.Score,
 		ScoreHunter:     report.ReportInfo.Details.Cvss.Hunter.Score,
 		CVSSHunter:      report.ReportInfo.Details.Cvss.Hunter.Vector,
-		RangeDate:       report.DateFrom,
+		RangeDate:       "از" + report.DateFrom + "  تا " + report.DateTo,
+		Targets:         report.ReportInfo.Details.Target,
 	}
 	return templateData
 }

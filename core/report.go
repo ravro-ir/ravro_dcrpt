@@ -33,19 +33,20 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if lstReportLen == 0 {
 			return report, err
 		}
-
 		lstInfo, _ := utils.WalkMatch(path, "report_info.json")
-		jsonFile, err := os.Open(lstInfo[0])
-		reportValue, _ := ioutil.ReadAll(jsonFile)
-		err = json.Unmarshal(reportValue, &infoReport)
-		if err != nil {
-			return report, err
+		if len(lstReport) >= 1 {
+			jsonFile, err := os.Open(lstInfo[0])
+			reportValue, _ := ioutil.ReadAll(jsonFile)
+			err = json.Unmarshal(reportValue, &infoReport)
+			if err != nil {
+				return report, err
+			}
+			err = jsonFile.Close()
+			if err != nil {
+				return report, err
+			}
+			report.ReportInfo = infoReport
 		}
-		err = jsonFile.Close()
-		if err != nil {
-			return report, err
-		}
-		report.ReportInfo = infoReport
 	} else {
 		lstReport, err = utils.WalkMatch(currentPath, "*.ravro")
 		if err != nil {
@@ -55,7 +56,6 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if lstReportLen == 0 {
 			return report, err
 		}
-		
 	}
 	for _, name := range lstReport {
 		if runtime.GOOS == "windows" {
