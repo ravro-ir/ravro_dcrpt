@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,40 +14,43 @@ import (
 
 const url string = "https://api.github.com/repos/ravro-ir/ravro_dcrpt/releases/latest"
 
-func downloadFileLessMemory(uri string) {
+func downloadFileLessMemory(uri string) error {
 	base := filepath.Base(uri)
 	resp, err := http.Get(uri)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	fileHandle, err := os.OpenFile(base, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer fileHandle.Close()
 	_, err = io.Copy(fileHandle, resp.Body)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func HttpGet() {
-	// Get request
+func HttpGet() error {
 	var osUrl string
 	osName := runtime.GOOS
 
 	resp, err := http.Get(url)
 	if err != nil {
-		fmt.Println("No response from request")
+		return err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body) // response body is []byte
-
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 	var result entity.DownloadGithub
-	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+	if err := json.Unmarshal(body, &result); err != nil {
 		fmt.Println("Can not unmarshal JSON")
+		return err
 	}
 	if osName == "linux" {
 		osUrl = result.Assets[0].BrowserDownloadUrl
@@ -59,8 +61,12 @@ func HttpGet() {
 	if osName == "windows" {
 		osUrl = result.Assets[2].BrowserDownloadUrl
 	}
-	downloadFileLessMemory(osUrl)
+	err = downloadFileLessMemory(osUrl)
+	if err != nil {
+		return err
+	}
 	fmt.Println("[++++] The latest version file downloaded ")
+	return nil
 }
 
 func LatestVersion() (string, error) {
@@ -70,12 +76,11 @@ func LatestVersion() (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body) // response body is []byte
+	body, err := ioutil.ReadAll(resp.Body)
 
 	var result entity.DownloadGithub
-	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
-		log.Fatalln(err)
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", err
 	}
 	return result.TagName, nil
 }

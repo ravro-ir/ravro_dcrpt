@@ -57,8 +57,9 @@ func main() {
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "key.private")
 	init := flag.String("init", "", "input directory of report encrypt file")
-	update := flag.Bool("u", false, "Update ravro decryptor")
-	format := flag.Bool("j", false, "Convert report to json")
+	update := flag.Bool("udate", false, "Update ravro decryptor")
+	format := flag.Bool("json", false, "Convert report to json")
+	log := flag.Bool("log", false, "Convert report to json")
 
 	flag.Parse()
 	fmt.Println(*version)
@@ -70,6 +71,7 @@ func main() {
 	if *latest {
 		ver, err := utils.LatestVersion()
 		if err != nil {
+			LogCheck(*log, err)
 		} else {
 			newVer := fmt.Sprintf("ravro_dcrpt/%s", ver)
 			if rvrVersion != ver {
@@ -123,22 +125,28 @@ func main() {
 	fmt.Println("[++++] Starting for decrypting Report . . . ")
 	report, err := core.DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
-		fmt.Println(err)
-		log.Fatalln("[----] Error : The private key is incorrect")
+		LogCheck(*log, err)
+		fmt.Println("[----] Error : The private key is incorrect")
+		return
 	}
 	if report.Title == "" {
+		LogCheck(*log, err)
 		fmt.Println("[----] The input file for decryption is not correct.")
 		return
 	}
 	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
 	judge, err := core.DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
-		log.Fatalln(err)
+		LogCheck(*log, err)
+		fmt.Println(err)
+		return
 	}
 	fmt.Println("[++++] Starting for decrypting Amendment . . . ")
 	amendment, err := core.DcrptAmendment(curretnPath, keyFixPath, outFixpath)
 	if err != nil {
-		log.Fatalln(err)
+		LogCheck(*log, err)
+		fmt.Println(err)
+		return
 	}
 	utils.AddDir("template")
 	utils.HtmlTemplate(templatePath)
@@ -178,14 +186,23 @@ func main() {
 	md := []byte(pdf.Report.Description)
 	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
-		_, _ = r.GeneratePDF(outputPath)
+		_, err = r.GeneratePDF(outputPath)
+		if err != nil {
+			LogCheck(*log, err)
+			fmt.Println("[----] failed to remove html template,")
+		}
 		err := os.RemoveAll("template")
 		if err != nil {
+			LogCheck(*log, err)
 			fmt.Println("[----] failed to remove html template,")
 		}
 		fmt.Println("[++++] PDF generated successfully")
-		utils.ChangeDirName(report.Slug, outFixpath)
+		err = utils.ChangeDirName(report.Slug, outFixpath)
+		if err != nil {
+			LogCheck(*log, err)
+		}
 	} else {
+		LogCheck(*log, err)
 		fmt.Println(err)
 	}
 }
@@ -350,4 +367,10 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		Targets:         report.ReportInfo.Details.Target,
 	}
 	return templateData
+}
+
+func LogCheck(status bool, Msg any) {
+	if status {
+		core.ErrorLogger.Println(Msg)
+	}
 }

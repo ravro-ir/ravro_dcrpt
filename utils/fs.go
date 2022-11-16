@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"golang.org/x/exp/utf8string"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -158,13 +157,14 @@ func JsonParser(process ProccesFile, AnyStruct interface{}) (interface{}, error)
 	return AnyStruct, nil
 }
 
-func ChangeDirName(reportId string, dirName string) {
+func ChangeDirName(reportId string, dirName string) error {
 
 	var oldPath string
 	var newPath string
+
 	files, err := ioutil.ReadDir(dirName)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	for _, file := range files {
 		if !file.IsDir() {
@@ -179,10 +179,11 @@ func ChangeDirName(reportId string, dirName string) {
 			}
 			err := os.Rename(oldPath, newPath)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 	}
+	return nil
 }
 
 func CheckIsEmpty(pdf entity.Pdf) entity.Pdf {

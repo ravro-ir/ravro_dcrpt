@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"log"
 	"os"
 	"ravro_dcrpt/entity"
@@ -26,7 +27,7 @@ func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool)
 			return judgment, err
 		}
 		if len(lstJudge) == 0 {
-			return judgment, err
+			return judgment, errors.New("judge is empty")
 		}
 	} else {
 		lstJudge, err = utils.WalkMatch(currentPath, "*.ravro")
@@ -34,7 +35,7 @@ func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool)
 			return judgment, err
 		}
 		if len(lstJudge) == 0 {
-			return judgment, err
+			return judgment, errors.New("judge is empty")
 		}
 	}
 	for _, name := range lstJudge {
