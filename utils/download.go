@@ -34,39 +34,44 @@ func downloadFileLessMemory(uri string) error {
 	return nil
 }
 
-func HttpGet() error {
+func HttpGet() (string, string, error) {
 	var osUrl string
+	var fileName string
+
 	osName := runtime.GOOS
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	var result entity.DownloadGithub
 	if err := json.Unmarshal(body, &result); err != nil {
 		fmt.Println("Can not unmarshal JSON")
-		return err
+		return "", "", err
 	}
 	if osName == "linux" {
 		osUrl = result.Assets[0].BrowserDownloadUrl
+		fileName = result.Assets[0].Name
 	}
 	if osName == "darwin" {
 		osUrl = result.Assets[1].BrowserDownloadUrl
+		fileName = result.Assets[1].Name
 	}
 	if osName == "windows" {
 		osUrl = result.Assets[2].BrowserDownloadUrl
+		fileName = result.Assets[2].Name
 	}
 	err = downloadFileLessMemory(osUrl)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	fmt.Println("[++++] The latest version file downloaded ")
-	return nil
+	return fileName, result.TagName, nil
 }
 
 func LatestVersion() (string, error) {

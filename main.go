@@ -22,6 +22,7 @@ const (
 	rvrVersion    = "v1.0.1"
 	publicMessage = "شرح داده نشده است."
 	noMsg         = "ثبت نشد"
+	appName       = "ravro_dcrpt"
 )
 
 func main() {
@@ -57,9 +58,9 @@ func main() {
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "key.private")
 	init := flag.String("init", "", "input directory of report encrypt file")
-	update := flag.Bool("udate", false, "Update ravro decryptor")
+	update := flag.Bool("update", false, "Update ravro decryptor")
 	format := flag.Bool("json", false, "Convert report to json")
-	log := flag.Bool("log", false, "Store logs in log.txt")
+	logs := flag.Bool("log", false, "Store logs in log.txt")
 
 	flag.Parse()
 	fmt.Println(*version)
@@ -71,7 +72,7 @@ func main() {
 	if *latest {
 		ver, err := utils.LatestVersion()
 		if err != nil {
-			LogCheck(*log, err)
+			LogCheck(*logs, err)
 		} else {
 			newVer := fmt.Sprintf("ravro_dcrpt/%s", ver)
 			if rvrVersion != ver {
@@ -83,13 +84,21 @@ func main() {
 	}
 	if *update {
 		fmt.Println("[++++] Downloading latest version")
-		err := utils.HttpGet()
+		fileName, _, err := utils.HttpGet()
 		if err != nil {
-			LogCheck(*log, err)
+			LogCheck(*logs, err)
 			fmt.Println("[----] Unable to download latest file, Maybe your internet connection is bad," +
 				"or please usage : `./ravro_dcrpt -log` for see monitoring error message")
 		}
 		// Extract zip file
+		path, err := os.Getwd()
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+			err := utils.Unzip(path+"/"+fileName, path)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] Error : Ubale to extract zip file.")
+			}
+		}
 		return
 	}
 	if *init == "init" {
@@ -131,26 +140,26 @@ func main() {
 	fmt.Println("[++++] Starting for decrypting Report . . . ")
 	report, err := core.DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
-		LogCheck(*log, err)
+		LogCheck(*logs, err)
 		fmt.Println("[----] Error : The private key is incorrect")
 		return
 	}
 	if report.Title == "" {
-		LogCheck(*log, err)
+		LogCheck(*logs, err)
 		fmt.Println("[----] The input file for decryption is not correct.")
 		return
 	}
 	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
 	judge, err := core.DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
-		LogCheck(*log, err)
+		LogCheck(*logs, err)
 		fmt.Println(err)
 		return
 	}
 	fmt.Println("[++++] Starting for decrypting Amendment . . . ")
 	amendment, err := core.DcrptAmendment(curretnPath, keyFixPath, outFixpath)
 	if err != nil {
-		LogCheck(*log, err)
+		LogCheck(*logs, err)
 		fmt.Println(err)
 		return
 	}
@@ -194,21 +203,21 @@ func main() {
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		_, err = r.GeneratePDF(outputPath)
 		if err != nil {
-			LogCheck(*log, err)
+			LogCheck(*logs, err)
 			fmt.Println("[----] failed to remove html template,")
 		}
 		err := os.RemoveAll("template")
 		if err != nil {
-			LogCheck(*log, err)
+			LogCheck(*logs, err)
 			fmt.Println("[----] failed to remove html template,")
 		}
 		fmt.Println("[++++] PDF generated successfully")
 		err = utils.ChangeDirName(report.Slug, outFixpath)
 		if err != nil {
-			LogCheck(*log, err)
+			LogCheck(*logs, err)
 		}
 	} else {
-		LogCheck(*log, err)
+		LogCheck(*logs, err)
 		fmt.Println(err)
 	}
 }
@@ -377,8 +386,8 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 	return templateData
 }
 
-func LogCheck(status bool, Msg any) {
+func LogCheck(status bool, Msg error) {
 	if status {
-		core.ErrorLogger.Println(Msg)
+		utils.Logger(Msg)
 	}
 }
