@@ -59,7 +59,7 @@ func main() {
 	init := flag.String("init", "", "input directory of report encrypt file")
 	update := flag.Bool("udate", false, "Update ravro decryptor")
 	format := flag.Bool("json", false, "Convert report to json")
-	log := flag.Bool("log", false, "Convert report to json")
+	log := flag.Bool("log", false, "Store logs in log.txt")
 
 	flag.Parse()
 	fmt.Println(*version)
@@ -83,7 +83,13 @@ func main() {
 	}
 	if *update {
 		fmt.Println("[++++] Downloading latest version")
-		utils.HttpGet()
+		err := utils.HttpGet()
+		if err != nil {
+			LogCheck(*log, err)
+			fmt.Println("[----] Unable to download latest file, Maybe your internet connection is bad," +
+				"or please usage : `./ravro_dcrpt -log` for see monitoring error message")
+		}
+		// Extract zip file
 		return
 	}
 	if *init == "init" {
@@ -337,6 +343,7 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		CVSSHunter      string
 		RangeDate       string
 		Targets         string
+		Status          string
 	}{
 		Title:           pdf.Report.Title,
 		PoC:             string(output),
@@ -365,6 +372,7 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		CVSSHunter:      report.ReportInfo.Details.Cvss.Hunter.Vector,
 		RangeDate:       "از" + report.DateFrom + "  تا " + report.DateTo,
 		Targets:         report.ReportInfo.Details.Target,
+		Status:          report.ReportInfo.Details.CurrentStatus,
 	}
 	return templateData
 }

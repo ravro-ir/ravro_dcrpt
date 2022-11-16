@@ -8,8 +8,9 @@ type InfoReport struct {
 		MoreInfo    string `json:"moreInfo"`
 	} `json:"tags"`
 	Details struct {
-		Target string `json:"target"`
-		Judges []struct {
+		CurrentStatus string `json:"currentStatus"`
+		Target        string `json:"target"`
+		Judges        []struct {
 			Name   string `json:"name"`
 			Avatar string `json:"avatar"`
 		} `json:"judges"`
