@@ -22,7 +22,6 @@ const (
 	rvrVersion    = "v1.0.1"
 	publicMessage = "شرح داده نشده است."
 	noMsg         = "ثبت نشد"
-	appName       = "ravro_dcrpt"
 )
 
 func main() {

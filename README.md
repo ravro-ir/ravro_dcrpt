@@ -39,17 +39,17 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
 
 # Automation Install Tools 
 
-#### [Linux](https://github.com/ravro-ir/ravro_dcrpt/blob/main/linux.sh)
+#### [Linux](https://github.com/ravro-ir/ravro_dcrpt/blob/main/autoinstall/linux.sh)
 ```bash
 root# chmod +x linux.sh
 root# ./linux.sh
 ```
-#### [Windows](https://github.com/ravro-ir/ravro_dcrpt/blob/main/win64.bat)
+#### [Windows](https://github.com/ravro-ir/ravro_dcrpt/blob/main/autoinstall/win64.bat)
 ```bash
 C:\Users\ravro> win64.bat
 ```
 
-#### [MacOS](https://github.com/ravro-ir/ravro_dcrpt/blob/main/darwin.sh)
+#### [MacOS](https://github.com/ravro-ir/ravro_dcrpt/blob/main/autoinstall/darwin.sh)
 ```bash
 root# ./darwin.sh
 ```
@@ -78,39 +78,57 @@ Use without command line :
 ```bash
 $ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt
->> Version : ravro_dcrpt/1.0.0
->> HomePage: https://github.com/ravro-ir/ravro_dcrpt
->> Issue: https://github.com/ravro-ir/ravro_dcrpt/issues
->> Author : Ramin Farajpour Cami
->> Help : ravro_dcrpt --help
+>> Current Version : ravro_dcrpt/1.0.2
+>> Github : https://github.com/ravro-ir/ravro_dcrp
+>> Issue : https://github.com/ravro-ir/ravro_dcrp/issues
+>> Author : Ravro Development Team (RDT)
+>> Help : ravro_dcrpt --help 
 
 
-[++++] Starting for decrypting Report . . .
+[++++] Starting for decrypting Report . . . 
 [++++] Starting for decrypting Judgment . . . 
 [++++] Starting for decrypting Amendment . . . 
-[++++] decrypted successfully 
+[++++] Decrypted successfully 
 [++++] Starting report to pdf . . . 
-[++++] pdf generated successfully
+[++++] PDF generated successfully
 
+
+```
+
+###### Receive latest version :
+
+```bash
+$ ./ravro_dcrpt -update
+```
+
+###### Receive log of error
+```bash
+$ ./ravro_dcrpt -log
+```
+
+###### Convert report to json
+```bash
+$ ./ravro_dcrpt -json
 ```
 
 Use with command line :
 ```bash
 $ ./ravro_dcrpt -init=init
 $ ./ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
->> Version : ravro_dcrpt/1.0.0
->> HomePage: https://github.com/ravro-ir/ravro_dcrpt
->> Issue: https://github.com/ravro-ir/ravro_dcrpt/issues
->> Author : Ramin Farajpour Cami
->> Help : ravro_dcrpt --help
+>> Current Version : ravro_dcrpt/1.0.2
+>> Github : https://github.com/ravro-ir/ravro_dcrp
+>> Issue : https://github.com/ravro-ir/ravro_dcrp/issues
+>> Author : Ravro Development Team (RDT)
+>> Help : ravro_dcrpt --help 
 
 
-[++++] Starting for decrypting Report . . .
+[++++] Starting for decrypting Report . . . 
 [++++] Starting for decrypting Judgment . . . 
 [++++] Starting for decrypting Amendment . . . 
-[++++] decrypted successfully 
+[++++] Decrypted successfully 
 [++++] Starting report to pdf . . . 
-[++++] pdf generated successfully
+[++++] PDF generated successfully
+
 
 ```
 
@@ -151,6 +169,16 @@ makepkg -sri
 
 # Bugs
 Please use github issues to [report](https://github.com/ravro-ir/ravro_dcrpt/issues) bugs.
+
+# Chagelog 
+> v1.0.2
+* Added feature logger
+* Added update ravro_dcrpt
+* Better performance pdf result
+* Project packaging
+* Added convert to json
+* Bug fix
+
 
 # License
 GNU General Public License, version 3
