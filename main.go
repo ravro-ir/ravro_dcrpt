@@ -47,60 +47,53 @@ func main() {
 		outFixpath = "decrypt"
 	}
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
-	version := flag.String("version", ">> Current Version : ravro_dcrpt/1.0.2", "")
-	homePage := flag.String("homepage", ">> Github : https://github.com/ravro-ir/ravro_dcrp", "")
-	issue := flag.String("issue", ">> Issue : https://github.com/ravro-ir/ravro_dcrp/issues", "")
-	author := flag.String("author", ">> Author : Ravro Development Team (RDT)", "")
-	help := flag.String("help", ">> Help : ravro_dcrpt --help \n\n", "")
-	latest := flag.Bool("latest", true, "")
-
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "key.private")
-	init := flag.String("init", "", "input directory of report encrypt file")
+	init := flag.Bool("init", false, "input directory of report encrypt file")
 	update := flag.Bool("update", false, "Update ravro decryptor")
 	format := flag.Bool("json", false, "Convert report to json")
-	logs := flag.Bool("log", false, "Store logs in log.txt")
+	logs := flag.Bool("log", false, "Store Error logs in log.txt")
 
 	flag.Parse()
-	fmt.Println(*version)
-	fmt.Println(*homePage)
-	fmt.Println(*issue)
-	fmt.Println(*author)
-	fmt.Println(*help)
+	fmt.Println(">> Help : ravro_dcrpt --help")
+	fmt.Println(">> Current Version : ravro_dcrpt/1.0.2")
+	fmt.Println(">> Github : https://github.com/ravro-ir/ravro_dcrp")
+	fmt.Println(">> Issue : https://github.com/ravro-ir/ravro_dcrp/issues")
+	fmt.Println(">> Author : Ravro Development Team (RDT) \n\n")
 
-	if *latest {
-		ver, err := utils.LatestVersion()
-		if err != nil {
-			LogCheck(*logs, err)
-		} else {
-			newVer := fmt.Sprintf("ravro_dcrpt/%s", ver)
-			if rvrVersion != ver {
-				fmt.Println(fmt.Sprintf("\n New version (%s) released, "+
-					"Please use command : ./ravro_dcrpt -u \n", newVer))
-				return
-			}
+	ver, err := utils.LatestVersion()
+	if err != nil {
+		LogCheck(*logs, err)
+	} else {
+		newVer := fmt.Sprintf("ravro_dcrpt/%s", ver)
+		if rvrVersion != ver {
+			fmt.Println(fmt.Sprintf("\n New version (%s) released, "+
+				"Please use command : ./ravro_dcrpt -update \n", newVer))
 		}
 	}
+
 	if *update {
-		fmt.Println("[++++] Downloading latest version")
-		fileName, _, err := utils.HttpGet()
+		fmt.Println("[++++] Downloading latest version from Github")
+		fileName, verTag, err := utils.HttpGet()
+		fmt.Println(fmt.Sprintf("[++++] Updating from [%s] -> [%s]", rvrVersion, verTag))
 		if err != nil {
 			LogCheck(*logs, err)
 			fmt.Println("[----] Unable to download latest file, Maybe your internet connection is bad," +
 				"or please usage : `./ravro_dcrpt -log` for see monitoring error message")
 		}
+		fmt.Println(fmt.Sprintf("[++++] The latest version Ravro_dcrpt downloaded - [%s]", fileName))
 		// Extract zip file
 		path, err := os.Getwd()
 		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
 			err := utils.Unzip(path+"/"+fileName, path)
 			if err != nil {
 				LogCheck(*logs, err)
-				fmt.Println("[----] Error : Ubale to extract zip file.")
+				fmt.Println("[----] Error : Unable to extract zip file.")
 			}
 		}
 		return
 	}
-	if *init == "init" {
+	if *init {
 		utils.AddDir("decrypt")
 		utils.AddDir("encrypt")
 		utils.AddDir("key")
@@ -352,10 +345,11 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		RangeDate       string
 		Targets         string
 		Status          string
+		UrlTarget       string
 	}{
 		Title:           pdf.Report.Title,
 		PoC:             string(output),
-		CVSSJudge:       report.ReportInfo.Details.Cvss.Judge.Vector,
+		CVSSJudge:       pdf.Judge.Cvss.Value,
 		Reproduce:       pdf.Report.Reproduce,
 		DateFrom:        dateFrom,
 		Hunter:          pdf.Report.HunterUsername,
@@ -375,12 +369,13 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		LinkMoreInfo:    infoTrain,
 		RavroVer:        rvrVersion,
 		JudgeUser:       JugmentUser(report.ReportInfo),
-		ScoreJudge:      report.ReportInfo.Details.Cvss.Judge.Score,
+		ScoreJudge:      pdf.Judge.Cvss.Rating,
 		ScoreHunter:     report.ReportInfo.Details.Cvss.Hunter.Score,
 		CVSSHunter:      report.ReportInfo.Details.Cvss.Hunter.Vector,
 		RangeDate:       "از" + report.DateFrom + "  تا " + report.DateTo,
 		Targets:         report.ReportInfo.Details.Target,
 		Status:          report.ReportInfo.Details.CurrentStatus,
+		UrlTarget:       report.Urls,
 	}
 	return templateData
 }

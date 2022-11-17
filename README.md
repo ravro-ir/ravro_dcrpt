@@ -76,7 +76,7 @@ root# ./darwin.sh
 # Usage :
 Use without command line :
 ```bash
-$ ./ravro_dcrpt -init=init
+$ ./ravro_dcrpt -init
 $ ./ravro_dcrpt
 >> Current Version : ravro_dcrpt/1.0.2
 >> Github : https://github.com/ravro-ir/ravro_dcrp
@@ -113,7 +113,7 @@ $ ./ravro_dcrpt -json
 
 Use with command line :
 ```bash
-$ ./ravro_dcrpt -init=init
+$ ./ravro_dcrpt -init
 $ ./ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
 >> Current Version : ravro_dcrpt/1.0.2
 >> Github : https://github.com/ravro-ir/ravro_dcrp

@@ -70,7 +70,6 @@ func HttpGet() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	fmt.Println("[++++] The latest version file downloaded ")
 	return fileName, result.TagName, nil
 }
 
