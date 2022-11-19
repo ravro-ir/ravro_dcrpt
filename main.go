@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/gomarkdown/markdown"
 	ptime "github.com/yaa110/go-persian-calendar"
 	"io/ioutil"
@@ -46,14 +47,14 @@ func main() {
 		keyFixPath = "key/key.private"
 		outFixpath = "decrypt"
 	}
+	init := flag.Bool("init", false, "input directory of report encrypt file")
 	inputDir := flag.String("in", "in", "input directory of report encrypt file")
 	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
 	key := flag.String("key", "key", "key.private")
-	init := flag.Bool("init", false, "input directory of report encrypt file")
+
 	update := flag.Bool("update", false, "Update ravro decryptor")
 	format := flag.Bool("json", false, "Convert report to json")
 	logs := flag.Bool("log", false, "Store Error logs in log.txt")
-
 	flag.Parse()
 	fmt.Println(">> Help : ravro_dcrpt --help")
 	fmt.Println(">> Current Version : ravro_dcrpt/1.0.2")
@@ -168,7 +169,7 @@ func main() {
 	pdf := entity.Pdf{Judge: judge, Report: report}
 
 	dateFrom, outputPath := Validate(report, outputPath, pdf)
-	fmt.Println("[++++] Starting report to pdf . . . ")
+	//fmt.Println("[++++] Starting report to pdf . . . ")
 	if *format {
 		file, _ := json.MarshalIndent(pdf.Judge, "", " ")
 		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
@@ -193,6 +194,9 @@ func main() {
 	md := []byte(pdf.Report.Description)
 	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
+		s := spinner.New(spinner.CharSets[4], 100*time.Millisecond) // Build our new spinner
+		s.Start()
+		s.Prefix = "[++++] Starting report to pdf "
 		_, err = r.GeneratePDF(outputPath)
 		if err != nil {
 			LogCheck(*logs, err)
@@ -203,11 +207,12 @@ func main() {
 			LogCheck(*logs, err)
 			fmt.Println("[----] failed to remove html template,")
 		}
-		fmt.Println("[++++] PDF generated successfully")
+		fmt.Println("\n[++++] PDF generated successfully")
 		err = utils.ChangeDirName(report.Slug, outFixpath)
 		if err != nil {
 			LogCheck(*logs, err)
 		}
+		s.Stop()
 	} else {
 		LogCheck(*logs, err)
 		fmt.Println(err)
