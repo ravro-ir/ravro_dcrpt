@@ -114,7 +114,10 @@ $ ./ravro_dcrpt -json
 Use with command line :
 ```bash
 $ ./ravro_dcrpt -init
-$ ./ravro_dcrpt -in=<INPUT PATH DIR> -out=<OUTPUT PATH DIR> -key=<KEY PATH DIR>\key.private
+$ ./ravro_dcrpt -in=<Inout path, /home/irx0xx-xx-xx-000x> -out=<Output path, Ex : /home/output/> -key=<KEY PATH DIR, Ex: key.private>
+$ mkdir /home/output
+$ mkdir /home/key
+$ ./ravro_dcrpt -in=/home/irx0xx-xx-xx-000x -out=/home/output/ -key=/home/key/key.private
 >> Current Version : ravro_dcrpt/1.0.2
 >> Github : https://github.com/ravro-ir/ravro_dcrp
 >> Issue : https://github.com/ravro-ir/ravro_dcrp/issues
@@ -173,6 +176,7 @@ Please use github issues to [report](https://github.com/ravro-ir/ravro_dcrpt/iss
 # Chagelog 
 > v1.0.2
 * Added feature logger
+* Added feature spinner load
 * Added update ravro_dcrpt
 * Better performance pdf result
 * Project packaging

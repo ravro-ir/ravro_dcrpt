@@ -47,20 +47,21 @@ func main() {
 		keyFixPath = "key/key.private"
 		outFixpath = "decrypt"
 	}
-	init := flag.Bool("init", false, "input directory of report encrypt file")
-	inputDir := flag.String("in", "in", "input directory of report encrypt file")
-	outputDir := flag.String("out", "out", "output directory for decrypt report file ")
-	key := flag.String("key", "key", "key.private")
+	init := flag.Bool("init", false, "Create encrypt/decrypt/key directory: ./ravro_dcrpt -init")
+	inputDir := flag.String("in", "in", "Input directory of report encrypt file, Ex: ./ravro_dcrpt -in=/home/path")
+	outputDir := flag.String("out", "out", "Output directory for decrypt report file,Ex: ./ravro_dcrpt -out=/home/path")
+	key := flag.String("key", "key", "Store key name Ex: ./ravro_dcrpt -key=/home/key.private")
 
 	update := flag.Bool("update", false, "Update ravro decryptor")
 	format := flag.Bool("json", false, "Convert report to json")
 	logs := flag.Bool("log", false, "Store Error logs in log.txt")
-	flag.Parse()
 	fmt.Println(">> Help : ravro_dcrpt --help")
 	fmt.Println(">> Current Version : ravro_dcrpt/1.0.2")
 	fmt.Println(">> Github : https://github.com/ravro-ir/ravro_dcrp")
 	fmt.Println(">> Issue : https://github.com/ravro-ir/ravro_dcrp/issues")
 	fmt.Println(">> Author : Ravro Development Team (RDT) \n\n")
+
+	flag.Parse()
 
 	ver, err := utils.LatestVersion()
 	if err != nil {
@@ -134,7 +135,7 @@ func main() {
 	report, err := core.DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 	if err != nil {
 		LogCheck(*logs, err)
-		fmt.Println("[----] Error : The private key is incorrect")
+		fmt.Println(fmt.Sprintf("[----] Error : %s", err.Error()))
 		return
 	}
 	if report.Title == "" {
@@ -169,7 +170,6 @@ func main() {
 	pdf := entity.Pdf{Judge: judge, Report: report}
 
 	dateFrom, outputPath := Validate(report, outputPath, pdf)
-	//fmt.Println("[++++] Starting report to pdf . . . ")
 	if *format {
 		file, _ := json.MarshalIndent(pdf.Judge, "", " ")
 		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
@@ -196,6 +196,7 @@ func main() {
 	if err := r.ParseTemplate(templatePath, templateData); err == nil {
 		s := spinner.New(spinner.CharSets[4], 100*time.Millisecond) // Build our new spinner
 		s.Start()
+		s.Color("yellow")
 		s.Prefix = "[++++] Starting report to pdf "
 		_, err = r.GeneratePDF(outputPath)
 		if err != nil {
@@ -311,7 +312,7 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		report.ReportInfo.Details.Cvss.Judge.Score = noMsg
 	}
 	if report.ReportInfo.Details.Cvss.Hunter.Score == "" {
-		report.ReportInfo.Details.Cvss.Hunter.Score = noMsg
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px;>%s</td>", noMsg)
 	}
 	if report.ReportInfo.Details.Cvss.Hunter.Vector == "" {
 		report.ReportInfo.Details.Cvss.Hunter.Vector = noMsg
@@ -319,6 +320,28 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 	if report.ReportInfo.Details.Cvss.Judge.Vector == "" {
 		report.ReportInfo.Details.Cvss.Judge.Vector = noMsg
 	}
+	if report.ReportInfo.Details.CurrentStatus == "" {
+		report.ReportInfo.Details.CurrentStatus = noMsg
+	}
+	if report.Urls == "" {
+		report.Urls = noMsg
+	}
+	if report.ReportInfo.Details.Target == "" {
+		report.ReportInfo.Details.Target = noMsg
+	}
+	if report.ReportInfo.Details.Cvss.Hunter.Score == "low" {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: #55ACEE'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	}
+	if report.ReportInfo.Details.Cvss.Hunter.Score == "high" {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: tomato'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	}
+	if report.ReportInfo.Details.Cvss.Hunter.Score == "medium" {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: gold'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	}
+	if report.ReportInfo.Details.Cvss.Hunter.Score == "critical" {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: crimson'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	}
+
 	templateData := struct {
 		Title           string
 		Description     string

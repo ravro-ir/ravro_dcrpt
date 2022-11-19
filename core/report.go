@@ -83,7 +83,7 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 			_, err = utils.SslDecrypt(Process.Name, outFixpath+"\\"+Process.Filename, keyFixPath)
 		} else {
 			if strings.Contains(outFixpath, "/") {
-				_, err = utils.SslDecrypt(Process.Name, outFixpath+Process.Filename, keyFixPath)
+				_, err = utils.SslDecrypt(Process.Name, outFixpath+"/"+Process.Filename, keyFixPath)
 			} else {
 				_, err = utils.SslDecrypt(Process.Name, outFixpath+"/"+Process.Filename, keyFixPath)
 			}
