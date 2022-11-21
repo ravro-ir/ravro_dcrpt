@@ -323,25 +323,28 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 	if report.ReportInfo.Details.CurrentStatus == "" {
 		report.ReportInfo.Details.CurrentStatus = noMsg
 	}
+	score, _ := strconv.ParseFloat(report.ReportInfo.Details.Cvss.Hunter.Score, 32)
+
+	//score, _ := strconv.At()
 	if report.Urls == "" {
 		report.Urls = noMsg
 	}
 	if report.ReportInfo.Details.Target == "" {
 		report.ReportInfo.Details.Target = noMsg
 	}
-	if report.ReportInfo.Details.Cvss.Hunter.Score == "low" {
-		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: #55ACEE'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	if score > 1 && score < 4 {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: #55ACEE'>%s</td>", "Low")
 	}
-	if report.ReportInfo.Details.Cvss.Hunter.Score == "high" {
-		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: tomato'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	if score >= 4 && score < 7 {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: tomato'>%s</td>", "High")
 	}
-	if report.ReportInfo.Details.Cvss.Hunter.Score == "medium" {
-		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: gold'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	if score >= 7 && score < 9 {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: gold'>%s</td>", "Medium")
 	}
-	if report.ReportInfo.Details.Cvss.Hunter.Score == "critical" {
-		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: crimson'>%s</td>", report.ReportInfo.Details.Cvss.Hunter.Score)
+	if score >= 9 && score < 10 {
+		report.ReportInfo.Details.Cvss.Hunter.Score = fmt.Sprintf("<td style='font-size: 10px; color: crimson'>%s</td>", "Critical")
 	}
-
+	valuation := fmt.Sprintf("https://www.ravro.ir/fa/report/%s/valuation", report.Slug)
 	templateData := struct {
 		Title           string
 		Description     string
@@ -374,6 +377,7 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		Targets         string
 		Status          string
 		UrlTarget       string
+		Valuation       string
 	}{
 		Title:           pdf.Report.Title,
 		PoC:             string(output),
@@ -404,6 +408,7 @@ func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string
 		Targets:         report.ReportInfo.Details.Target,
 		Status:          report.ReportInfo.Details.CurrentStatus,
 		UrlTarget:       report.Urls,
+		Valuation:       valuation,
 	}
 	return templateData
 }
