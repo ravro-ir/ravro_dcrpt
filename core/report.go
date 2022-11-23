@@ -25,7 +25,6 @@ func getSubstring(s string, indices []int) string {
 
 func GetReportID(valuePath string) string {
 	pattern := regexp.MustCompile("r[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]")
-	//welcomeMessage := "Hello guys, welcome to new york city"
 	firstMatchIndex := pattern.FindStringIndex(valuePath)
 	return getSubstring(valuePath, firstMatchIndex)
 }
