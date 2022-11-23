@@ -32,7 +32,7 @@ This is a tool to decrypt reports submitted by a hunter from the Ravro platform 
   * Mac OS : `brew install wkhtmltopdf` <br />
 
 3 - Rename your private `key` name to `key.private` and copy to `key` folder <br />
-4 - Download `.zip` file report, Copy `zip` file in the `encrypt` folder and extract it <br />
+4 - Download `.zip` file report, Copy `zip` file in the `encrypt` folder.<br />
 5 - Run `ravro_dcrpt.exe` /  `ravro_dcrpt` <br />
 
 
