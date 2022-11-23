@@ -2,14 +2,33 @@ package core
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"ravro_dcrpt/entity"
 	"ravro_dcrpt/utils"
+	"regexp"
 	"runtime"
 	"strings"
 )
+
+func ReportFiles(path, exten string) ([]string, error) {
+	out, err := utils.WalkMatch(path, exten)
+	return out, err
+}
+
+func getSubstring(s string, indices []int) string {
+	return string(s[indices[0]:indices[1]])
+}
+
+func GetReportID(valuePath string) string {
+	pattern := regexp.MustCompile("r[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]")
+	//welcomeMessage := "Hello guys, welcome to new york city"
+	firstMatchIndex := pattern.FindStringIndex(valuePath)
+	return getSubstring(valuePath, firstMatchIndex)
+}
 
 func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (entity.Report, error) {
 	var report entity.Report
@@ -25,14 +44,44 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if err != nil {
 			return report, err
 		}
-		lstReport, err = utils.WalkMatch(path, "*.ravro")
+		lstReport, err = ReportFiles(path, "*.ravro")
 		if err != nil {
 			return report, err
 		}
-		lstReportLen := len(lstReport)
-		if lstReportLen == 0 {
-			return report, err
+		if len(lstReport) == 0 {
+			zipFile, err := ReportFiles(path, "*.zip")
+			if err != nil {
+				return report, err
+			}
+			if len(zipFile) == 0 {
+				return report, err
+			} else {
+				CurrPath, _ := os.Getwd()
+				if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+					for _, value := range zipFile {
+						if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+							err := utils.Unzip(value, CurrPath+"/encrypt/"+GetReportID(value))
+							if err != nil {
+								fmt.Println("[----] Error : Unable to extract zip file.")
+								return report, errors.New("[----] Error : Unable to extract zip file.")
+							}
+						} else {
+							err := utils.Unzip(value, CurrPath+"\\encrypt\\"+GetReportID(value))
+							if err != nil {
+								fmt.Println("[----] Error : Unable to extract zip file.")
+								return report, errors.New("[----] Error : Unable to extract zip file.")
+							}
+						}
+					}
+
+				}
+			}
+			lstReport, err = ReportFiles(path, "*.ravro")
+			if err != nil {
+				return report, err
+			}
 		}
+
 		lstInfo, _ := utils.WalkMatch(path, "report_info.json")
 		if len(lstReport) >= 1 {
 			jsonFile, err := os.Open(lstInfo[0])
