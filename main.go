@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	rvrVersion    = "v1.0.1"
+	rvrVersion    = "v1.0.2"
 	publicMessage = "شرح داده نشده است."
 	noMsg         = "ثبت نشد"
 )
