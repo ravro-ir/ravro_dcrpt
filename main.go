@@ -140,46 +140,40 @@ func main() {
 	CurrPath, _ := os.Getwd()
 	var ll []string
 	for _, value := range lstReport {
-		ll = append(ll, CurrPath+"/encrypt/"+utils.GetReportID(value))
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+			ll = append(ll, CurrPath+"/encrypt/"+utils.GetReportID(value))
+		} else {
+			ll = append(ll, CurrPath+"\\encrypt\\"+utils.GetReportID(value))
+		}
 	}
 	zipFile, err := utils.ReportFiles(path, "*.zip")
 	if err != nil {
 		return
 	}
 	var lstZipFilepath []string
-	//if len(zipFile) >= 1 {
-	//	zipStatus = true
-	//}
 	if len(ll) >= 1 {
-		//zipStatus = false
 		lstZipFilepath = append(lstZipFilepath, utils.Unique(ll)...)
 	}
-
-	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		for _, value := range zipFile {
-			//if zipStatus {
-			if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-				extractPath := CurrPath + "/encrypt/" + utils.GetReportID(value)
-				err := utils.Unzip(value, extractPath)
-				if err != nil {
-					fmt.Println("[----] Error : Unable to extract zip file.")
-					return
-				}
-				lstZipFilepath = append(lstZipFilepath, extractPath)
-
-			} else {
-				extractPath := CurrPath + "\\encrypt\\" + utils.GetReportID(value)
-				err := utils.Unzip(value, extractPath)
-				if err != nil {
-					fmt.Println("[----] Error : Unable to extract zip file.")
-					return
-				}
-				lstZipFilepath = append(lstZipFilepath, extractPath)
+	for _, value := range zipFile {
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+			extractPath := CurrPath + "/encrypt/" + utils.GetReportID(value)
+			err := utils.Unzip(value, extractPath)
+			if err != nil {
+				fmt.Println("[----] Error : Unable to extract zip file.")
+				return
 			}
-			//}
+			lstZipFilepath = append(lstZipFilepath, extractPath)
+		} else {
+			extractPath := CurrPath + "\\encrypt\\" + utils.GetReportID(value)
+			err := utils.Unzip(value, extractPath)
+			if err != nil {
+				fmt.Println("[----] Error : Unable to extract zip file.")
+				return
+			}
+			lstZipFilepath = append(lstZipFilepath, extractPath)
 		}
-
 	}
+
 	r := utils.NewRequestPdf("")
 	pt := ptime.Now()
 	for _, zipdata := range lstZipFilepath {
@@ -243,7 +237,6 @@ func main() {
 				_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
 			}
 		}
-
 		md := []byte(pdf.Report.Description)
 		templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
 		if err := r.ParseTemplate(templatePath, templateData); err == nil {
@@ -271,6 +264,7 @@ func main() {
 			LogCheck(*logs, err)
 			fmt.Println(err)
 		}
+		fmt.Println("\n\n")
 	}
 
 }
