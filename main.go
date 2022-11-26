@@ -74,7 +74,6 @@ func main() {
 				"Please use command : ./ravro_dcrpt -update \n", newVer))
 		}
 	}
-
 	if *update {
 		fmt.Println("[++++] Downloading latest version from Github")
 		fileName, verTag, err := utils.HttpGet()
@@ -129,10 +128,16 @@ func main() {
 		status = true
 		keyFixPath = *key
 	}
-	path, err := utils.Projectpath()
-	if err != nil {
-		return
+	var path string
+	if curretnPath == "" {
+		path, err = utils.Projectpath()
+		if err != nil {
+			return
+		}
+	} else {
+		path = curretnPath
 	}
+
 	lstReport, err := utils.ReportFiles(path, "*.ravro")
 	if err != nil {
 		return
@@ -141,9 +146,17 @@ func main() {
 	var ll []string
 	for _, value := range lstReport {
 		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			ll = append(ll, CurrPath+"/encrypt/"+utils.GetReportID(value))
+			if curretnPath == "" {
+				ll = append(ll, CurrPath+"/encrypt/"+utils.GetReportID(value))
+			} else {
+				ll = append(ll, curretnPath+utils.GetReportID(value))
+			}
 		} else {
-			ll = append(ll, CurrPath+"\\encrypt\\"+utils.GetReportID(value))
+			if curretnPath == "" {
+				ll = append(ll, CurrPath+"\\encrypt\\"+utils.GetReportID(value))
+			} else {
+				ll = append(ll, curretnPath+utils.GetReportID(value))
+			}
 		}
 	}
 	zipFile, err := utils.ReportFiles(path, "*.zip")
@@ -154,28 +167,36 @@ func main() {
 	if len(ll) >= 1 {
 		lstZipFilepath = append(lstZipFilepath, utils.Unique(ll)...)
 	}
+	var extractPath string
+	for _, value := range zipFile {
 
-	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		for _, value := range zipFile {
-
-			if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-				extractPath := CurrPath + "/encrypt/" + utils.GetReportID(value)
-				err := utils.Unzip(value, extractPath)
-				if err != nil {
-					fmt.Println("[----] Error : Unable to extract zip file.")
-					return
-				}
-				lstZipFilepath = append(lstZipFilepath, extractPath)
-
+		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+			if curretnPath == "" {
+				extractPath = CurrPath + "/encrypt/" + utils.GetReportID(value)
 			} else {
-				extractPath := CurrPath + "\\encrypt\\" + utils.GetReportID(value)
-				err := utils.Unzip(value, extractPath)
-				if err != nil {
-					fmt.Println("[----] Error : Unable to extract zip file.")
-					return
-				}
-				lstZipFilepath = append(lstZipFilepath, extractPath)
+				extractPath = curretnPath + utils.GetReportID(value)
 			}
+			err := utils.Unzip(value, extractPath)
+			if err != nil {
+				fmt.Println("[----] Error : Unable to extract zip file.")
+				return
+			}
+			lstZipFilepath = append(lstZipFilepath, extractPath)
+
+		} else {
+
+			if curretnPath == "" {
+				extractPath = CurrPath + "\\encrypt\\" + utils.GetReportID(value)
+			} else {
+				extractPath = curretnPath + utils.GetReportID(value)
+			}
+
+			err := utils.Unzip(value, extractPath)
+			if err != nil {
+				fmt.Println("[----] Error : Unable to extract zip file.")
+				return
+			}
+			lstZipFilepath = append(lstZipFilepath, extractPath)
 		}
 	}
 	r := utils.NewRequestPdf("")
