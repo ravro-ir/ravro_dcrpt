@@ -34,6 +34,7 @@ func main() {
 		outFixpath   string
 		curretnPath  string
 		status       bool
+		//zipStatus    bool
 	)
 	lstDir := []string{"encrypt", "decrypt", "key"}
 	if runtime.GOOS == "windows" {
@@ -128,96 +129,150 @@ func main() {
 		status = true
 		keyFixPath = *key
 	}
+	path, err := utils.Projectpath()
+	if err != nil {
+		return
+	}
+	lstReport, err := utils.ReportFiles(path, "*.ravro")
+	if err != nil {
+		return
+	}
+	CurrPath, _ := os.Getwd()
+	var ll []string
+	for _, value := range lstReport {
+		ll = append(ll, CurrPath+"/encrypt/"+utils.GetReportID(value))
+	}
+	zipFile, err := utils.ReportFiles(path, "*.zip")
+	if err != nil {
+		return
+	}
+	var lstZipFilepath []string
+	//if len(zipFile) >= 1 {
+	//	zipStatus = true
+	//}
+	if len(ll) >= 1 {
+		//zipStatus = false
+		lstZipFilepath = append(lstZipFilepath, utils.Unique(ll)...)
+	}
+
+	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+		for _, value := range zipFile {
+			//if zipStatus {
+			if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+				extractPath := CurrPath + "/encrypt/" + utils.GetReportID(value)
+				err := utils.Unzip(value, extractPath)
+				if err != nil {
+					fmt.Println("[----] Error : Unable to extract zip file.")
+					return
+				}
+				lstZipFilepath = append(lstZipFilepath, extractPath)
+
+			} else {
+				extractPath := CurrPath + "\\encrypt\\" + utils.GetReportID(value)
+				err := utils.Unzip(value, extractPath)
+				if err != nil {
+					fmt.Println("[----] Error : Unable to extract zip file.")
+					return
+				}
+				lstZipFilepath = append(lstZipFilepath, extractPath)
+			}
+			//}
+		}
+
+	}
 	r := utils.NewRequestPdf("")
 	pt := ptime.Now()
-
-	fmt.Println("[++++] Starting for decrypting Report . . . ")
-	report, err := core.DcrptReport(curretnPath, keyFixPath, outFixpath, status)
-	if err != nil {
-		LogCheck(*logs, err)
-		fmt.Println("[----] Error : Unable to decrypt files, We think your key is invalid. Please use : ./ravro_dcrpt -log")
-		return
-	}
-	if report.Title == "" {
-		LogCheck(*logs, err)
-		fmt.Println("[----] The input file for decryption is not correct.")
-		return
-	}
-	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
-	judge, err := core.DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
-	if err != nil {
-		LogCheck(*logs, err)
-		fmt.Println(err)
-		return
-	}
-	fmt.Println("[++++] Starting for decrypting Amendment . . . ")
-	amendment, err := core.DcrptAmendment(curretnPath, keyFixPath, outFixpath)
-	if err != nil {
-		LogCheck(*logs, err)
-		fmt.Println(err)
-		return
-	}
-	utils.AddDir("template")
-	utils.HtmlTemplate(templatePath)
-	moreInfo := strings.Join(amendment[:], ",")
-	if moreInfo == "" {
-		moreInfo = publicMessage
-	}
-	if report.Reproduce == "" {
-		report.Reproduce = publicMessage
-	}
-	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
-	pdf := entity.Pdf{Judge: judge, Report: report}
-
-	dateFrom, outputPath := Validate(report, outputPath, pdf)
-	if *format {
-		file, _ := json.MarshalIndent(pdf.Judge, "", " ")
-		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			_ = ioutil.WriteFile("decrypt//juror.json", file, 0644)
-		} else {
-			_ = ioutil.WriteFile("decrypt\\juror.json", file, 0644)
-		}
-		reportd, _ := json.MarshalIndent(pdf.Report, "", " ")
-		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			_ = ioutil.WriteFile("decrypt//repo.json", reportd, 0644)
-		} else {
-			_ = ioutil.WriteFile("decrypt\\repo.json", reportd, 0644)
-		}
-		amendments, _ := json.MarshalIndent(pdf.Amendment, "", " ")
-		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			_ = ioutil.WriteFile("decrypt//moreinfo.json", amendments, 0644)
-		} else {
-			_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
-		}
-	}
-
-	md := []byte(pdf.Report.Description)
-	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
-	if err := r.ParseTemplate(templatePath, templateData); err == nil {
-		s := spinner.New(spinner.CharSets[4], 100*time.Millisecond) // Build our new spinner
-		s.Start()
-		s.Color("yellow")
-		s.Prefix = "[++++] Starting report to pdf "
-		_, err = r.GeneratePDF(outputPath)
+	for _, zipdata := range lstZipFilepath {
+		curretnPath = zipdata
+		fmt.Println(fmt.Sprintf("[++++] Starting for decrypting report ID [%s] . . . ", utils.GetReportID(zipdata)))
+		report, err := core.DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println("[----] failed to remove html template,")
+			fmt.Println("[----] Error : Unable to decrypt files, We think your key is invalid. Please use : ./ravro_dcrpt -log")
+			return
 		}
-		err := os.RemoveAll("template")
+		if report.Title == "" {
+			LogCheck(*logs, err)
+			fmt.Println("[----] The input file for decryption is not correct.")
+			return
+		}
+		fmt.Println("[++++] Starting for decrypting Judgment . . . ")
+		judge, err := core.DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println("[----] failed to remove html template,")
+			fmt.Println(err)
+			return
 		}
-		fmt.Println("\n[++++] PDF generated successfully")
-		err = utils.ChangeDirName(report.Slug, outFixpath)
+		fmt.Println("[++++] Starting for decrypting Amendment . . . ")
+		amendment, err := core.DcrptAmendment(curretnPath, keyFixPath, outFixpath)
 		if err != nil {
 			LogCheck(*logs, err)
+			fmt.Println(err)
+			return
 		}
-		s.Stop()
-	} else {
-		LogCheck(*logs, err)
-		fmt.Println(err)
+		utils.AddDir("template")
+		utils.HtmlTemplate(templatePath)
+		moreInfo := strings.Join(amendment[:], ",")
+		if moreInfo == "" {
+			moreInfo = publicMessage
+		}
+		if report.Reproduce == "" {
+			report.Reproduce = publicMessage
+		}
+		dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
+		pdf := entity.Pdf{Judge: judge, Report: report}
+
+		dateFrom, outputPath := Validate(report, outputPath, pdf)
+		if *format {
+			file, _ := json.MarshalIndent(pdf.Judge, "", " ")
+			if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+				_ = ioutil.WriteFile("decrypt//juror.json", file, 0644)
+			} else {
+				_ = ioutil.WriteFile("decrypt\\juror.json", file, 0644)
+			}
+			reportd, _ := json.MarshalIndent(pdf.Report, "", " ")
+			if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+				_ = ioutil.WriteFile("decrypt//repo.json", reportd, 0644)
+			} else {
+				_ = ioutil.WriteFile("decrypt\\repo.json", reportd, 0644)
+			}
+			amendments, _ := json.MarshalIndent(pdf.Amendment, "", " ")
+			if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+				_ = ioutil.WriteFile("decrypt//moreinfo.json", amendments, 0644)
+			} else {
+				_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
+			}
+		}
+
+		md := []byte(pdf.Report.Description)
+		templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
+		if err := r.ParseTemplate(templatePath, templateData); err == nil {
+			s := spinner.New(spinner.CharSets[4], 100*time.Millisecond) // Build our new spinner
+			s.Start()
+			s.Color("yellow")
+			s.Prefix = "[++++] Starting report to pdf "
+			_, err = r.GeneratePDF(outputPath)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] failed to remove html template,")
+			}
+			err := os.RemoveAll("template")
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] failed to remove html template,")
+			}
+			fmt.Println("\n[++++] PDF generated successfully")
+			err = utils.ChangeDirName(report.Slug, outFixpath)
+			if err != nil {
+				LogCheck(*logs, err)
+			}
+			s.Stop()
+		} else {
+			LogCheck(*logs, err)
+			fmt.Println(err)
+		}
 	}
+
 }
 
 func AttachmentFiles(info entity.InfoReport) string {

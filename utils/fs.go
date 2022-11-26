@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"ravro_dcrpt/entity"
+	"regexp"
 	"runtime"
 	"strings"
 )
@@ -184,6 +185,33 @@ func ChangeDirName(reportId string, dirName string) error {
 		}
 	}
 	return nil
+}
+
+func Unique(s []string) []string {
+	inResult := make(map[string]bool)
+	var result []string
+	for _, str := range s {
+		if _, ok := inResult[str]; !ok {
+			inResult[str] = true
+			result = append(result, str)
+		}
+	}
+	return result
+}
+
+func ReportFiles(path, exten string) ([]string, error) {
+	out, err := WalkMatch(path, exten)
+	return out, err
+}
+
+func GetReportID(valuePath string) string {
+	pattern := regexp.MustCompile("r[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]")
+	firstMatchIndex := pattern.FindStringIndex(valuePath)
+	return getSubstring(valuePath, firstMatchIndex)
+}
+
+func getSubstring(s string, indices []int) string {
+	return string(s[indices[0]:indices[1]])
 }
 
 func CheckIsEmpty(pdf entity.Pdf) entity.Pdf {
