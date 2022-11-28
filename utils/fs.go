@@ -133,13 +133,8 @@ func CheckDir(dirName string) bool {
 }
 
 func CheckPlatform(outFixpath string, process ProccesFile) ProccesFile {
-	if runtime.GOOS == "windows" {
-		process.OldNamePath = outFixpath + "\\" + process.OldName + process.FileExt
-		process.NewNamePath = outFixpath + "\\" + process.Filename
-	} else {
-		process.OldNamePath = outFixpath + "/" + process.OldName + process.FileExt
-		process.NewNamePath = outFixpath + "/" + process.Filename
-	}
+	process.OldNamePath = filepath.Join(outFixpath, process.OldName+process.FileExt)
+	process.NewNamePath = filepath.Join(outFixpath, process.Filename)
 	return process
 }
 
@@ -169,15 +164,10 @@ func ChangeDirName(reportId string, dirName string) error {
 	}
 	for _, file := range files {
 		if !file.IsDir() {
-			if runtime.GOOS == "windows" {
-				AddDir(dirName + "\\" + reportId)
-				oldPath = dirName + "\\" + file.Name()
-				newPath = dirName + "\\" + reportId + "\\" + file.Name()
-			} else {
-				AddDir(dirName + "/" + reportId)
-				oldPath = dirName + "/" + file.Name()
-				newPath = dirName + "/" + reportId + "/" + file.Name()
-			}
+			dirNewName := filepath.Join(dirName, reportId)
+			AddDir(dirNewName)
+			oldPath = filepath.Join(dirName, file.Name())
+			newPath = filepath.Join(dirName, reportId, file.Name())
 			err := os.Rename(oldPath, newPath)
 			if err != nil {
 				return err

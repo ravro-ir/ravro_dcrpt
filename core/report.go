@@ -5,11 +5,14 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"ravro_dcrpt/entity"
 	"ravro_dcrpt/utils"
 	"runtime"
 	"strings"
 )
+
+const jsonInfo string = "report_info.json"
 
 func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (entity.Report, error) {
 	var report entity.Report
@@ -18,7 +21,7 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		err       error
 		lstReport []string
 	)
-	lstInfo, _ := utils.WalkMatch(currentPath, "report_info.json")
+	lstInfo, _ := utils.WalkMatch(currentPath, jsonInfo)
 	if len(lstReport) >= 1 {
 		jsonFile, err := os.Open(lstInfo[0])
 		reportValue, _ := ioutil.ReadAll(jsonFile)
@@ -32,7 +35,6 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		}
 		report.ReportInfo = infoReport
 	}
-	//} else {
 	lstReport, err = utils.WalkMatch(currentPath, "*.ravro")
 	if err != nil {
 		return report, err
@@ -60,15 +62,8 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		if err != nil {
 			return report, err
 		}
-		if runtime.GOOS == "windows" {
-			_, err = utils.SslDecrypt(Process.Name, outFixpath+"\\"+Process.Filename, keyFixPath)
-		} else {
-			if strings.Contains(outFixpath, "/") {
-				_, err = utils.SslDecrypt(Process.Name, outFixpath+"/"+Process.Filename, keyFixPath)
-			} else {
-				_, err = utils.SslDecrypt(Process.Name, outFixpath+"/"+Process.Filename, keyFixPath)
-			}
-		}
+		reportPath := filepath.Join(outFixpath, Process.Filename)
+		_, err = utils.SslDecrypt(Process.Name, reportPath, keyFixPath)
 		if err != nil {
 			return report, err
 		}
