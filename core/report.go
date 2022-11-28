@@ -22,7 +22,7 @@ func DcrptReport(currentPath, keyFixPath, outFixpath string, checkStatus bool) (
 		lstReport []string
 	)
 	lstInfo, _ := utils.WalkMatch(currentPath, jsonInfo)
-	if len(lstReport) >= 1 {
+	if len(lstInfo) >= 1 {
 		jsonFile, err := os.Open(lstInfo[0])
 		reportValue, _ := ioutil.ReadAll(jsonFile)
 		err = json.Unmarshal(reportValue, &infoReport)

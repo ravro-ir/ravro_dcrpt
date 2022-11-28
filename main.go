@@ -134,7 +134,8 @@ func main() {
 		path, err = utils.Projectpath()
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println(err)
+			// TODO
+			//fmt.Println(err)
 			return
 		}
 	} else {
@@ -146,7 +147,8 @@ func main() {
 		files, err = ioutil.ReadDir(keyPath)
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println(err)
+			// TODO
+			//fmt.Println(err)
 			return
 		}
 		if len(files) == 1 {
@@ -172,7 +174,8 @@ func main() {
 	lstReport, err := utils.ReportFiles(path, ExtRavro)
 	if err != nil {
 		LogCheck(*logs, err)
-		fmt.Println(err)
+		// TODO
+		//fmt.Println(err)
 		return
 	}
 	CurrPath, _ := os.Getwd()
@@ -188,8 +191,6 @@ func main() {
 	var lstZipFilepath []string
 	if len(ll) >= 1 {
 		lstZipFilepath = append(lstZipFilepath, utils.Unique(ll)...)
-	} else {
-
 	}
 	var extractPath string
 	for _, value := range zipFile {
@@ -201,6 +202,7 @@ func main() {
 		}
 		err := utils.Unzip(value, extractPath)
 		if err != nil {
+			LogCheck(*logs, err)
 			fmt.Println("[----] Error : Unable to extract zip file.")
 			return
 		}
