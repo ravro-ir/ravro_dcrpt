@@ -92,7 +92,7 @@ func main() {
 		err = utils.Unzip(newPathZip, path)
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println("[----] Error : Unable to extract zip file.")
+			fmt.Println("[----] Error : Unable to extract zip file. , More Info : ./ravro_dcrpt -log")
 		}
 		return
 	}
@@ -134,8 +134,7 @@ func main() {
 		path, err = utils.Projectpath()
 		if err != nil {
 			LogCheck(*logs, err)
-			// TODO
-			//fmt.Println(err)
+			fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
 			return
 		}
 	} else {
@@ -147,8 +146,7 @@ func main() {
 		files, err = ioutil.ReadDir(keyPath)
 		if err != nil {
 			LogCheck(*logs, err)
-			// TODO
-			//fmt.Println(err)
+			fmt.Println("[----] We have a error,  More Info : ./ravro_dcrpt -log")
 			return
 		}
 		if len(files) == 1 {
@@ -164,7 +162,8 @@ func main() {
 			}
 			_, result, err := prompt.Run()
 			if err != nil {
-				fmt.Printf("Prompt failed %v\n", err)
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error,  More Info : ./ravro_dcrpt -log")
 				return
 			}
 			keyFixPath = filepath.Join("key", result)
@@ -174,8 +173,7 @@ func main() {
 	lstReport, err := utils.ReportFiles(path, ExtRavro)
 	if err != nil {
 		LogCheck(*logs, err)
-		// TODO
-		//fmt.Println(err)
+		fmt.Println("[----] We have a error,  More Info : ./ravro_dcrpt -log")
 		return
 	}
 	CurrPath, _ := os.Getwd()
@@ -203,7 +201,7 @@ func main() {
 		err := utils.Unzip(value, extractPath)
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println("[----] Error : Unable to extract zip file.")
+			fmt.Println("[----] Error : Unable to extract zip file, More Info : ./ravro_dcrpt -log")
 			return
 		}
 		lstZipFilepath = append(lstZipFilepath, extractPath)
@@ -226,7 +224,7 @@ func main() {
 			LogCheck(*logs, err)
 			checkList["id"] = report.Slug
 			checkList["hunter"] = report.HunterUsername
-			checkList["status"] = "Failed"
+			checkList["status"] = "Failed,  More Info : ./ravro_dcrpt -log"
 			fmt.Println("[----] Error : Unable to decrypt files, We think your key is invalid. Please use : ./ravro_dcrpt -log")
 			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 			continue
@@ -235,8 +233,8 @@ func main() {
 			LogCheck(*logs, err)
 			checkList["id"] = report.Slug
 			checkList["hunter"] = report.HunterUsername
-			checkList["status"] = "Failed"
-			fmt.Println("[----] The input file for decryption is not correct.")
+			checkList["status"] = "Failed,  More Info : ./ravro_dcrpt -log"
+			fmt.Println("[----] The input file for decryption is not correct. More Info : ./ravro_dcrpt -log")
 			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 			continue
 		}
@@ -246,7 +244,7 @@ func main() {
 			LogCheck(*logs, err)
 			checkList["id"] = report.Slug
 			checkList["hunter"] = report.HunterUsername
-			checkList["status"] = "Failed"
+			checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
 			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 			continue
 		}
@@ -256,7 +254,7 @@ func main() {
 			LogCheck(*logs, err)
 			checkList["id"] = report.Slug
 			checkList["hunter"] = report.HunterUsername
-			checkList["status"] = "Failed"
+			checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
 			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 			continue
 		}
@@ -274,20 +272,44 @@ func main() {
 
 		dateFrom, outputPath := Validate(report, outputPath, pdf)
 		if *format {
-			file, _ := json.MarshalIndent(pdf.Judge, "", " ")
+			file, err := json.MarshalIndent(pdf.Judge, "", " ")
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
 			fileJurorsonPath := filepath.Join("decrypt", "juror.json")
-			_ = ioutil.WriteFile(fileJurorsonPath, file, 0644)
-			reportd, _ := json.MarshalIndent(pdf.Report, "", " ")
+			err = ioutil.WriteFile(fileJurorsonPath, file, 0644)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+			reportd, err := json.MarshalIndent(pdf.Report, "", " ")
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
 			fileRepoPath := filepath.Join("decrypt", "repo.json")
-			_ = ioutil.WriteFile(fileRepoPath, reportd, 0644)
-			amendments, _ := json.MarshalIndent(pdf.Amendment, "", " ")
+			err = ioutil.WriteFile(fileRepoPath, reportd, 0644)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+			amendments, err := json.MarshalIndent(pdf.Amendment, "", " ")
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
 			fileMorePath := filepath.Join("decrypt", "moreinfo.json")
-			_ = ioutil.WriteFile(fileMorePath, amendments, 0644)
+			err = ioutil.WriteFile(fileMorePath, amendments, 0644)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
 		}
 		md := []byte(pdf.Report.Description)
 		templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
 		if err := r.ParseTemplate(templatePath, templateData); err == nil {
-			s := spinner.New(spinner.CharSets[4], 100*time.Millisecond) // Build our new spinner
+			s := spinner.New(spinner.CharSets[4], 100*time.Millisecond)
 			s.Start()
 			s.Color("yellow")
 			s.Prefix = "[++++] Starting report to pdf "
@@ -296,8 +318,7 @@ func main() {
 				LogCheck(*logs, err)
 				checkList["id"] = report.Slug
 				checkList["hunter"] = report.HunterUsername
-				checkList["status"] = "Failed"
-				fmt.Println("[----] failed to remove html template,")
+				checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
 				fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 				continue
 			}
@@ -306,8 +327,7 @@ func main() {
 				LogCheck(*logs, err)
 				checkList["id"] = report.Slug
 				checkList["hunter"] = report.HunterUsername
-				checkList["status"] = "Failed"
-				fmt.Println("[----] failed to remove html template,")
+				checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
 				fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 				continue
 			}
@@ -318,7 +338,7 @@ func main() {
 				LogCheck(*logs, err)
 				checkList["id"] = report.Slug
 				checkList["hunter"] = report.HunterUsername
-				checkList["status"] = "Failed"
+				checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
 				fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 				continue
 			}
@@ -327,7 +347,7 @@ func main() {
 			LogCheck(*logs, err)
 			checkList["id"] = report.Slug
 			checkList["hunter"] = report.HunterUsername
-			checkList["status"] = "Failed"
+			checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
 			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 			continue
 		}
