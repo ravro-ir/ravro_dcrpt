@@ -165,7 +165,7 @@ func main() {
 				lst = append(lst, value.Name())
 			}
 			prompt := promptui.Select{
-				Label: "Please Choose",
+				Label: "Please choose a key",
 				Items: lst,
 			}
 			_, result, err := prompt.Run()
@@ -337,13 +337,6 @@ func main() {
 			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
 			continue
 		}
-		//if report.HunterUsername == "hitman" {
-		//	checkList["id"] = report.Slug
-		//	checkList["hunter"] = report.HunterUsername
-		//	checkList["status"] = "Failed"
-		//	fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
-		//	continue
-		//}
 		checkList["id"] = report.Slug
 		checkList["hunter"] = report.HunterUsername
 		checkList["status"] = "Successfully"
