@@ -16,7 +16,6 @@ import (
 	"ravro_dcrpt/core"
 	"ravro_dcrpt/entity"
 	"ravro_dcrpt/utils"
-	"runtime"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -45,18 +44,12 @@ func main() {
 		status       bool
 		files        []fs.FileInfo
 	)
+
 	lstDir := []string{"encrypt", "decrypt", "key"}
-	if runtime.GOOS == "windows" {
-		templatePath = "template\\sample.html"
-		outputPath = "decrypt\\reports.pdf"
-		keyFixPath = "key/%s"
-		outFixpath = "decrypt"
-	} else {
-		templatePath = "template/sample.html"
-		outputPath = "decrypt/reports.pdf"
-		keyFixPath = "key/%s"
-		outFixpath = "decrypt"
-	}
+	outFixpath = "decrypt"
+	templatePath = filepath.Join("template", "sample.html")
+	outputPath = filepath.Join("decrypt", "reports.pdf")
+
 	init := flag.Bool("init", false, "Create encrypt/decrypt/key directory: ./ravro_dcrpt -init")
 	inputDir := flag.String("in", "in", "Input directory of report encrypt file, Ex: ./ravro_dcrpt -in=/home/path")
 	outputDir := flag.String("out", "out", "Output directory for decrypt report file,Ex: ./ravro_dcrpt -out=/home/path/")
@@ -134,7 +127,6 @@ func main() {
 	}
 	if *key != keyDir {
 		status = true
-
 		keyFixPath = *key
 	}
 	var path string
@@ -158,7 +150,7 @@ func main() {
 			return
 		}
 		if len(files) == 1 {
-			keyFixPath = fmt.Sprintf(keyFixPath, files[0].Name())
+			keyFixPath = filepath.Join("key", files[0].Name())
 		} else {
 			var lst []string
 			for _, value := range files {
@@ -173,7 +165,7 @@ func main() {
 				fmt.Printf("Prompt failed %v\n", err)
 				return
 			}
-			keyFixPath = fmt.Sprintf(keyFixPath, result)
+			keyFixPath = filepath.Join("key", result)
 		}
 	}
 
