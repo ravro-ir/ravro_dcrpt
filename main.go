@@ -6,16 +6,19 @@ import (
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/gomarkdown/markdown"
+	"github.com/manifoldco/promptui"
 	ptime "github.com/yaa110/go-persian-calendar"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"ravro_dcrpt/core"
 	"ravro_dcrpt/entity"
 	"ravro_dcrpt/utils"
-	"runtime"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 )
 
@@ -23,6 +26,11 @@ const (
 	rvrVersion    = "v1.0.2"
 	publicMessage = "شرح داده نشده است."
 	noMsg         = "ثبت نشد"
+	PathDir       = "encrypt"
+	keyDir        = "key"
+	DecryptPath   = "decrypt"
+	ExtRavro      = "*.ravro"
+	ExtZip        = "*.zip"
 )
 
 func main() {
@@ -34,19 +42,14 @@ func main() {
 		outFixpath   string
 		curretnPath  string
 		status       bool
+		files        []fs.FileInfo
 	)
+
 	lstDir := []string{"encrypt", "decrypt", "key"}
-	if runtime.GOOS == "windows" {
-		templatePath = "template\\sample.html"
-		outputPath = "decrypt\\reports.pdf"
-		keyFixPath = "key/key.private"
-		outFixpath = "decrypt"
-	} else {
-		templatePath = "template/sample.html"
-		outputPath = "decrypt/reports.pdf"
-		keyFixPath = "key/key.private"
-		outFixpath = "decrypt"
-	}
+	outFixpath = "decrypt"
+	templatePath = filepath.Join("template", "sample.html")
+	outputPath = filepath.Join("decrypt", "reports.pdf")
+
 	init := flag.Bool("init", false, "Create encrypt/decrypt/key directory: ./ravro_dcrpt -init")
 	inputDir := flag.String("in", "in", "Input directory of report encrypt file, Ex: ./ravro_dcrpt -in=/home/path")
 	outputDir := flag.String("out", "out", "Output directory for decrypt report file,Ex: ./ravro_dcrpt -out=/home/path/")
@@ -73,7 +76,6 @@ func main() {
 				"Please use command : ./ravro_dcrpt -update \n", newVer))
 		}
 	}
-
 	if *update {
 		fmt.Println("[++++] Downloading latest version from Github")
 		fileName, verTag, err := utils.HttpGet()
@@ -86,19 +88,18 @@ func main() {
 		fmt.Println(fmt.Sprintf("[++++] The latest version Ravro_dcrpt downloaded - [%s]", fileName))
 		// Extract zip file
 		path, err := os.Getwd()
-		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			err := utils.Unzip(path+"/"+fileName, path)
-			if err != nil {
-				LogCheck(*logs, err)
-				fmt.Println("[----] Error : Unable to extract zip file.")
-			}
+		newPathZip := filepath.Join(path, fileName)
+		err = utils.Unzip(newPathZip, path)
+		if err != nil {
+			LogCheck(*logs, err)
+			fmt.Println("[----] Error : Unable to extract zip file. , More Info : ./ravro_dcrpt -log")
 		}
 		return
 	}
 	if *init {
-		utils.AddDir("decrypt")
-		utils.AddDir("encrypt")
-		utils.AddDir("key")
+		utils.AddDir(DecryptPath)
+		utils.AddDir(PathDir)
+		utils.AddDir(keyDir)
 		fmt.Println("[++] Created directory decrypt, encrypt, key")
 		return
 	} else {
@@ -124,99 +125,237 @@ func main() {
 		outputPath = *outputDir + "reports.pdf"
 		outFixpath = *outputDir
 	}
-	if *key != "key" {
+	if *key != keyDir {
 		status = true
 		keyFixPath = *key
 	}
+	var path string
+	if curretnPath == "" {
+		path, err = utils.Projectpath()
+		if err != nil {
+			LogCheck(*logs, err)
+			fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			return
+		}
+	} else {
+		path = curretnPath
+	}
+
+	if *key == keyDir {
+		keyPath := filepath.Join(path, keyDir)
+		files, err = ioutil.ReadDir(keyPath)
+		if err != nil {
+			LogCheck(*logs, err)
+			fmt.Println("[----] We have a error,  More Info : ./ravro_dcrpt -log")
+			return
+		}
+		if len(files) == 1 {
+			keyFixPath = filepath.Join("key", files[0].Name())
+		} else {
+			var lst []string
+			for _, value := range files {
+				lst = append(lst, value.Name())
+			}
+			prompt := promptui.Select{
+				Label: "Please choose a key",
+				Items: lst,
+			}
+			_, result, err := prompt.Run()
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error,  More Info : ./ravro_dcrpt -log")
+				return
+			}
+			keyFixPath = filepath.Join("key", result)
+		}
+	}
+
+	lstReport, err := utils.ReportFiles(path, ExtRavro)
+	if err != nil {
+		LogCheck(*logs, err)
+		fmt.Println("[----] We have a error,  More Info : ./ravro_dcrpt -log")
+		return
+	}
+	CurrPath, _ := os.Getwd()
+	var ll []string
+	for _, value := range lstReport {
+		reportPath := filepath.Join(CurrPath, PathDir, utils.GetReportID(value))
+		ll = append(ll, reportPath)
+	}
+	zipFile, err := utils.ReportFiles(path, ExtZip)
+	if err != nil {
+		return
+	}
+	var lstZipFilepath []string
+	if len(ll) >= 1 {
+		lstZipFilepath = append(lstZipFilepath, utils.Unique(ll)...)
+	}
+	var extractPath string
+	for _, value := range zipFile {
+
+		if curretnPath == "" {
+			extractPath = filepath.Join(CurrPath, PathDir, utils.GetReportID(value))
+		} else {
+			extractPath = curretnPath + utils.GetReportID(value)
+		}
+		err := utils.Unzip(value, extractPath)
+		if err != nil {
+			LogCheck(*logs, err)
+			fmt.Println("[----] Error : Unable to extract zip file, More Info : ./ravro_dcrpt -log")
+			return
+		}
+		lstZipFilepath = append(lstZipFilepath, extractPath)
+	}
 	r := utils.NewRequestPdf("")
 	pt := ptime.Now()
+	w := new(tabwriter.Writer)
 
-	fmt.Println("[++++] Starting for decrypting Report . . . ")
-	report, err := core.DcrptReport(curretnPath, keyFixPath, outFixpath, status)
-	if err != nil {
-		LogCheck(*logs, err)
-		fmt.Println("[----] Error : Unable to decrypt files, We think your key is invalid. Please use : ./ravro_dcrpt -log")
-		return
-	}
-	if report.Title == "" {
-		LogCheck(*logs, err)
-		fmt.Println("[----] The input file for decryption is not correct.")
-		return
-	}
-	fmt.Println("[++++] Starting for decrypting Judgment . . . ")
-	judge, err := core.DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
-	if err != nil {
-		LogCheck(*logs, err)
-		fmt.Println(err)
-		return
-	}
-	fmt.Println("[++++] Starting for decrypting Amendment . . . ")
-	amendment, err := core.DcrptAmendment(curretnPath, keyFixPath, outFixpath)
-	if err != nil {
-		LogCheck(*logs, err)
-		fmt.Println(err)
-		return
-	}
-	utils.AddDir("template")
-	utils.HtmlTemplate(templatePath)
-	moreInfo := strings.Join(amendment[:], ",")
-	if moreInfo == "" {
-		moreInfo = publicMessage
-	}
-	if report.Reproduce == "" {
-		report.Reproduce = publicMessage
-	}
-	dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
-	pdf := entity.Pdf{Judge: judge, Report: report}
+	w.Init(os.Stdout, 8, 8, 0, '\t', 0)
+	defer w.Flush()
+	fmt.Fprintf(w, "\n %s\t%s\t%s\t", "ID", "Hunter", "Status")
+	fmt.Fprintf(w, "\n %s\t%s\t%s\t", "-------", "-------", "-------")
 
-	dateFrom, outputPath := Validate(report, outputPath, pdf)
-	if *format {
-		file, _ := json.MarshalIndent(pdf.Judge, "", " ")
-		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			_ = ioutil.WriteFile("decrypt//juror.json", file, 0644)
-		} else {
-			_ = ioutil.WriteFile("decrypt\\juror.json", file, 0644)
-		}
-		reportd, _ := json.MarshalIndent(pdf.Report, "", " ")
-		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			_ = ioutil.WriteFile("decrypt//repo.json", reportd, 0644)
-		} else {
-			_ = ioutil.WriteFile("decrypt\\repo.json", reportd, 0644)
-		}
-		amendments, _ := json.MarshalIndent(pdf.Amendment, "", " ")
-		if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-			_ = ioutil.WriteFile("decrypt//moreinfo.json", amendments, 0644)
-		} else {
-			_ = ioutil.WriteFile("decrypt\\moreinfo.json", amendments, 0644)
-		}
-	}
-
-	md := []byte(pdf.Report.Description)
-	templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
-	if err := r.ParseTemplate(templatePath, templateData); err == nil {
-		s := spinner.New(spinner.CharSets[4], 100*time.Millisecond) // Build our new spinner
-		s.Start()
-		s.Color("yellow")
-		s.Prefix = "[++++] Starting report to pdf "
-		_, err = r.GeneratePDF(outputPath)
+	checkList := make(map[string]string)
+	for _, zipdata := range utils.Unique(lstZipFilepath) {
+		curretnPath = zipdata
+		fmt.Println(fmt.Sprintf("[++++] Starting for decrypting report ID [%s] . . . ", utils.GetReportID(zipdata)))
+		report, err := core.DcrptReport(curretnPath, keyFixPath, outFixpath, status)
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println("[----] failed to remove html template,")
+			checkList["id"] = report.Slug
+			checkList["hunter"] = report.HunterUsername
+			checkList["status"] = "Failed,  More Info : ./ravro_dcrpt -log"
+			fmt.Println("[----] Error : Unable to decrypt files, We think your key is invalid. Please use : ./ravro_dcrpt -log")
+			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+			continue
 		}
-		err := os.RemoveAll("template")
+		if report.Title == "" {
+			LogCheck(*logs, err)
+			checkList["id"] = report.Slug
+			checkList["hunter"] = report.HunterUsername
+			checkList["status"] = "Failed,  More Info : ./ravro_dcrpt -log"
+			fmt.Println("[----] The input file for decryption is not correct. More Info : ./ravro_dcrpt -log")
+			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+			continue
+		}
+		fmt.Println("[++++] Starting for decrypting Judgment . . . ")
+		judge, err := core.DcrptJudgment(curretnPath, keyFixPath, outFixpath, status)
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println("[----] failed to remove html template,")
+			checkList["id"] = report.Slug
+			checkList["hunter"] = report.HunterUsername
+			checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
+			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+			continue
 		}
-		fmt.Println("\n[++++] PDF generated successfully")
-		err = utils.ChangeDirName(report.Slug, outFixpath)
+		fmt.Println("[++++] Starting for decrypting Amendment . . . ")
+		amendment, err := core.DcrptAmendment(curretnPath, keyFixPath, outFixpath)
 		if err != nil {
 			LogCheck(*logs, err)
+			checkList["id"] = report.Slug
+			checkList["hunter"] = report.HunterUsername
+			checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
+			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+			continue
 		}
-		s.Stop()
-	} else {
-		LogCheck(*logs, err)
-		fmt.Println(err)
+		utils.AddDir("template")
+		utils.HtmlTemplate(templatePath)
+		moreInfo := strings.Join(amendment[:], ",")
+		if moreInfo == "" {
+			moreInfo = publicMessage
+		}
+		if report.Reproduce == "" {
+			report.Reproduce = publicMessage
+		}
+		dateTo := strconv.Itoa(pt.Year()) + "/" + strconv.Itoa(int(pt.Month())) + "/" + strconv.Itoa(pt.Day())
+		pdf := entity.Pdf{Judge: judge, Report: report}
+
+		dateFrom, outputPath := Validate(report, outputPath, pdf)
+		if *format {
+			file, err := json.MarshalIndent(pdf.Judge, "", " ")
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+			fileJurorsonPath := filepath.Join("decrypt", "juror.json")
+			err = ioutil.WriteFile(fileJurorsonPath, file, 0644)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+			reportd, err := json.MarshalIndent(pdf.Report, "", " ")
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+			fileRepoPath := filepath.Join("decrypt", "repo.json")
+			err = ioutil.WriteFile(fileRepoPath, reportd, 0644)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+			amendments, err := json.MarshalIndent(pdf.Amendment, "", " ")
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+			fileMorePath := filepath.Join("decrypt", "moreinfo.json")
+			err = ioutil.WriteFile(fileMorePath, amendments, 0644)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] We have a error, More Info : ./ravro_dcrpt -log")
+			}
+		}
+		md := []byte(pdf.Report.Description)
+		templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
+		if err := r.ParseTemplate(templatePath, templateData); err == nil {
+			s := spinner.New(spinner.CharSets[4], 100*time.Millisecond)
+			s.Start()
+			s.Color("yellow")
+			s.Prefix = "[++++] Starting report to pdf "
+			_, err = r.GeneratePDF(outputPath)
+			if err != nil {
+				LogCheck(*logs, err)
+				checkList["id"] = report.Slug
+				checkList["hunter"] = report.HunterUsername
+				checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
+				fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+				continue
+			}
+			err := os.RemoveAll("template")
+			if err != nil {
+				LogCheck(*logs, err)
+				checkList["id"] = report.Slug
+				checkList["hunter"] = report.HunterUsername
+				checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
+				fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+				continue
+			}
+			fmt.Println("\n[++++] PDF generated successfully")
+			fmt.Println("\n")
+			err = utils.ChangeDirName(report.Slug, outFixpath)
+			if err != nil {
+				LogCheck(*logs, err)
+				checkList["id"] = report.Slug
+				checkList["hunter"] = report.HunterUsername
+				checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
+				fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+				continue
+			}
+			s.Stop()
+		} else {
+			LogCheck(*logs, err)
+			checkList["id"] = report.Slug
+			checkList["hunter"] = report.HunterUsername
+			checkList["status"] = "Failed, More Info : ./ravro_dcrpt -log"
+			fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+			continue
+		}
+		checkList["id"] = report.Slug
+		checkList["hunter"] = report.HunterUsername
+		checkList["status"] = "Successfully"
+		fmt.Fprintf(w, "\n %s\t%s\t%s\t", checkList["id"], checkList["hunter"], checkList["status"])
+		fmt.Println("\n")
 	}
 }
 

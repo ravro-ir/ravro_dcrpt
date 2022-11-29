@@ -36,6 +36,7 @@
 
 key/key.private
 key/key.prv
+key/*
 decrypt
 encrypt
 
