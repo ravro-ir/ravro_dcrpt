@@ -85,6 +85,12 @@ $ ./ravro_dcrpt
 >> Help : ravro_dcrpt --help 
 
 
+Use the arrow keys to navigate: ↓ ↑ → ← 
+? Please choose a key: 
+  ▸ ravro_key2
+    ravro_key1
+
+
 [++++] Starting for decrypting Report . . . 
 [++++] Starting for decrypting Judgment . . . 
 [++++] Starting for decrypting Amendment . . . 
@@ -123,6 +129,12 @@ $ ./ravro_dcrpt -in=/home/irx0xx-xx-xx-000x -out=/home/output/ -key=/home/key/ke
 >> Issue : https://github.com/ravro-ir/ravro_dcrp/issues
 >> Author : Ravro Development Team (RDT)
 >> Help : ravro_dcrpt --help 
+
+
+Use the arrow keys to navigate: ↓ ↑ → ← 
+? Please choose a key: 
+  ▸ ravro_key2
+    ravro_key1
 
 
 [++++] Starting for decrypting Report . . . 
@@ -173,7 +185,15 @@ makepkg -sri
 # Bugs
 Please use github issues to [report](https://github.com/ravro-ir/ravro_dcrpt/issues) bugs.
 
-# Chagelog 
+# Chagelog
+> v1.0.3
+* Added multi zip file for decrypting
+* Change read argument of multi zip file for decrypting
+* Multi select key and refactor code of paths
+* Refactor code
+* Error handling
+* Fixed bugs
+
 > v1.0.2
 * Added feature logger
 * Added feature spinner load
