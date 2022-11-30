@@ -5,7 +5,6 @@ import (
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -51,7 +50,7 @@ func (r *RequestPdf) GeneratePDF(pdfPath string) (bool, error) {
 	if _, err := os.Stat(tmpPath); os.IsNotExist(err) {
 		errDir := os.Mkdir(tmpPath, 0777)
 		if errDir != nil {
-			log.Fatal(errDir)
+			return false, err
 		}
 	}
 	err1 := ioutil.WriteFile(tmpPath+strconv.FormatInt(int64(t), 10)+".html", []byte(r.body), 0644)
@@ -60,19 +59,21 @@ func (r *RequestPdf) GeneratePDF(pdfPath string) (bool, error) {
 	}
 	f, err := os.Open(tmpPath + strconv.FormatInt(int64(t), 10) + ".html")
 	if f != nil {
-		defer func(f *os.File) {
+		defer func(f *os.File) (bool, error) {
 			err := f.Close()
 			if err != nil {
-				log.Fatal(err)
+				return false, err
 			}
+			return true, nil
 		}(f)
+
 	}
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 	pdfg, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 
 	pdfg.AddPage(wkhtmltopdf.NewPageReader(f))
@@ -83,24 +84,25 @@ func (r *RequestPdf) GeneratePDF(pdfPath string) (bool, error) {
 
 	err = pdfg.Create()
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 
 	err = pdfg.WriteFile(pdfPath)
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 
 	dir, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		return false, err
 	}
 
-	defer func(path string) {
+	defer func(path string) (bool, error) {
 		err := os.RemoveAll(path)
 		if err != nil {
-			log.Fatal(err)
+			return false, err
 		}
+		return true, nil
 	}(dir + tmpPath)
 
 	return true, nil
