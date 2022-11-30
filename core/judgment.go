@@ -13,7 +13,6 @@ import (
 func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool) (entity.Judgment, error) {
 	var judgment entity.Judgment
 	var (
-		//path     string
 		err      error
 		lstJudge []string
 	)

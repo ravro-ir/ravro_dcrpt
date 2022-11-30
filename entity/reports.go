@@ -2,10 +2,10 @@ package entity
 
 type InfoReport struct {
 	Tags []struct {
-		Title       string `json:"title"`
-		Description string `json:"description"`
-		Solution    string `json:"solution"`
-		MoreInfo    string `json:"moreInfo"`
+		InfoTitle       string `json:"infoTitle"`
+		InfoDescription string `json:"infoDescription"`
+		InfoSolution    string `json:"infoSolution"`
+		InfoMore        string `json:"infoMore"`
 	} `json:"tags"`
 	Details struct {
 		CurrentStatus string `json:"currentStatus"`
@@ -27,6 +27,10 @@ type InfoReport struct {
 				Vector string `json:"vector"`
 				Score  string `json:"score"`
 			} `json:"judge"`
+			Company struct {
+				Vector string `json:"vector"`
+				Score  string `json:"score"`
+			} `json:"company"`
 			Final struct {
 				Vector string `json:"vector"`
 				Score  string `json:"score"`
