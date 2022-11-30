@@ -13,31 +13,18 @@ import (
 func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool) (entity.Judgment, error) {
 	var judgment entity.Judgment
 	var (
-		path     string
+		//path     string
 		err      error
 		lstJudge []string
 	)
-	if currentPath == "" {
-		path, err = utils.Projectpath()
-		if err != nil {
-			return judgment, err
-		}
-		lstJudge, err = utils.WalkMatch(path, "*.ravro")
-		if err != nil {
-			return judgment, err
-		}
-		if len(lstJudge) == 0 {
-			return judgment, errors.New("judge is empty")
-		}
-	} else {
-		lstJudge, err = utils.WalkMatch(currentPath, "*.ravro")
-		if err != nil {
-			return judgment, err
-		}
-		if len(lstJudge) == 0 {
-			return judgment, errors.New("judge is empty")
-		}
+	lstJudge, err = utils.WalkMatch(currentPath, "*.ravro")
+	if err != nil {
+		return judgment, err
 	}
+	if len(lstJudge) == 0 {
+		return judgment, errors.New("judge is empty")
+	}
+	//}
 	for _, name := range lstJudge {
 		if runtime.GOOS == "windows" {
 			if !checkStatus {

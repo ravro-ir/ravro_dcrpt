@@ -11,18 +11,10 @@ import (
 func DcrptAmendment(currentPath, keyFixPath, outFixPath string) ([]string, error) {
 	var amendment entity.Amendment
 	var (
-		path    string
-		err     error
 		lstMore []string
 	)
-	if currentPath == "" {
-		path, err = utils.Projectpath()
-		if err != nil {
-			return lstMore, err
-		}
-	}
 
-	lstAmendment, _ := utils.WalkMatch(path, "*.ravro")
+	lstAmendment, _ := utils.WalkMatch(currentPath, "*.ravro")
 	for _, name := range lstAmendment {
 		if !strings.Contains(name, "amendment-") {
 			continue
