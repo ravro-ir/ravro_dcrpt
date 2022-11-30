@@ -381,10 +381,10 @@ func JugmentUser(info entity.InfoReport) string {
 func ConString(info entity.InfoReport) string {
 	var infoMore string
 	for _, content := range info.Tags {
-		infoMore += " عنوان گزارش : " + content.Title + "<br />"
-		infoMore += " توضیحات گزارش : " + "<br />" + content.Description + "<br />"
-		infoMore += "راه حل : " + "<br />" + content.Solution + "<br />"
-		infoMore += "اطلاعات بیشتر : " + "<br />" + content.MoreInfo + "<br />"
+		infoMore += " عنوان گزارش : " + content.InfoTitle + "<br />"
+		infoMore += " توضیحات گزارش : " + "<br />" + content.InfoDescription + "<br />"
+		infoMore += "راه حل : " + "<br />" + content.InfoSolution + "<br />"
+		infoMore += "اطلاعات بیشتر : " + "<br />" + content.InfoMore + "<br />"
 		infoMore += "<hr>"
 	}
 	return infoMore
