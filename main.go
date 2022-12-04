@@ -191,6 +191,9 @@ func main() {
 	var ll []string
 	for _, value := range lstReport {
 		reportPath := filepath.Join(CurrPath, PathDir, utils.GetReportID(value))
+		if reportPath == "" {
+			continue
+		}
 		ll = append(ll, reportPath)
 	}
 	zipFile, err := utils.ReportFiles(path, ExtZip)
@@ -203,7 +206,10 @@ func main() {
 	}
 	var extractPath string
 	for _, value := range zipFile {
-
+		checkZipFile := utils.GetReportID(value)
+		if checkZipFile == "" {
+			continue
+		}
 		if curretnPath == "" {
 			extractPath = filepath.Join(CurrPath, PathDir, utils.GetReportID(value))
 		} else {

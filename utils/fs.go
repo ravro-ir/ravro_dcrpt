@@ -195,13 +195,19 @@ func ReportFiles(path, exten string) ([]string, error) {
 }
 
 func GetReportID(valuePath string) string {
+	var result string
 	pattern := regexp.MustCompile("r[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]")
 	firstMatchIndex := pattern.FindStringIndex(valuePath)
-	return getSubstring(valuePath, firstMatchIndex)
+	result = getSubstring(valuePath, firstMatchIndex)
+	return result
 }
 
 func getSubstring(s string, indices []int) string {
-	return s[indices[0]:indices[1]]
+	if len(indices) == 0 {
+		return ""
+	}
+	out := s[indices[0]:indices[1]]
+	return out
 }
 
 func CheckIsEmpty(pdf entity.Pdf) entity.Pdf {
