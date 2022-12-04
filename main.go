@@ -59,7 +59,7 @@ func main() {
 	format := flag.Bool("json", false, "Convert report to json")
 	logs := flag.Bool("log", false, "Store Error logs in log.txt")
 	fmt.Println(">> Help : ravro_dcrpt --help")
-	fmt.Println(">> Current Version : ravro_dcrpt/1.0.2")
+	fmt.Println(fmt.Sprintf(">> Current Version : ravro_dcrpt/%s", rvrVersion))
 	fmt.Println(">> Github : https://github.com/ravro-ir/ravro_dcrp")
 	fmt.Println(">> Issue : https://github.com/ravro-ir/ravro_dcrp/issues")
 	fmt.Println(">> Author : Ravro Development Team (RDT) \n\n")
@@ -77,24 +77,35 @@ func main() {
 		}
 	}
 	if *update {
-		fmt.Println("[++++] Downloading latest version from Github")
-		fileName, verTag, err := utils.HttpGet()
-		fmt.Println(fmt.Sprintf("[++++] Updating from [%s] -> [%s]", rvrVersion, verTag))
+		fmt.Println("[++++] Checking for latest version from github")
+		getLatest, err := utils.LatestVersion()
 		if err != nil {
 			LogCheck(*logs, err)
-			fmt.Println("[----] Unable to download latest file, Maybe your internet connection is bad," +
+			fmt.Println("[----] Unable to checking to latest file, Maybe your internet connection is bad," +
 				"or please usage : `./ravro_dcrpt -log` for see monitoring error message")
 		}
-		fmt.Println(fmt.Sprintf("[++++] The latest version Ravro_dcrpt downloaded - [%s]", fileName))
-		// Extract zip file
-		path, err := os.Getwd()
-		newPathZip := filepath.Join(path, fileName)
-		err = utils.Unzip(newPathZip, path)
-		if err != nil {
-			LogCheck(*logs, err)
-			fmt.Println("[----] Error : Unable to extract zip file. , More Info : ./ravro_dcrpt -log")
+		if rvrVersion == getLatest {
+			fmt.Println("[++++] You have latest version of ravro_dcrpt")
+			os.Exit(0)
+		} else {
+			fileName, verTag, err := utils.HttpGet()
+			fmt.Println(fmt.Sprintf("[++++] Updating from [%s] -> [%s]", rvrVersion, verTag))
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] Unable to download latest file, Maybe your internet connection is bad," +
+					"or please usage : `./ravro_dcrpt -log` for see monitoring error message")
+			}
+			fmt.Println(fmt.Sprintf("[++++] The latest version Ravro_dcrpt downloaded - [%s]", fileName))
+			// Extract zip file
+			path, err := os.Getwd()
+			newPathZip := filepath.Join(path, fileName)
+			err = utils.Unzip(newPathZip, path)
+			if err != nil {
+				LogCheck(*logs, err)
+				fmt.Println("[----] Error : Unable to extract zip file. , More Info : ./ravro_dcrpt -log")
+			}
+			return
 		}
-		return
 	}
 	if *init {
 		utils.AddDir(DecryptPath)
