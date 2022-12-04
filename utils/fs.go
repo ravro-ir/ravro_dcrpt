@@ -201,7 +201,7 @@ func GetReportID(valuePath string) string {
 }
 
 func getSubstring(s string, indices []int) string {
-	return string(s[indices[0]:indices[1]])
+	return s[indices[0]:indices[1]]
 }
 
 func CheckIsEmpty(pdf entity.Pdf) entity.Pdf {
