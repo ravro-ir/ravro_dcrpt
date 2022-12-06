@@ -324,7 +324,8 @@ func main() {
 			}
 		}
 		md := []byte(pdf.Report.Description)
-		templateData := TemplateStruct(md, pdf, dateFrom, dateTo, moreInfo, report)
+		senario := []byte(pdf.Report.Scenario)
+		templateData := TemplateStruct(md, senario, pdf, dateFrom, dateTo, moreInfo, report)
 		if err := r.ParseTemplate(templatePath, templateData); err == nil {
 			s := spinner.New(spinner.CharSets[4], 100*time.Millisecond)
 			s.Start()
@@ -398,7 +399,7 @@ func JugmentUser(info entity.InfoReport) string {
 func ConString(info entity.InfoReport) string {
 	var infoMore string
 	for _, content := range info.Tags {
-		infoMore += " عنوان گزارش : " + content.InfoTitle + "<br />"
+		infoMore += " عنوان تگ : " + content.InfoTitle + "<br />"
 		infoMore += " توضیحات گزارش : " + "<br />" + content.InfoDescription + "<br />"
 		infoMore += "راه حل : " + "<br />" + content.InfoSolution + "<br />"
 		infoMore += "اطلاعات بیشتر : " + "<br />" + content.InfoMore + "<br />"
@@ -447,10 +448,11 @@ func MiladiToShamsi(year, month, day int) string {
 	return shamsiDate
 }
 
-func TemplateStruct(md []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string, report entity.Report) any {
+func TemplateStruct(md []byte, sen []byte, pdf entity.Pdf, dateFrom, dateTo, moreInfo string, report entity.Report) any {
 	var valuation string
 	output := markdown.ToHTML(md, nil, nil)
 	infoTrain := ConString(report.ReportInfo)
+	pdf.Report.Scenario = string(markdown.ToHTML(sen, nil, nil))
 	dateOf := strings.Split(report.DateFrom, "-")
 	if len(dateOf) == 0 {
 		log.Fatalln("[----] Error : The datefrom is invalid,")
