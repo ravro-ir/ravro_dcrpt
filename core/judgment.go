@@ -23,7 +23,6 @@ func DcrptJudgment(currentPath, keyFixPath, outFixpath string, checkStatus bool)
 	if len(lstJudge) == 0 {
 		return judgment, errors.New("judge is empty")
 	}
-	//}
 	for _, name := range lstJudge {
 		if runtime.GOOS == "windows" {
 			if !checkStatus {
