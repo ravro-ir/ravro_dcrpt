@@ -185,7 +185,7 @@ makepkg -sri
 # Bugs
 Please use github issues to [report](https://github.com/ravro-ir/ravro_dcrpt/issues) bugs.
 
-# Chagelog
+# Changelog
 > v1.0.3
 * Added multi zip file for decrypting
 * Change read argument of multi zip file for decrypting
