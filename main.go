@@ -494,10 +494,10 @@ func TemplateStruct(md []byte, sen []byte, pdf entity.Pdf, dateFrom, dateTo, mor
 		report.ReportInfo.Details.Cvss.Hunter.Score = "Low"
 	}
 	if score >= 4 && score < 7 {
-		report.ReportInfo.Details.Cvss.Hunter.Score = "High"
+		report.ReportInfo.Details.Cvss.Hunter.Score = "Medium"
 	}
 	if score >= 7 && score < 9 {
-		report.ReportInfo.Details.Cvss.Hunter.Score = "Medium"
+		report.ReportInfo.Details.Cvss.Hunter.Score = "High"
 	}
 	if score >= 9 && score < 10 {
 		report.ReportInfo.Details.Cvss.Hunter.Score = "Critical"
