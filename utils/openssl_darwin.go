@@ -1,8 +1,10 @@
-//go:build linux
+//go:build darwin
+// +build darwin
 
 package utils
 
 // #cgo pkg-config: openssl
+// #cgo CFLAGS: -DOPENSSL_API_COMPAT=0x30000000
 // #include <openssl/bio.h>
 // #include <openssl/err.h>
 // #include <openssl/evp.h>

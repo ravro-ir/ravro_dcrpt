@@ -1,8 +1,11 @@
+//go:build windows
+// +build windows
+
 package utils
 
 import (
 	"bytes"
-	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	pdf "github.com/adrg/go-wkhtmltopdf"
 	"html/template"
 	"io/ioutil"
 	"os"
@@ -11,19 +14,19 @@ import (
 	"time"
 )
 
-//pdf requestpdf struct
+// RequestPdf pdf requestpdf struct
 type RequestPdf struct {
 	body string
 }
 
-//new request to pdf function
+// NewRequestPdf new request to pdf function
 func NewRequestPdf(body string) *RequestPdf {
 	return &RequestPdf{
 		body: body,
 	}
 }
 
-//parsing template function
+// ParseTemplate parsing template function
 func (r *RequestPdf) ParseTemplate(templateFileName string, data interface{}) error {
 
 	t, err := template.ParseFiles(templateFileName)
@@ -45,65 +48,44 @@ func (r *RequestPdf) ParseTemplate(templateFileName string, data interface{}) er
 }
 
 func (r *RequestPdf) GeneratePDF(pdfPath string) (bool, error) {
+	// Initialize library
+	if err := pdf.Init(); err != nil {
+		return false, err
+	}
+	defer pdf.Destroy()
 	tmpPath := "template/"
 	t := time.Now().Unix()
+
 	if _, err := os.Stat(tmpPath); os.IsNotExist(err) {
-		errDir := os.Mkdir(tmpPath, 0777)
-		if errDir != nil {
+		if err := os.Mkdir(tmpPath, 0777); err != nil {
 			return false, err
 		}
 	}
-	err1 := ioutil.WriteFile(tmpPath+strconv.FormatInt(int64(t), 10)+".html", []byte(r.body), 0644)
-	if err1 != nil {
-		panic(err1)
+	htmlFileName := tmpPath + strconv.FormatInt(int64(t), 10) + ".html"
+	if err := ioutil.WriteFile(htmlFileName, []byte(r.body), 0644); err != nil {
+		return false, err
 	}
-	f, err := os.Open(tmpPath + strconv.FormatInt(int64(t), 10) + ".html")
-	if f != nil {
-		defer func(f *os.File) (bool, error) {
-			err := f.Close()
-			if err != nil {
-				return false, err
-			}
-			return true, nil
-		}(f)
-
-	}
+	object, err := pdf.NewObject(htmlFileName)
 	if err != nil {
 		return false, err
 	}
-	pdfg, err := wkhtmltopdf.NewPDFGenerator()
+	converter, err := pdf.NewConverter()
 	if err != nil {
 		return false, err
 	}
-
-	pdfg.AddPage(wkhtmltopdf.NewPageReader(f))
-
-	pdfg.PageSize.Set(wkhtmltopdf.PageSizeA4)
-
-	pdfg.Dpi.Set(300)
-
-	err = pdfg.Create()
+	defer converter.Destroy()
+	converter.Add(object)
+	outFile, err := os.Create(pdfPath)
 	if err != nil {
 		return false, err
 	}
-
-	err = pdfg.WriteFile(pdfPath)
-	if err != nil {
+	defer outFile.Close()
+	if err := converter.Run(outFile); err != nil {
 		return false, err
 	}
-
-	dir, err := os.Getwd()
-	if err != nil {
+	if err := os.Remove(htmlFileName); err != nil {
 		return false, err
 	}
-
-	defer func(path string) (bool, error) {
-		err := os.RemoveAll(path)
-		if err != nil {
-			return false, err
-		}
-		return true, nil
-	}(dir + tmpPath)
 
 	return true, nil
 }
