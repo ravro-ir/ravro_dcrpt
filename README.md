@@ -211,5 +211,20 @@ GNU General Public License, version 3
 Ramin Farajpour Cami <<ramin.blackhat@gmail.com>>, <<farajpour@ravro.ir>>
 
 
+### TODO
+
 Update Soon : https://github.com/adrg/go-wkhtmltopdf
+
+
+##### Build in windows (OpenSSL)
+$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include"
+$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -lssl -lcrypto -lws2_32 -lcrypt32"
+go build
+
+
+##### Build in windows (OpenSSL / wkhtml2pdf)
+$env:PATH="C:/OpenSSL-Win64/bin;C:/wkhtmltox/bin;$env:PATH"
+$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include -IC:/wkhtmltox/include"
+$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -LC:/wkhtmltox/lib -L/C:/wkhtmltox/bin -lssl -lcrypto -lws2_32 -lcrypt32 -lwkhtmltox"
+go build
 
