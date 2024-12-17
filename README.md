@@ -5,29 +5,15 @@
 # Introduction
 This is a tool to decrypt reports submitted by a hunter from the Ravro platform bug bounty.
 
-# Manual Install Tools 
+# Install Tools
 
 1 - Install openssl <br />
-  * Windows : https://slproweb.com/products/Win32OpenSSL.html <br /> 
   * Linux (Ubuntu) : `apt update && apt install build-essential checkinstall zlib1g-dev openssl libssl-dev -y`
   * Mac OS : `brew install openssl`<br />
 
-2 - Install wkhtmltopdf 
-  * Windows : https://wkhtmltopdf.org/downloads.html and add environment variable `C:\ProgramFiles\wkhtmltopdf`
-  * Linux : <br />
-        
-        $ apt install libssl1.0-dev
-        $ apt --fix-broken install
-        $ apt install libssl1.0-dev
-        $ cd ~
-        $ wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-        $ tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-        $ cp wkhtmltox/bin/wk* /usr/local/bin/
-    
-    And you can confirm with:
-    
-        $ wkhtmltopdf --version
-        wkhtmltopdf 0.12.3 (with patched qt)
+2 - Install wkhtmltopdf <br />
+    Download and the latest installation package for your system from https://wkhtmltopdf.org/downloads.html.
+  * Linux : sudo dpkg -i wkhtmltox.deb  && sudo ldconfig
 
   * Mac OS : `brew install wkhtmltopdf` <br />
 
@@ -160,6 +146,24 @@ $ go run ravro_dcrpt
 ```
 Building other platform:
 
+
+##### Build in windows (OpenSSL)
+```cmd
+$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include"
+$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -lssl -lcrypto -lws2_32 -lcrypt32"
+go build
+```
+
+
+##### Build in windows (OpenSSL / wkhtml2pdf)
+```cmd
+$env:PATH="C:/OpenSSL-Win64/bin;C:/wkhtmltox/bin;$env:PATH"
+$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include -IC:/wkhtmltox/include"
+$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -LC:/wkhtmltox/lib -L/C:/wkhtmltox/bin -lssl -lcrypto -lws2_32 -lcrypt32 -lwkhtmltox"
+go build
+```
+
+
 ```bash
 $ GOOS=windows GOARCH=amd64 go build .
 
@@ -210,21 +214,4 @@ GNU General Public License, version 3
 # Author
 Ramin Farajpour Cami <<ramin.blackhat@gmail.com>>, <<farajpour@ravro.ir>>
 
-
-### TODO
-
-Update Soon : https://github.com/adrg/go-wkhtmltopdf
-
-
-##### Build in windows (OpenSSL)
-$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include"
-$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -lssl -lcrypto -lws2_32 -lcrypt32"
-go build
-
-
-##### Build in windows (OpenSSL / wkhtml2pdf)
-$env:PATH="C:/OpenSSL-Win64/bin;C:/wkhtmltox/bin;$env:PATH"
-$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include -IC:/wkhtmltox/include"
-$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -LC:/wkhtmltox/lib -L/C:/wkhtmltox/bin -lssl -lcrypto -lws2_32 -lcrypt32 -lwkhtmltox"
-go build
 
