@@ -96,7 +96,7 @@ $ go build ravro_dcrpt
 $ go run ravro_dcrpt
 ```
 
-### Cross-Platform Builds
+### Cross-Platform Builds (Developing)
 
 #### Build for Windows with OpenSSL
 ```powershell
