@@ -331,6 +331,7 @@ func main() {
 			s.Start()
 			s.Color("yellow")
 			s.Prefix = "[++++] Starting report to pdf "
+
 			_, err = r.GeneratePDF(outputPath)
 			if err != nil {
 				LogCheck(*logs, err)

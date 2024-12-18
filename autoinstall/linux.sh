@@ -1,14 +1,25 @@
 #!/bin/bash
-# Install packages
-apt update && apt install build-essential checkinstall zlib1g-dev openssl libssl-dev unzip -y
-apt install libssl1.0-dev
-apt --fix-broken install
-apt install libssl1.0-dev
-cd ~
-## Download wkhtmltox
-wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-cp wkhtmltox/bin/wk* /usr/local/bin/
-## Download ravro_dcrpt
-wget https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.3/linux_x64_ravro_dcrpt.zip
-unzip linux_x64_ravro_dcrpt.zip
+
+set -e
+
+echo "[+++] Updating package lists and installing dependencies..."
+sudo apt update && sudo apt install -y build-essential checkinstall zlib1g-dev openssl libssl-dev unzip wget
+
+echo "[+++] Downloading wkhtmltox..."
+wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+
+echo "[+++] Installing wkhtmltox..."
+sudo dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+sudo apt-get install -f -y
+sudo ldconfig
+
+echo "[+++] Downloading Ravro Decrypt Tools..."
+wget -q https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.3/linux_x64_ravro_dcrpt.zip
+
+echo "[+++] Extracting Ravro Decrypt Tools..."
+unzip -q linux_x64_ravro_dcrpt.zip -d ravro_dcrpt
+
+echo "[+++] Cleanup..."
+rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb linux_x64_ravro_dcrpt.zip
+
+echo "[+++] Installation complete!"

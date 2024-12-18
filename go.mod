@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.6.1
+	github.com/adrg/go-wkhtmltopdf v0.3.0
 	github.com/briandowns/spinner v1.19.0
 	github.com/gomarkdown/markdown v0.0.0-20220310201231-552c6011c0b8
 	github.com/google/logger v1.1.1
