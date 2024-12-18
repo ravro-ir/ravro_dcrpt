@@ -120,10 +120,6 @@ cd ravro_dcrpt-git
 makepkg -sri
 ```
 
-## 🐞 Bug Reporting
-
-Please use [GitHub Issues](https://github.com/ravro-ir/ravro_dcrpt/issues) to report bugs.
-
 ## 📋 Changelog
 
 ### v1.0.3
