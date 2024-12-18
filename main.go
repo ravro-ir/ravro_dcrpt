@@ -332,7 +332,7 @@ func main() {
 			s.Color("yellow")
 			s.Prefix = "[++++] Starting report to pdf "
 
-			_, err = r.GeneratePDF(outputPath) //GeneratePDF(outputPath)
+			_, err = r.GeneratePDF(outputPath)
 			if err != nil {
 				LogCheck(*logs, err)
 				checkList["id"] = report.Slug
