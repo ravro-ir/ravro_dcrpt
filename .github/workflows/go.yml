@@ -36,10 +36,10 @@ jobs:
           xfonts-base \
           xfonts-75dpi
 
-    - name: Install wkhtmltopdf
+    - name: Download and Install wkhtmltopdf
       run: |
-        wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
-        sudo dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb || true
+        wget https://downloads.wkhtmltopdf.org/0.12.6/wkhtmltox_0.12.6-1.bionic_amd64.deb
+        sudo dpkg -i wkhtmltox_0.12.6-1.bionic_amd64.deb || true
         sudo apt-get install -f -y
         sudo ldconfig
 
@@ -48,13 +48,9 @@ jobs:
         ls -l /usr/include/wkhtmltox
         ls -l /usr/lib
 
-    - name: Download Ravro Decrypt Tools
-      run: |
-        echo "Running"
-
     - name: Cleanup
       run: |
-        rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+        rm wkhtmltox_0.12.6-1.bionic_amd64.deb
 
     - name: Build
       env:
