@@ -26,7 +26,6 @@ jobs:
           zlib1g-dev \
           openssl \
           libssl-dev \
-          libssl1.1 \
           unzip \
           wget \
           fontconfig \
