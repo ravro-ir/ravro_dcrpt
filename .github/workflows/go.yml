@@ -17,20 +17,20 @@ jobs:
       with:
         go-version: 1.19
 
-    - name: Install dependencies
+    - name: Install Dependencies and Setup
       run: |
-        sudo apt-get update
-        sudo apt-get install -y wget xfonts-base xfonts-75dpi libssl1.1
-
-    - name: Install wkhtmltopdf
-      run: |
-        wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb
-        sudo dpkg -i wkhtmltox_0.12.6-1.focal_amd64.deb
+        set -e
+        echo "[+++] Updating package lists and installing dependencies..."
+        sudo apt update && sudo apt install -y build-essential checkinstall zlib1g-dev openssl libssl-dev unzip wget
+        
+        echo "[+++] Downloading wkhtmltox..."
+        wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+        
+        echo "[+++] Installing wkhtmltox..."
+        sudo dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
         sudo apt-get install -f -y
-
-    - name: Install additional dependencies
-      run: |
-        sudo apt-get install -y libssl-dev
+        sudo ldconfig
+        echo "[+++] Installation complete!"
 
     - name: Build
       run: go build -v ./...
