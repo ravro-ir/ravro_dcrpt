@@ -45,14 +45,23 @@ jobs:
 
     - name: Download Ravro Decrypt Tools
       run: |
-        echo "Runing"
+        echo "Running"
 
     - name: Cleanup
       run: |
         rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
 
     - name: Build
-      run: go build -v ./...
+      env:
+        CGO_ENABLED: 1
+        CGO_CFLAGS: "-I/usr/include/wkhtmltox"
+        CGO_LDFLAGS: "-L/usr/lib -lwkhtmltox"
+      run: |
+        go build -v -tags static -ldflags '-extldflags "-static"' ./...
 
     - name: Test
+      env:
+        CGO_ENABLED: 1
+        CGO_CFLAGS: "-I/usr/include/wkhtmltox"
+        CGO_LDFLAGS: "-L/usr/lib -lwkhtmltox"
       run: go test -v ./...
