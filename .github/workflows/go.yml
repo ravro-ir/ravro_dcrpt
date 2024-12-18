@@ -43,6 +43,11 @@ jobs:
         sudo apt-get install -f -y
         sudo ldconfig
 
+    - name: Verify wkhtmltopdf Installation
+      run: |
+        ls -l /usr/include/wkhtmltox
+        ls -l /usr/lib
+
     - name: Download Ravro Decrypt Tools
       run: |
         echo "Running"
