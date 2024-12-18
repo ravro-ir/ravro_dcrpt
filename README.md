@@ -38,29 +38,6 @@ C:\Users\ravro> win64.bat
 root# ./darwin.sh
 ```
 
-### Prerequisites
-
-1. **OpenSSL**
-    - Linux (Ubuntu):
-      ```bash
-      apt update && apt install build-essential checkinstall zlib1g-dev openssl libssl-dev -y
-      ```
-    - macOS:
-      ```bash
-      brew install openssl
-      ```
-
-2. **wkhtmltopdf**
-    - Download latest package from [wkhtmltopdf Downloads](https://wkhtmltopdf.org/downloads.html)
-    - Linux:
-      ```bash
-      sudo dpkg -i wkhtmltox.deb && sudo ldconfig
-      ```
-    - macOS:
-      ```bash
-      brew install wkhtmltopdf
-      ```
-
 ## 📂 Project Structure
 
 ```
