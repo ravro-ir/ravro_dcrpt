@@ -16,13 +16,32 @@ if [ $? -ne 0 ]; then
     sudo apt --fix-broken install -y
     echo "Retrying installation of wkhtmltopdf..."
     sudo apt-get install -y wkhtmltopdf
+     # Define the URL for the wkhtmltox package
+    PACKAGE_URL="https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.focal_amd64.deb"
+    PACKAGE_NAME="wkhtmltox_0.12.6-1.focal_amd64.deb"
+
+    # Download the package
+    echo "Downloading $PACKAGE_NAME..."
+    wget -O $PACKAGE_NAME $PACKAGE_URL
+
+    # Install the package
+    echo "Installing $PACKAGE_NAME..."
+    sudo dpkg -i $PACKAGE_NAME
+
+    # Fix any broken dependencies
+    echo "Fixing dependencies..."
+    sudo apt-get install -f -y
 fi
 
 # Verify installation
 if command -v wkhtmltopdf &> /dev/null; then
-    echo "wkhtmltopdf installed successfully."
+    echo "[+++]"
+    echo "[+++]wkhtmltopdf installed successfully."
+    echo "[+++]"
 else
+    echo "[---]"
     echo "Failed to install wkhtmltopdf. Please check the errors above."
+    echo "[---]"
 fi
 
 #echo "[+++] Downloading Ravro Decrypt Tools..."
