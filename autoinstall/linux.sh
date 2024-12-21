@@ -50,7 +50,6 @@ else
     sudo apt-get install -f -y
 fi
 
-# Verify installation
 echo "[+++]"
 echo "[+++] wkhtmltopdf installation process completed."
 echo "[+++]"
