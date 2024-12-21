@@ -59,8 +59,10 @@ wget -q https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/linux_x
 
 echo "[+++] Extracting Ravro Decrypt Tools..."
 unzip -q -o linux_x64_ravro_dcrpt.zip
-
+echo "[+++] Creating directories..."
+cd ravro_dcrpt && mkdir encrypt decrypt key
 echo "[+++] Cleanup..."
+cd ..
 rm linux_x64_ravro_dcrpt.zip
 
 echo "[+++] Installation complete!"
