@@ -29,7 +29,9 @@ wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/autoinstall/lin
 
 #### Windows
 ```bash
-curl -L -o install_ravro.bat https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat
+Ps> curl -L -o win64.bat https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat
+
+Ps> .\win64.bat
 ```
 
 #### macOS (Soon)
