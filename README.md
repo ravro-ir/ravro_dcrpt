@@ -24,7 +24,7 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
 
 #### Linux
 ```bash
-wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/autoinstall/linux.sh -O - | sh
+wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/linux.sh -O - | sh
 ```
 
 #### Windows
