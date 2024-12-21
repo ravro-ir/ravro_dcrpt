@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	rvrVersion    = "v1.0.3"
+	rvrVersion    = "v1.0.4"
 	publicMessage = "شرح داده نشده است."
 	noMsg         = "ثبت نشد"
 	PathDir       = "encrypt"
