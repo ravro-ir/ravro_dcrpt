@@ -121,7 +121,7 @@ func main() {
 			out := utils.CheckDir(lstDir[i])
 			if out {
 				fmt.Println("[---] encrypt, decrypt, key is not exist.")
-				fmt.Println("[+++] Usage : ravro_dcrpt -init=init")
+				fmt.Println("[+++] Usage : ravro_dcrpt -init")
 				return
 			}
 		}

@@ -24,16 +24,15 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
 
 #### Linux
 ```bash
-root# chmod +x linux.sh
-root# ./linux.sh
+wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/autoinstall/linux.sh -O - | sh
 ```
 
 #### Windows
 ```bash
-C:\Users\ravro> win64.bat
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat' -OutFile 'win64.bat' && call win64.bat && del win64.bat"
 ```
 
-#### macOS
+#### macOS (Soon)
 ```bash
 root# ./darwin.sh
 ```
