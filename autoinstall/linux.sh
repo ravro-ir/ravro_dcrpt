@@ -58,7 +58,7 @@ echo "[+++] Downloading Ravro Decrypt Tools..."
 wget -q https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/linux_x64_ravro_dcrpt.zip
 
 echo "[+++] Extracting Ravro Decrypt Tools..."
-unzip -q linux_x64_ravro_dcrpt.zip -d ravro_dcrpt
+unzip -q -o linux_x64_ravro_dcrpt.zip
 
 echo "[+++] Cleanup..."
 rm linux_x64_ravro_dcrpt.zip
