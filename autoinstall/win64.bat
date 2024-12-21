@@ -1,5 +1,8 @@
 @echo off
 
+echo [+++] Creating directories...
+mkdir encrypt decrypt key
+
 echo [+++] Downloading OpenSSL Libraries...
 curl -L -o libcrypto-3-x64.dll https://github.com/ravro-ir/ravro_dcrpt/raw/main/lib/libcrypto-3-x64.dll
 curl -L -o libssl-3-x64.dll https://github.com/ravro-ir/ravro_dcrpt/raw/main/lib/libssl-3-x64.dll
