@@ -32,6 +32,29 @@ wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/autoinstall/lin
 Ps> curl -L -o win64.bat https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat
 
 Ps> .\win64.bat
+[+++] Downloading OpenSSL Libraries...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 6445k  100 6445k    0     0  2571k      0  0:00:02  0:00:02 --:--:-- 8572k
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 1224k  100 1224k    0     0  46645      0  0:00:26  0:00:26 --:--:-- 51891
+[+++] Downloading wkhtmltox Library...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 28.7M  100 28.7M    0     0  2247k      0  0:00:13  0:00:13 --:--:-- 1839k
+[+++] Downloading Ravro Decrypt Tools...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100 6100k  100 6100k    0     0  33418      0  0:03:06  0:03:06 --:--:-- 29295
+[+++] Extracting Ravro Decrypt Tools...
+[+++] Cleanup...
+[+++] Installation complete!
+
 ```
 
 #### macOS (Soon)
