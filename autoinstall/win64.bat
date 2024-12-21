@@ -16,7 +16,7 @@ powershell -command "& {
 echo [+++] Downloading Ravro Decrypt Tools...
 powershell -command "& {
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -OutFile ravro_dcrpt.zip -Uri https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/ravro_dcrpt.rar
+    Invoke-WebRequest -OutFile ravro_dcrpt.zip -Uri https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/ravro_dcrpt.zip
 }"
 
 echo [+++] Extracting Ravro Decrypt Tools...
