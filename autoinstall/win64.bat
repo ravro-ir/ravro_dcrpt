@@ -20,8 +20,7 @@ powershell -command "& {
 }"
 
 echo [+++] Extracting Ravro Decrypt Tools...
-powershell -command "Expand-Archive -Force 'ravro_dcrpt.zip' 'ravro_dcrpt'"
-
+powershell -command "Expand-Archive -Force 'ravro_dcrpt.zip' '.'"
 echo [+++] Cleanup...
 del ravro_dcrpt.zip
 

@@ -29,7 +29,7 @@ wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/autoinstall/lin
 
 #### Windows
 ```bash
-powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat' -OutFile 'win64.bat'; call win64.bat; del win64.bat"
+curl -L -o install_ravro.bat https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat
 ```
 
 #### macOS (Soon)
