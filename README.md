@@ -57,7 +57,7 @@ Ps> .\win64.bat
 
 ```
 
-#### macOS (Soon)
+#### macOS
 ```bash
 wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/darwin.sh -O - | sh
 ```
