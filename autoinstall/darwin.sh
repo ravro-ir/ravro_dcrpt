@@ -11,13 +11,16 @@ fi
 
 echo "[+++] Updating Homebrew and installing dependencies..."
 brew update
-brew install unzip openssl wkhtmltopdf wget
+brew install unzip openssl wkhtmltopdf wget pkg-config
 
 echo "[+++] Downloading Ravro Decrypt Tools..."
-wget -q https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.3/macos_x64_ravro_dcrpt.zip
+wget -q https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/macos_x64_ravro_dcrpt.zip
 
 echo "[+++] Extracting Ravro Decrypt Tools..."
-unzip -q macos_x64_ravro_dcrpt.zip -d ravro_dcrpt
+unzip -q -o macos_x64_ravro_dcrpt.zip
+
+echo "[+++] Creating directories..."
+mkdir encrypt decrypt key
 
 echo "[+++] Cleanup..."
 rm macos_x64_ravro_dcrpt.zip
