@@ -129,12 +129,24 @@ Ps> $env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -lssl -lcrypto -lws2_32 -
 Ps> go build
 ```
 
+#### Build for MacOS with OpenSSL
+```bash
+$ export PKG_CONFIG_PATH=$(brew --prefix openssl)/lib/pkgconfig
+$ export CGO_CFLAGS="-I$(brew --prefix openssl)/include"
+$ export CGO_LDFLAGS="-L$(brew --prefix openssl)/lib"
+$ go build
+```
+
 #### Build for Windows with OpenSSL and wkhtmltopdf
 ```powershell
 Ps> $env:PATH="C:/OpenSSL-Win64/bin;C:/wkhtmltox/bin;$env:PATH"
 Ps> $env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include -IC:/wkhtmltox/include"
 Ps> $env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -LC:/wkhtmltox/lib -L/C:/wkhtmltox/bin -lssl -lcrypto -lws2_32 -lcrypt32 -lwkhtmltox"
 Ps> go build
+```
+#### Build for MacOS with OpenSSL and wkhtmltopdf
+```bash
+TODO
 ```
 
 ## 🐧 Arch Linux Installation
