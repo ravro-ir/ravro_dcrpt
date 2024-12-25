@@ -158,6 +158,9 @@ makepkg -sri
 
 ## 📋 Changelog
 
+### v1.0.4
+- Use CGO for OpenSSL and wkhtmltopdf
+
 ### v1.0.3
 - Multi-zip file decryption support
 - Improved key selection process
