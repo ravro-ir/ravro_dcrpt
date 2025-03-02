@@ -6,7 +6,8 @@ require (
 	github.com/SebastiaanKlippert/go-wkhtmltopdf v1.6.1
 	github.com/adrg/go-wkhtmltopdf v0.3.0
 	github.com/briandowns/spinner v1.19.0
-	github.com/gomarkdown/markdown v0.0.0-20220310201231-552c6011c0b8
+	github.com/gomarkdown/markdown v0.0.0-20240729212818-a2a9c4f76ef5
+
 	github.com/google/logger v1.1.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/yaa110/go-persian-calendar v1.0.2
@@ -18,5 +19,5 @@ require (
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.8 // indirect
-	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
+	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
 )
