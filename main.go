@@ -117,7 +117,8 @@ func main() {
 
 	// Process each report
 	for _, reportPath := range reportPaths {
-		if !strings.Contains(reportPath, "/encrypt/") {
+		normalizedPath := filepath.ToSlash(reportPath) // Converts Windows `\` to `/`
+		if !strings.Contains(normalizedPath, "/encrypt/") {
 			fmt.Printf("[----] Skipping path without /encrypt/: %s\n", reportPath)
 			continue
 		}
