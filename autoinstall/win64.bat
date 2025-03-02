@@ -1,6 +1,8 @@
 @echo off
 
 echo [+++] Creating directories...
+mkdir ravro_dcrpt
+cd ravro_dcrpt
 mkdir encrypt decrypt key
 
 echo [+++] Downloading OpenSSL Libraries...
@@ -14,7 +16,7 @@ echo [+++] Downloading Ravro Decrypt Tools...
 curl -L -o ravro_dcrpt.zip https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/win_x64_ravro_dcrpt.zip
 
 echo [+++] Extracting Ravro Decrypt Tools...
-powershell -command "Expand-Archive -Force 'ravro_dcrpt.zip' 'ravro_dcrpt'"
+powershell -command "Expand-Archive -Force 'ravro_dcrpt.zip' '.'"
 
 echo [+++] Cleanup...
 del ravro_dcrpt.zip
