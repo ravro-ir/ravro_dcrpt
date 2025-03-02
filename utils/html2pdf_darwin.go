@@ -1,31 +1,38 @@
+//go:build darwin
+// +build darwin
+
 package utils
 
 import (
 	"bytes"
-	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"errors"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	wk "github.com/SebastiaanKlippert/go-wkhtmltopdf"
 )
 
-// pdf requestpdf struct
+// RequestPdf structure to manage PDF creation
 type RequestPdf struct {
 	body string
 }
 
-// new request to pdf function
+// NewRequestPdf creates a new PDF request
 func NewRequestPdf(body string) *RequestPdf {
 	return &RequestPdf{
 		body: body,
 	}
 }
 
-// parsing template function
+// ParseTemplate parses an HTML template with dynamic data
 func (r *RequestPdf) ParseTemplate(templateFileName string, data interface{}) error {
-
 	t, err := template.ParseFiles(templateFileName)
 	if err != nil {
 		return err
@@ -35,6 +42,8 @@ func (r *RequestPdf) ParseTemplate(templateFileName string, data interface{}) er
 		return err
 	}
 	r.body = buf.String()
+
+	// Properly replace HTML entities
 	r.body = strings.ReplaceAll(r.body, "&#34;&lt;", "<")
 	r.body = strings.ReplaceAll(r.body, "&gt;", ">")
 	r.body = strings.ReplaceAll(r.body, "&lt;", "<")
@@ -44,66 +53,70 @@ func (r *RequestPdf) ParseTemplate(templateFileName string, data interface{}) er
 	return nil
 }
 
+// GeneratePDF generates the PDF file from the parsed HTML using go-wkhtmltopdf
 func (r *RequestPdf) GeneratePDF(pdfPath string) (bool, error) {
+	// Validate HTML content
+	if len(strings.TrimSpace(r.body)) == 0 {
+		return false, errors.New("HTML content is empty")
+	}
+
+	// Create temporary directory for HTML files if it does not exist (optional, for debugging)
 	tmpPath := "template/"
-	t := time.Now().Unix()
 	if _, err := os.Stat(tmpPath); os.IsNotExist(err) {
-		errDir := os.Mkdir(tmpPath, 0777)
-		if errDir != nil {
+		if err := os.Mkdir(tmpPath, 0777); err != nil {
 			return false, err
 		}
 	}
-	err1 := ioutil.WriteFile(tmpPath+strconv.FormatInt(int64(t), 10)+".html", []byte(r.body), 0644)
-	if err1 != nil {
-		panic(err1)
-	}
-	f, err := os.Open(tmpPath + strconv.FormatInt(int64(t), 10) + ".html")
-	if f != nil {
-		defer func(f *os.File) (bool, error) {
-			err := f.Close()
-			if err != nil {
-				return false, err
-			}
-			return true, nil
-		}(f)
 
-	}
-	if err != nil {
+	// Optionally, write the HTML to a temp file for debugging purposes
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	htmlFileName := tmpPath + timestamp + ".html"
+	if err := ioutil.WriteFile(htmlFileName, []byte(r.body), 0644); err != nil {
 		return false, err
 	}
-	pdfg, err := wkhtmltopdf.NewPDFGenerator()
-	if err != nil {
-		return false, err
+	// Clean up the temporary file when done
+	defer os.Remove(htmlFileName)
+
+	// Check OS before creating the PDF generator
+	if runtime.GOOS != "linux" && runtime.GOOS != "darwin" {
+		return false, errors.New("unsupported operating system")
 	}
 
-	pdfg.AddPage(wkhtmltopdf.NewPageReader(f))
+	// Create a new PDF generator instance
+	pdfg, err := wk.NewPDFGenerator()
+	if err != nil {
+		return false, fmt.Errorf("failed to create PDF generator: %w", err)
+	}
 
-	pdfg.PageSize.Set(wkhtmltopdf.PageSizeA4)
-
+	// Set global options (similar to command-line options)
 	pdfg.Dpi.Set(300)
+	pdfg.MarginBottom.Set(10)
+	pdfg.MarginTop.Set(10)
+	pdfg.MarginLeft.Set(10)
+	pdfg.MarginRight.Set(10)
 
-	err = pdfg.Create()
-	if err != nil {
-		return false, err
+	// Create a new page from the HTML string (you can also use NewPageReader with a reader)
+	page := wk.NewPageReader(strings.NewReader(r.body))
+
+	// Add the page to the PDF generator
+	pdfg.AddPage(page)
+
+	// Create the PDF document in memory
+	if err = pdfg.Create(); err != nil {
+		return false, fmt.Errorf("failed to create PDF: %w", err)
 	}
 
-	err = pdfg.WriteFile(pdfPath)
-	if err != nil {
-		return false, err
-	}
-
-	dir, err := os.Getwd()
-	if err != nil {
-		return false, err
-	}
-
-	defer func(path string) (bool, error) {
-		err := os.RemoveAll(path)
-		if err != nil {
+	// Ensure the output directory exists
+	outputDir := filepath.Dir(pdfPath)
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(outputDir, 0777); err != nil {
 			return false, err
 		}
-		return true, nil
-	}(dir + tmpPath)
+	}
 
+	// Write the PDF to file
+	if err = pdfg.WriteFile(pdfPath); err != nil {
+		return false, fmt.Errorf("failed to write PDF file: %w", err)
+	}
 	return true, nil
 }
