@@ -56,6 +56,11 @@ Ps> .\win64.bat
 [+++] Installation complete!
 
 ```
+Or
+```bash
+Ps> Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ravro-tr/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat" -OutFile "win64.bat"
+Ps> .\win64.bat
+```
 
 #### macOS
 ```bash
