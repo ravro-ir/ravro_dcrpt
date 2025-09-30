@@ -33,9 +33,9 @@ go.work
 .DS_Store
 
 # Application directories (data)
-encrypt/
-decrypt/
-key/
+/encrypt/
+/decrypt/
+/key/
 *.ravro
 *.zip
 
