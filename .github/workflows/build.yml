@@ -30,7 +30,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Go
         uses: actions/setup-go@v4
@@ -80,14 +80,14 @@ jobs:
 
       - name: Upload artifacts (Windows)
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}-binaries
           path: ravro_dcrpt-windows-amd64.zip
 
       - name: Upload artifacts (Non-Windows)
         if: runner.os != 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}-binaries
           path: |
@@ -101,7 +101,7 @@ jobs:
     
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
