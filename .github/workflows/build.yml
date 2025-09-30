@@ -36,6 +36,13 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.23'
+          cache: true
+
+      - name: Verify Go environment
+        run: |
+          go version
+          go env GOMOD
+          go env GO111MODULE
 
       - name: Install dependencies (Ubuntu)
         if: runner.os == 'Linux'
@@ -65,17 +72,16 @@ jobs:
       - name: Build CLI
         env:
           CGO_ENABLED: ${{ runner.os == 'Windows' && '1' || '0' }}
-          GO111MODULE: on
         run: |
-          go mod download
-          go build -ldflags="-s -w" -o ${{ matrix.cli_output }} ./cmd/cli
+          go mod verify
+          go mod tidy
+          go build -v -ldflags="-s -w" -o ${{ matrix.cli_output }} ./cmd/cli
 
       - name: Build GUI
         env:
           CGO_ENABLED: ${{ runner.os == 'Windows' && '1' || '0' }}
-          GO111MODULE: on
         run: |
-          go build -ldflags="-s -w" -o ${{ matrix.gui_output }} ./cmd/gui
+          go build -v -ldflags="-s -w" -o ${{ matrix.gui_output }} ./cmd/gui
 
       - name: Package Windows build with DLLs
         if: runner.os == 'Windows'

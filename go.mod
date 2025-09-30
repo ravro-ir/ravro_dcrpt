@@ -5,7 +5,6 @@ go 1.21.1
 toolchain go1.23.2
 
 require (
-
 	// GUI framework (Pure Go, cross-platform)
 	fyne.io/fyne/v2 v2.4.3
 
