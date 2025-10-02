@@ -61,7 +61,11 @@ build-cli: ## Build CLI application
 build-gui: ## Build GUI application
 	@echo "🔨 Building GUI..."
 	@mkdir -p build
+ifeq ($(OS),Windows_NT)
+	$(GOBUILD) $(LDFLAGS) -ldflags "-s -w -H windowsgui" -o $(GUI_BIN).exe ./cmd/gui
+else
 	$(GOBUILD) $(LDFLAGS) -o $(GUI_BIN) ./cmd/gui
+endif
 	@echo "✅ GUI built: $(GUI_BIN)"
 
 ##@ Running

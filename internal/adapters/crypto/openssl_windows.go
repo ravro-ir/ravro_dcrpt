@@ -12,6 +12,7 @@ package crypto
 #include <openssl/evp.h>
 #include <openssl/pkcs7.h>
 #include <openssl/pem.h>
+#include <openssl/ssl.h>
 #include <stdlib.h>
 #include <string.h>
 

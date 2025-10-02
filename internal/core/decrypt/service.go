@@ -175,6 +175,58 @@ func (s *Service) ValidateKey(privateKeyPath string) error {
 	return s.crypto.ValidatePrivateKey(privateKeyPath)
 }
 
+// DecryptAttachments decrypts all attachment files (images, etc.)
+func (s *Service) DecryptAttachments(reportPath string, privateKeyPath string, outputPath string) error {
+	// Find all ravro files
+	ravroFiles, err := s.storage.ListFiles(reportPath, "*.ravro")
+	if err != nil {
+		return fmt.Errorf("failed to list ravro files: %w", err)
+	}
+
+	for _, file := range ravroFiles {
+		// Skip data.ravro files (already processed)
+		if strings.HasSuffix(file, "/data.ravro") || strings.HasSuffix(file, "\\data.ravro") {
+			continue
+		}
+
+		// This is an attachment file - decrypt it
+		decrypted, err := s.decryptFile(file, privateKeyPath)
+		if err != nil {
+			// Skip files that can't be decrypted
+			continue
+		}
+
+		// Determine output path
+		// Extract relative path from report path
+		absReportPath, _ := filepath.Abs(reportPath)
+		absFilePath, _ := filepath.Abs(file)
+		
+		relPath, err := filepath.Rel(absReportPath, absFilePath)
+		if err != nil {
+			// Fallback to basename
+			relPath = filepath.Base(file)
+		}
+		
+		// Remove .ravro extension
+		relPath = strings.TrimSuffix(relPath, ".ravro")
+
+		outputFile := filepath.Join(outputPath, relPath)
+
+		// Ensure directory exists
+		outputDir := filepath.Dir(outputFile)
+		if err := s.storage.CreateDir(outputDir); err != nil {
+			continue
+		}
+
+		// Write decrypted file
+		if err := s.storage.WriteFile(outputFile, decrypted); err != nil {
+			continue
+		}
+	}
+
+	return nil
+}
+
 // GetReportID extracts report ID from file path
 func (s *Service) GetReportID(path string) string {
 	// Extract report ID from path (e.g., encrypt/ir2020-07-16-0002)

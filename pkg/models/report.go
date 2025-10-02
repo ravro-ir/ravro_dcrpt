@@ -9,13 +9,13 @@ type Report struct {
 	Description     string     `json:"description"`
 	Reproduce       string     `json:"reproduce"`
 	Scenario        string     `json:"scenario"`
-	HunterUsername  string     `json:"hunter_username"`
-	CompanyUsername string     `json:"company_username"`
+	HunterUsername  string     `json:"hunterUsername"`
+	CompanyUsername string     `json:"companyUsername"`
 	Urls            string     `json:"urls"`
 	Ips             string     `json:"ips"`
-	SubmissionDate  string     `json:"submission_date"`
-	DateFrom        string     `json:"date_from"`
-	DateTo          string     `json:"date_to"`
+	SubmissionDate  string     `json:"submissionDate"`
+	DateFrom        string     `json:"dateFrom"`
+	DateTo          string     `json:"dateTo"`
 	ReportInfo      InfoReport `json:"report_info"`
 }
 
@@ -28,7 +28,7 @@ type InfoReport struct {
 // ReportDetails contains detailed information about the report
 type ReportDetails struct {
 	Target        string       `json:"target"`
-	CurrentStatus string       `json:"current_status"`
+	CurrentStatus string       `json:"currentStatus"`
 	Cvss          CVSSInfo     `json:"cvss"`
 	Attachments   []Attachment `json:"attachments"`
 	Judges        []Judge      `json:"judges"`

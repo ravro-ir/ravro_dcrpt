@@ -31,7 +31,6 @@ type GUI struct {
 
 	storageService *storage.FileSystemService
 	cryptoService  crypto.PKCS7Service
-	pdfGenerator   pdfgen.MarotoGenerator
 	decryptService *decrypt.Service
 	reportService  *report.Service
 }
@@ -79,11 +78,13 @@ func (g *GUI) setupUI() {
 	g.inputEntry.SetText("encrypt")
 
 	inputBtn := widget.NewButton("Browse", func() {
-		dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
+		fd := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
 			if err == nil && uri != nil {
 				g.inputEntry.SetText(uri.Path())
 			}
 		}, g.window)
+		fd.Resize(fyne.NewSize(1000, 700))
+		fd.Show()
 	})
 
 	inputContainer := container.NewBorder(nil, nil, nil, inputBtn, g.inputEntry)
@@ -94,11 +95,13 @@ func (g *GUI) setupUI() {
 	g.outputEntry.SetText("decrypt")
 
 	outputBtn := widget.NewButton("Browse", func() {
-		dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
+		fd := dialog.NewFolderOpen(func(uri fyne.ListableURI, err error) {
 			if err == nil && uri != nil {
 				g.outputEntry.SetText(uri.Path())
 			}
 		}, g.window)
+		fd.Resize(fyne.NewSize(1000, 700))
+		fd.Show()
 	})
 
 	outputContainer := container.NewBorder(nil, nil, nil, outputBtn, g.outputEntry)
@@ -109,11 +112,13 @@ func (g *GUI) setupUI() {
 	g.keyEntry.SetText("key")
 
 	keyBtn := widget.NewButton("Browse", func() {
-		dialog.ShowFileOpen(func(uri fyne.URIReadCloser, err error) {
+		fd := dialog.NewFileOpen(func(uri fyne.URIReadCloser, err error) {
 			if err == nil && uri != nil {
 				g.keyEntry.SetText(uri.URI().Path())
 			}
 		}, g.window)
+		fd.Resize(fyne.NewSize(1000, 700))
+		fd.Show()
 	})
 
 	keyContainer := container.NewBorder(nil, nil, nil, keyBtn, g.keyEntry)

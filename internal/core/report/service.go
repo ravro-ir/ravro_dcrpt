@@ -60,6 +60,16 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 	}
 	result.Amendments = amendments
 
+	// Decrypt attachments (images, files, etc.)
+	// Attachments should go to the same directory as the PDF
+	pdfDir := filepath.Join(outputDir, report.Slug)
+	if err := s.storage.CreateDir(pdfDir); err == nil {
+		if err := s.decryptService.DecryptAttachments(reportPath, keyPath, pdfDir); err != nil {
+			// Attachments decryption failure shouldn't stop PDF generation
+			// Just log it
+		}
+	}
+
 	// Generate PDF
 	pdfPath := s.generatePDFPath(outputDir, report)
 	if err := s.pdfGenerator.GenerateReport(report, judgment, pdfPath); err != nil {
@@ -74,35 +84,43 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 
 // ProcessReports processes multiple reports
 func (s *Service) ProcessReports(inputDir string, keyPath string, outputDir string) ([]*ProcessResult, error) {
-	// Find all zip files
-	zipFiles, err := s.storage.ListFiles(inputDir, "*.zip")
-	if err != nil {
-		return nil, fmt.Errorf("failed to list zip files: %w", err)
-	}
-
-	// Extract zip files
 	var reportPaths []string
-	for _, zipFile := range zipFiles {
-		reportID := s.decryptService.GetReportID(zipFile)
-		extractPath := filepath.Join(inputDir, reportID)
 
-		// Check if already extracted
-		if !s.storage.FileExists(extractPath) {
-			if err := s.decryptService.ProcessZipFile(zipFile, extractPath); err != nil {
-				continue // Skip files that can't be extracted
-			}
+	// Check if inputDir itself is a report directory (contains report/data.ravro)
+	reportDataPath := filepath.Join(inputDir, "report", "data.ravro")
+	if s.storage.FileExists(reportDataPath) {
+		// This is a report directory itself
+		reportPaths = append(reportPaths, inputDir)
+	} else {
+		// Find all zip files
+		zipFiles, err := s.storage.ListFiles(inputDir, "*.zip")
+		if err != nil {
+			return nil, fmt.Errorf("failed to list zip files: %w", err)
 		}
 
-		reportPaths = append(reportPaths, extractPath)
-	}
+		// Extract zip files
+		for _, zipFile := range zipFiles {
+			reportID := s.decryptService.GetReportID(zipFile)
+			extractPath := filepath.Join(inputDir, reportID)
 
-	// Find existing ravro directories (already extracted)
-	ravroFiles, err := s.storage.ListFiles(inputDir, "*.ravro")
-	if err == nil {
-		for _, ravroFile := range ravroFiles {
-			reportDir := filepath.Dir(filepath.Dir(ravroFile)) // Go up two levels from data.ravro
-			if !contains(reportPaths, reportDir) {
-				reportPaths = append(reportPaths, reportDir)
+			// Check if already extracted
+			if !s.storage.FileExists(extractPath) {
+				if err := s.decryptService.ProcessZipFile(zipFile, extractPath); err != nil {
+					continue // Skip files that can't be extracted
+				}
+			}
+
+			reportPaths = append(reportPaths, extractPath)
+		}
+
+		// Find existing ravro directories (already extracted)
+		ravroFiles, err := s.storage.ListFiles(inputDir, "*.ravro")
+		if err == nil {
+			for _, ravroFile := range ravroFiles {
+				reportDir := filepath.Dir(filepath.Dir(ravroFile)) // Go up two levels from data.ravro
+				if !contains(reportPaths, reportDir) {
+					reportPaths = append(reportPaths, reportDir)
+				}
 			}
 		}
 	}

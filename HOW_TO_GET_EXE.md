@@ -97,12 +97,21 @@ cd ravro_dcrpt
 #### 3. Build
 
 ```powershell
-# Build CLI
-go build -o ravro_dcrpt.exe .\cmd\cli
+# Set environment variables
+$env:PATH="C:/OpenSSL-Win64/bin;C:/wkhtmltox/bin;$env:PATH"
+$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include -IC:/wkhtmltox/include"
+$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -LC:/wkhtmltox/lib -L/C:/wkhtmltox/bin -lssl -lcrypto -lws2_32 -lcrypt32 -lwkhtmltox"
 
-# Build GUI
-go build -o ravro_dcrpt_gui.exe .\cmd\gui
+# Build CLI
+go build -ldflags="-s -w" -o ravro_dcrpt.exe .\cmd\cli
+
+# Build GUI (without console window)
+go build -ldflags="-s -w -H windowsgui" -o ravro_dcrpt_gui.exe .\cmd\gui
 ```
+
+**توضیحات:**
+- فلگ `-s -w` حجم فایل را کاهش می‌دهد
+- فلگ `-H windowsgui` پنجره CMD را برای برنامه GUI مخفی می‌کند
 
 **نتیجه:**
 - `ravro_dcrpt.exe` ✅
