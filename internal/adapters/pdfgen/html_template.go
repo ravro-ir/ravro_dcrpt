@@ -16,9 +16,9 @@ const HTMLTemplate = `<!DOCTYPE html>
 
         body {
             font-family: 'Vazirmatn', 'B Nazanin', Tahoma, Arial, sans-serif;
-            line-height: 1.9;
+            line-height: 1.6;
             color: #333333;
-            background: #f5f5f5;
+            background: #ffffff;
             padding: 0;
             margin: 0;
             font-size: 14px;
@@ -32,31 +32,33 @@ const HTMLTemplate = `<!DOCTYPE html>
 
         /* Header Section */
         .header {
-            background: #ff5722;
-            background: linear-gradient(135deg, #ff5722 0%, #e64a19 100%);
+            background: #1a1a1a;
             color: white;
-            padding: 40px 20px;
+            padding: 60px 40px;
             text-align: center;
+            position: relative;
         }
 
         .logo {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
             color: white;
         }
 
         .header h1 {
-            font-size: 26px;
-            font-weight: bold;
-            margin: 10px 0;
+            font-size: 24px;
+            font-weight: 400;
+            margin: 15px 0;
+            line-height: 1.4;
         }
 
         .header .subtitle {
-            font-size: 17px;
-            margin-top: 10px;
-            opacity: 0.95;
+            font-size: 16px;
+            margin-top: 15px;
+            opacity: 0.9;
+            font-weight: 300;
         }
 
         .header a {
@@ -67,8 +69,8 @@ const HTMLTemplate = `<!DOCTYPE html>
         /* Icon styling */
         .icon {
             display: inline-block;
-            margin-left: 5px;
-            font-size: 18px;
+            margin-left: 8px;
+            font-size: 16px;
         }
 
         /* Info Table */
@@ -76,128 +78,141 @@ const HTMLTemplate = `<!DOCTYPE html>
             width: 100%;
             border-collapse: collapse;
             margin: 0;
-            background: #f8f9fa;
+            background: #ffffff;
         }
 
         .info-table td {
-            padding: 15px 20px;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 20px 30px;
+            border-bottom: 1px solid #f0f0f0;
             width: 50%;
+            vertical-align: top;
         }
 
         .info-label {
-            font-size: 11px;
-            color: #666666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: bold;
+            font-size: 12px;
+            color: #888888;
+            font-weight: 500;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .info-value {
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 600;
             color: #333333;
         }
 
         .info-value a {
-            color: #2196f3;
+            color: #6366f1;
             text-decoration: none;
+        }
+
+        .info-value a:hover {
+            text-decoration: underline;
         }
 
         /* Severity Badge */
         .severity-badge {
             display: inline-block;
-            padding: 5px 12px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 12px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 11px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .severity-critical {
-            background: #f44336;
+            background: #dc2626;
             color: white;
         }
 
         .severity-high {
-            background: #ff9800;
+            background: #ea580c;
             color: white;
         }
 
         .severity-medium {
-            background: #ffc107;
-            color: #333;
+            background: #d97706;
+            color: white;
         }
 
         .severity-low {
-            background: #4caf50;
+            background: #16a34a;
             color: white;
         }
 
         /* Content Section */
         .content-section {
-                padding: 30px 20px;
-            }
+            padding: 40px 30px;
+        }
 
         .content-section-alt {
-            padding: 30px 20px;
-            background: #fafafa;
+            padding: 40px 30px;
+            background: #fafbfc;
         }
 
         .section-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #ff5722;
-            margin-bottom: 20px;
-            padding: 12px 15px;
-            border-right: 5px solid #ff5722;
-            background: #fff3f0;
-            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            padding: 16px 20px;
+            border-right: 4px solid #f59e0b;
+            background: #fffbeb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
         }
 
         .section-title .icon {
-            font-size: 22px;
-            margin-left: 8px;
+            font-size: 20px;
+            margin-left: 12px;
+            color: #f59e0b;
         }
 
         /* Card */
         .card {
             background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .card-header {
-            font-size: 15px;
-            font-weight: bold;
-            color: #333333;
-            margin-bottom: 15px;
-            padding: 10px 12px;
-            background: #f8f9fa;
-            border-right: 3px solid #ff5722;
-            border-radius: 3px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-right: 3px solid #f59e0b;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
         }
 
         .card-header .icon {
-            font-size: 16px;
-            margin-left: 6px;
+            font-size: 18px;
+            margin-left: 10px;
+            color: #f59e0b;
         }
 
         .card-body {
-            color: #333333;
-            line-height: 1.8;
+            color: #374151;
+            line-height: 1.7;
+            font-size: 14px;
         }
 
         .card-body p {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .card-body strong {
-            color: #ff5722;
+            color: #1a1a1a;
+            font-weight: 600;
         }
 
         /* Data Table */
@@ -205,54 +220,63 @@ const HTMLTemplate = `<!DOCTYPE html>
             width: 100%;
             border-collapse: collapse;
             background: white;
-            margin: 20px 0;
+            margin: 24px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .data-table th {
-            background: #ff5722;
+            background: #1f2937;
             color: white;
-            padding: 12px 15px;
+            padding: 16px 20px;
             text-align: right;
-            font-weight: bold;
-            font-size: 13px;
-            border: 1px solid #e64a19;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid #374151;
         }
 
         .data-table td {
-            padding: 12px 15px;
-            border: 1px solid #e0e0e0;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
             text-align: right;
+            font-size: 14px;
         }
 
         .data-table tr:nth-child(even) {
-            background: #f8f9fa;
+            background: #f9fafb;
+        }
+
+        .data-table tr:hover {
+            background: #f3f4f6;
         }
 
         /* Alert Boxes */
         .alert {
-            padding: 15px 20px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
             border-right: 4px solid;
         }
 
         .alert-info {
-            background: #e3f2fd;
-            border-color: #2196f3;
-            color: #0d47a1;
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1e40af;
         }
 
         .alert strong {
             display: block;
-            margin-bottom: 8px;
-            font-size: 15px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
         }
 
         /* Footer */
         .footer {
-            background: #1a1a2e;
+            background: #1a1a1a;
             color: white;
-            padding: 30px 20px;
+            padding: 40px 30px;
         }
 
         .footer-table {
@@ -261,35 +285,36 @@ const HTMLTemplate = `<!DOCTYPE html>
         }
 
         .footer-table td {
-            padding: 10px 15px;
+            padding: 15px 20px;
             vertical-align: top;
             width: 33.33%;
         }
 
         .footer h4 {
-            color: #ffc107;
-            margin-bottom: 10px;
-            font-size: 14px;
+            color: #f59e0b;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
         }
 
         .footer p {
             line-height: 1.6;
-            opacity: 0.8;
-            font-size: 12px;
-            margin: 5px 0;
+            opacity: 0.9;
+            font-size: 14px;
+            margin: 8px 0;
         }
 
         .footer-bottom {
             text-align: center;
-            padding-top: 20px;
+            padding-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 20px;
-            opacity: 0.7;
-            font-size: 11px;
+            margin-top: 30px;
+            opacity: 0.8;
+            font-size: 12px;
         }
 
         .footer-bottom a {
-            color: #ffc107;
+            color: #f59e0b;
             text-decoration: none;
         }
 
@@ -313,7 +338,6 @@ const HTMLTemplate = `<!DOCTYPE html>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="logo">🔐 RAVRO</div>
             <h1>{{.Title}}</h1>
             <div class="subtitle">
                 <span class="icon">🏢</span>
@@ -363,7 +387,7 @@ const HTMLTemplate = `<!DOCTYPE html>
 
         <!-- Hunter Section -->
         <div class="content-section-alt">
-            <h2 class="section-title"><span class="icon">🎯</span>اطلاعات شکارچی</h2>
+            <h2 class="section-title"><span class="icon">📊</span>اطلاعات شکارچی</h2>
             
             <table class="data-table no-break">
                 <thead>
@@ -413,7 +437,7 @@ const HTMLTemplate = `<!DOCTYPE html>
         <!-- Judge Section -->
         {{if .JudgeUser}}
         <div class="content-section">
-            <h2 class="section-title"><span class="icon">⚖️</span>قیمت پیشنهادی تیم داوری</h2>
+            <h2 class="section-title"><span class="icon">💰</span>اطلاعات تیم داوری</h2>
             
             <table class="data-table no-break">
                 <thead>
@@ -450,7 +474,7 @@ const HTMLTemplate = `<!DOCTYPE html>
         <!-- Additional Info -->
         {{if .LinkMoreInfo}}
         <div class="content-section-alt">
-            <h2 class="section-title"><span class="icon">📚</span>منابع آموزشی</h2>
+            <h2 class="section-title"><span class="icon">🔗</span>شرح آسیب‌پذیری</h2>
             
             <div class="alert alert-info">
                 <strong>برای اطلاعات بیشتر:</strong>
@@ -462,7 +486,7 @@ const HTMLTemplate = `<!DOCTYPE html>
         <!-- Attachments -->
         {{if .Attachment}}
         <div class="content-section">
-            <h2 class="section-title"><span class="icon">📎</span>فایل‌های پیوست</h2>
+            <h2 class="section-title"><span class="icon">📁</span>فایل‌های پیوست</h2>
             
             {{.Attachment}}
                 </div>
