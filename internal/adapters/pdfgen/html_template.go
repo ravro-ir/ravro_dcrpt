@@ -209,6 +209,14 @@ const HTMLTemplate = `<!DOCTYPE html>
             color: #f59e0b;
         }
 
+        .card-header svg,
+        .section-title svg {
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
         .card-body {
             color: #374151;
             line-height: 1.7;
@@ -476,7 +484,12 @@ const HTMLTemplate = `<!DOCTYPE html>
 
             {{if .JudgeInfo}}
             <div class="card no-break">
-                <div class="card-header"><span class="icon">💬</span>نظر داور</div>
+                <div class="card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#f59e0b" fill-opacity="0.1"/>
+                    </svg>
+                    نظر داور
+                </div>
                 <div class="card-body">
                     <p>{{.JudgeInfo}}</p>
                         </div>
@@ -500,7 +513,13 @@ const HTMLTemplate = `<!DOCTYPE html>
         <!-- Attachments -->
         {{if .Attachment}}
         <div class="content-section">
-            <h2 class="section-title"><span class="icon">📁</span>فایل‌های پیوست</h2>
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#f59e0b" fill-opacity="0.1"/>
+                    <path d="M13 2V9H20" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                فایل‌های پیوست
+            </h2>
             
             {{.Attachment}}
                 </div>
