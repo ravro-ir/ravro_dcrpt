@@ -275,7 +275,7 @@ func createTemplateData(report *models.Report, judgment *models.Judgment, amendm
 			moreInfo += "\n\n---\n\n"
 		}
 
-		// moreInfo += "## نیازمندی اطلاعات بیشتر از طرف شرکت\n\n"
+		// Amendment info without title
 		for i, amendment := range amendments {
 			content := amendment.Description
 			if content == "" {

@@ -272,13 +272,12 @@ func createTemplateData(report *models.Report, judgment *models.Judgment, amendm
 		}
 	}
 
-	// Extract amendment info (نیازمندی اطلاعات بیشتر از طرف شرکت)
+	// Extract amendment info (without title)
 	if len(amendments) > 0 {
 		if moreInfo != "" {
 			moreInfo += "\n\n---\n\n"
 		}
 
-		moreInfo += "## نیازمندی اطلاعات بیشتر از طرف شرکت\n\n"
 		for i, amendment := range amendments {
 			content := amendment.Description
 			if content == "" {

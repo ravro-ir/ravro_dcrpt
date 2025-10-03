@@ -70,8 +70,7 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 		}
 	}
 
-	// Save decrypted JSON files for debugging
-	s.decryptService.SaveDecryptedJSON(reportPath, keyPath, outputDir)
+	// Debug JSON files removed
 
 	// Generate PDF
 	pdfPath := s.generatePDFPath(outputDir, report)
