@@ -311,6 +311,11 @@ func (g *GUI) processReports() {
 		}
 
 		g.log(fmt.Sprintf("%-30s %-15s %s", result.ReportID, hunter, status))
+
+		// Show error details for failed reports
+		if !result.Success && result.Error != nil {
+			g.log(fmt.Sprintf("   Error: %v", result.Error))
+		}
 	}
 
 	g.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
