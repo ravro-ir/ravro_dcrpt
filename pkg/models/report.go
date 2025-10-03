@@ -90,6 +90,14 @@ type VulnerabilityInfo struct {
 
 // Amendment represents additional amendment information
 type Amendment struct {
+	ReportID         string `json:"reportId"`
+	AttachmentsCount int    `json:"attachmentsCount"`
+	Description      string `json:"description"`
+	HunterUsername   string `json:"hunterUsername"`
+	CompanyUsername  string `json:"companyUsername"`
+	SubmissionDate   string `json:"submissionDate"`
+
+	// Legacy fields for backward compatibility
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 }

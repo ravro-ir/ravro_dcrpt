@@ -14,6 +14,9 @@ import (
 	"time"
 
 	wk "github.com/SebastiaanKlippert/go-wkhtmltopdf"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
 	ptime "github.com/yaa110/go-persian-calendar"
 
 	"ravro_dcrpt/internal/ports"
@@ -36,9 +39,9 @@ func (g *WKHTMLToPDFGenerator) SetTemplate(templatePath string) error {
 }
 
 // GenerateReport generates a PDF report using HTML template
-func (g *WKHTMLToPDFGenerator) GenerateReport(report *models.Report, judgment *models.Judgment, outputPath string) error {
+func (g *WKHTMLToPDFGenerator) GenerateReport(report *models.Report, judgment *models.Judgment, amendments []models.Amendment, outputPath string) error {
 	// Create template data
-	templateData := createTemplateData(report, judgment)
+	templateData := createTemplateData(report, judgment, amendments)
 
 	// Parse HTML template
 	tmpl, err := template.New("report").Parse(HTMLTemplate)
@@ -85,8 +88,13 @@ func (g *WKHTMLToPDFGenerator) generatePDF(pdfPath string) error {
 	if err := os.WriteFile(htmlFileName, []byte(g.body), 0644); err != nil {
 		return fmt.Errorf("failed to write HTML file: %w", err)
 	}
-	
-	defer os.Remove(htmlFileName)
+
+	// Remove HTML file after PDF generation
+	defer func() {
+		os.Remove(htmlFileName)
+		// Try to remove template directory if empty
+		os.Remove(tmpPath)
+	}()
 
 	// Create PDF generator
 	pdfg, err := wk.NewPDFGenerator()
@@ -98,7 +106,7 @@ func (g *WKHTMLToPDFGenerator) generatePDF(pdfPath string) error {
 	pdfg.Dpi.Set(300)
 	pdfg.Orientation.Set(wk.OrientationPortrait)
 	pdfg.Grayscale.Set(false)
-	
+
 	// Enable external resources (for fonts, images, etc.)
 	pdfg.NoCollate.Set(false)
 
@@ -107,12 +115,12 @@ func (g *WKHTMLToPDFGenerator) generatePDF(pdfPath string) error {
 	page.FooterRight.Set("[page]")
 	page.FooterFontSize.Set(10)
 	page.Zoom.Set(0.95)
-	
+
 	// Enable loading external resources (fonts from Google, etc.)
 	page.EnableLocalFileAccess.Set(true)
 	page.LoadErrorHandling.Set("ignore")
 	page.LoadMediaErrorHandling.Set("ignore")
-	
+
 	pdfg.AddPage(page)
 
 	// Create PDF
@@ -174,10 +182,10 @@ func formatAmount(amount int) string {
 	if amount == 0 {
 		return "در حال بررسی"
 	}
-	
+
 	// Convert to string
 	str := strconv.Itoa(amount)
-	
+
 	// Add thousand separators
 	var result strings.Builder
 	for i, digit := range str {
@@ -186,12 +194,36 @@ func formatAmount(amount int) string {
 		}
 		result.WriteRune(digit)
 	}
-	
+
 	return result.String() + " ریال"
 }
 
+// markdownToHTML converts Markdown text to HTML
+func markdownToHTML(mdText string) string {
+	if strings.TrimSpace(mdText) == "" {
+		return ""
+	}
+
+	// Create markdown parser with extensions
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	p := parser.NewWithExtensions(extensions)
+
+	// Parse markdown
+	doc := p.Parse([]byte(mdText))
+
+	// Create HTML renderer
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+	renderer := html.NewRenderer(opts)
+
+	// Render to HTML
+	htmlBytes := markdown.Render(doc, renderer)
+
+	return string(htmlBytes)
+}
+
 // createTemplateData creates template data structure from report and judgment
-func createTemplateData(report *models.Report, judgment *models.Judgment) interface{} {
+func createTemplateData(report *models.Report, judgment *models.Judgment, amendments []models.Amendment) interface{} {
 	// Extract judge names
 	judgeNames := ""
 	if len(report.ReportInfo.Details.Judges) > 0 {
@@ -225,12 +257,45 @@ func createTemplateData(report *models.Report, judgment *models.Judgment) interf
 	if len(report.ReportInfo.Tags) > 0 {
 		for _, tag := range report.ReportInfo.Tags {
 			if tag.InfoDescription != "" {
-				moreInfo += tag.InfoDescription + "\n"
+				moreInfo += tag.InfoDescription + "\n\n"
+			}
+			if tag.InfoTitle != "" && tag.InfoSolution != "" {
+				moreInfo += "### " + tag.InfoTitle + "\n\n"
+				moreInfo += tag.InfoSolution + "\n\n"
 			}
 			if tag.InfoMore != "" {
 				linkMoreInfo += tag.InfoMore + "\n"
 			}
 		}
+	}
+
+	// Extract amendment info (نیازمندی اطلاعات بیشتر از طرف شرکت)
+	if len(amendments) > 0 {
+		if moreInfo != "" {
+			moreInfo += "\n\n---\n\n"
+		}
+
+		// moreInfo += "## نیازمندی اطلاعات بیشتر از طرف شرکت\n\n"
+		for i, amendment := range amendments {
+			content := amendment.Description
+			if content == "" {
+				content = amendment.Content // Fallback to legacy field
+			}
+			if content != "" {
+				if i > 0 {
+					moreInfo += "\n\n"
+				}
+				moreInfo += content
+			}
+		}
+	}
+
+	// Convert markdown to HTML for info fields
+	if moreInfo != "" {
+		moreInfo = markdownToHTML(moreInfo)
+	}
+	if linkMoreInfo != "" {
+		linkMoreInfo = markdownToHTML(linkMoreInfo)
 	}
 
 	// Prepare judgment data
@@ -239,25 +304,25 @@ func createTemplateData(report *models.Report, judgment *models.Judgment) interf
 	cvssJudge := ""
 	scoreJudge := ""
 	judgeInfo := ""
-	
+
 	if judgment != nil {
 		amount = judgment.Reward
 		cvssJudge = judgment.Cvss.Value
 		scoreJudge = judgment.Cvss.Rating
 		judgeInfo = judgment.Description
-		
+
 		// Also check vulnerability info
 		if judgment.Vulnerability.Define != "" {
 			if judgeInfo != "" {
 				judgeInfo += "\n\n"
 			}
-			judgeInfo += "📝 تعریف: " + judgment.Vulnerability.Define
+			judgeInfo += "**📝 تعریف:**\n\n" + judgment.Vulnerability.Define
 		}
 		if judgment.Vulnerability.Fix != "" {
 			if judgeInfo != "" {
 				judgeInfo += "\n\n"
 			}
-			judgeInfo += "🔧 راه حل: " + judgment.Vulnerability.Fix
+			judgeInfo += "**🔧 راه حل:**\n\n" + judgment.Vulnerability.Fix
 		}
 	}
 
@@ -266,6 +331,15 @@ func createTemplateData(report *models.Report, judgment *models.Judgment) interf
 		cvssJudge = report.ReportInfo.Details.Cvss.Judge.Vector
 		scoreJudge = report.ReportInfo.Details.Cvss.Judge.Score
 	}
+
+	// Convert markdown to HTML for judgment info
+	if judgeInfo != "" {
+		judgeInfo = markdownToHTML(judgeInfo)
+	}
+
+	// Convert markdown to HTML for report fields
+	scenario := markdownToHTML(report.Scenario)
+	description := markdownToHTML(report.Description)
 
 	return struct {
 		Title           string
@@ -279,18 +353,18 @@ func createTemplateData(report *models.Report, judgment *models.Judgment) interf
 		ScoreHunter     string
 		Ips             string
 		RangeDate       string
-		Scenario        string
+		Scenario        template.HTML
 		UrlTarget       string
-		PoC             string
-		MoreInfo        string
+		PoC             template.HTML
+		MoreInfo        template.HTML
 		JudgeUser       string
 		Amount          string
 		CVSSJudge       string
 		ScoreJudge      string
 		DateTo          string
-		JudgeInfo       string
-		LinkMoreInfo    string
-		Attachment      string
+		JudgeInfo       template.HTML
+		LinkMoreInfo    template.HTML
+		Attachment      template.HTML
 		RavroVer        string
 		Valuation       string
 	}{
@@ -305,18 +379,18 @@ func createTemplateData(report *models.Report, judgment *models.Judgment) interf
 		ScoreHunter:     report.ReportInfo.Details.Cvss.Hunter.Score,
 		Ips:             report.Ips,
 		RangeDate:       fmt.Sprintf("از %s تا %s", convertToShamsi(report.DateFrom), convertToShamsi(report.DateTo)),
-		Scenario:        report.Scenario,
+		Scenario:        template.HTML(scenario),
 		UrlTarget:       report.Urls,
-		PoC:             report.Description,
-		MoreInfo:        moreInfo,
+		PoC:             template.HTML(description),
+		MoreInfo:        template.HTML(moreInfo),
 		JudgeUser:       judgeUser,
 		Amount:          formatAmount(amount),
 		CVSSJudge:       cvssJudge,
 		ScoreJudge:      scoreJudge,
 		DateTo:          convertToShamsi(report.DateTo),
-		JudgeInfo:       judgeInfo,
-		LinkMoreInfo:    linkMoreInfo,
-		Attachment:      attachmentList,
+		JudgeInfo:       template.HTML(judgeInfo),
+		LinkMoreInfo:    template.HTML(linkMoreInfo),
+		Attachment:      template.HTML(attachmentList),
 		RavroVer:        "v2.0.0",
 		Valuation:       "",
 	}

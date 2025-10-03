@@ -73,6 +73,38 @@ func (s *Service) DecryptReport(reportPath string, privateKeyPath string) (*mode
 	return &report, nil
 }
 
+// SaveDecryptedJSON saves decrypted JSON for debugging
+func (s *Service) SaveDecryptedJSON(reportPath string, privateKeyPath string, outputDir string) error {
+	// Get report ID
+	reportID := s.GetReportID(reportPath)
+	debugDir := filepath.Join(outputDir, reportID, "debug")
+
+	// Create debug directory
+	if err := s.storage.CreateDir(debugDir); err != nil {
+		return err
+	}
+
+	// Decrypt and save report JSON
+	if report, err := s.DecryptReport(reportPath, privateKeyPath); err == nil {
+		reportJSON, _ := json.MarshalIndent(report, "", "  ")
+		s.storage.WriteFile(filepath.Join(debugDir, "report.json"), reportJSON)
+	}
+
+	// Decrypt and save judgment JSON
+	if judgment, err := s.DecryptJudgment(reportPath, privateKeyPath); err == nil {
+		judgmentJSON, _ := json.MarshalIndent(judgment, "", "  ")
+		s.storage.WriteFile(filepath.Join(debugDir, "judgment.json"), judgmentJSON)
+	}
+
+	// Decrypt and save amendments JSON
+	if amendments, err := s.DecryptAmendment(reportPath, privateKeyPath); err == nil && len(amendments) > 0 {
+		amendmentsJSON, _ := json.MarshalIndent(amendments, "", "  ")
+		s.storage.WriteFile(filepath.Join(debugDir, "amendments.json"), amendmentsJSON)
+	}
+
+	return nil
+}
+
 // DecryptJudgment decrypts judgment data
 func (s *Service) DecryptJudgment(reportPath string, privateKeyPath string) (*models.Judgment, error) {
 	// Find judgment data file
@@ -200,13 +232,13 @@ func (s *Service) DecryptAttachments(reportPath string, privateKeyPath string, o
 		// Extract relative path from report path
 		absReportPath, _ := filepath.Abs(reportPath)
 		absFilePath, _ := filepath.Abs(file)
-		
+
 		relPath, err := filepath.Rel(absReportPath, absFilePath)
 		if err != nil {
 			// Fallback to basename
 			relPath = filepath.Base(file)
 		}
-		
+
 		// Remove .ravro extension
 		relPath = strings.TrimSuffix(relPath, ".ravro")
 
@@ -233,12 +265,17 @@ func (s *Service) GetReportID(path string) string {
 	parts := strings.Split(filepath.ToSlash(path), "/")
 	for i, part := range parts {
 		if part == "encrypt" && i+1 < len(parts) {
-			return strings.TrimPrefix(parts[i+1], "report-")
+			filename := parts[i+1]
+			// Remove file extension if present
+			filename = strings.TrimSuffix(filename, filepath.Ext(filename))
+			return strings.TrimPrefix(filename, "report-")
 		}
 	}
 
 	// Try to extract from filename
 	base := filepath.Base(path)
+	// Remove file extension if present
+	base = strings.TrimSuffix(base, filepath.Ext(base))
 	if strings.HasPrefix(base, "report-") {
 		return strings.TrimPrefix(base, "report-")
 	}

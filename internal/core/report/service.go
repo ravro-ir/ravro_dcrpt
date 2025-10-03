@@ -70,9 +70,12 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 		}
 	}
 
+	// Save decrypted JSON files for debugging
+	s.decryptService.SaveDecryptedJSON(reportPath, keyPath, outputDir)
+
 	// Generate PDF
 	pdfPath := s.generatePDFPath(outputDir, report)
-	if err := s.pdfGenerator.GenerateReport(report, judgment, pdfPath); err != nil {
+	if err := s.pdfGenerator.GenerateReport(report, judgment, amendments, pdfPath); err != nil {
 		result.Error = err
 		return result, fmt.Errorf("failed to generate PDF: %w", err)
 	}
@@ -85,6 +88,7 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 // ProcessReports processes multiple reports
 func (s *Service) ProcessReports(inputDir string, keyPath string, outputDir string) ([]*ProcessResult, error) {
 	var reportPaths []string
+	var results []*ProcessResult
 
 	// Check if inputDir itself is a report directory (contains report/data.ravro)
 	reportDataPath := filepath.Join(inputDir, "report", "data.ravro")
@@ -106,6 +110,14 @@ func (s *Service) ProcessReports(inputDir string, keyPath string, outputDir stri
 			// Check if already extracted
 			if !s.storage.FileExists(extractPath) {
 				if err := s.decryptService.ProcessZipFile(zipFile, extractPath); err != nil {
+					// Create a failed result for this ZIP file
+					result := &ProcessResult{
+						ReportPath: zipFile,
+						ReportID:   reportID,
+						Success:    false,
+						Error:      fmt.Errorf("failed to extract ZIP: %w", err),
+					}
+					results = append(results, result)
 					continue // Skip files that can't be extracted
 				}
 			}
@@ -126,7 +138,6 @@ func (s *Service) ProcessReports(inputDir string, keyPath string, outputDir stri
 	}
 
 	// Process each report
-	var results []*ProcessResult
 	for _, reportPath := range reportPaths {
 		result, _ := s.ProcessReport(reportPath, keyPath, outputDir)
 		results = append(results, result)

@@ -448,11 +448,9 @@ const HTMLTemplate = `<!DOCTYPE html>
             <div class="card no-break">
                 <div class="card-header"><span class="icon">ℹ️</span>نیاز به اطلاعات بیشتر</div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <p>{{.MoreInfo}}</p>
-                        </div>
-                    </div>
+                    <p>{{.MoreInfo}}</p>
                 </div>
+            </div>
             {{end}}
 </div>
 

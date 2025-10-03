@@ -193,6 +193,11 @@ func displayResults(results []*report.ProcessResult) {
 		}
 
 		fmt.Printf("%-30s %-20s %s\n", result.ReportID, hunter, status)
+
+		// Show error details for failed reports
+		if !result.Success && result.Error != nil {
+			fmt.Printf("   Error: %v\n", result.Error)
+		}
 	}
 
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
