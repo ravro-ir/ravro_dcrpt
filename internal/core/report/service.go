@@ -62,7 +62,7 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 
 	// Decrypt attachments (images, files, etc.)
 	// Attachments should go to the same directory as the PDF
-	pdfDir := filepath.Join(outputDir, report.Slug)
+	pdfDir := filepath.Join(outputDir, result.ReportID)
 	if err := s.storage.CreateDir(pdfDir); err == nil {
 		if err := s.decryptService.DecryptAttachments(reportPath, keyPath, pdfDir); err != nil {
 			// Attachments decryption failure shouldn't stop PDF generation
@@ -73,7 +73,7 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 	// Debug JSON files removed
 
 	// Generate PDF
-	pdfPath := s.generatePDFPath(outputDir, report)
+	pdfPath := s.generatePDFPathWithReportID(outputDir, report, result.ReportID)
 	if err := s.pdfGenerator.GenerateReport(report, judgment, amendments, pdfPath); err != nil {
 		result.Error = err
 		return result, fmt.Errorf("failed to generate PDF: %w", err)
@@ -124,13 +124,15 @@ func (s *Service) ProcessReports(inputDir string, keyPath string, outputDir stri
 			reportPaths = append(reportPaths, extractPath)
 		}
 
-		// Find existing ravro directories (already extracted)
-		ravroFiles, err := s.storage.ListFiles(inputDir, "*.ravro")
-		if err == nil {
-			for _, ravroFile := range ravroFiles {
-				reportDir := filepath.Dir(filepath.Dir(ravroFile)) // Go up two levels from data.ravro
-				if !contains(reportPaths, reportDir) {
-					reportPaths = append(reportPaths, reportDir)
+		// Find existing ravro directories (already extracted) - only if no ZIP files were processed
+		if len(reportPaths) == 0 {
+			ravroFiles, err := s.storage.ListFiles(inputDir, "*.ravro")
+			if err == nil {
+				for _, ravroFile := range ravroFiles {
+					reportDir := filepath.Dir(filepath.Dir(ravroFile)) // Go up two levels from data.ravro
+					if !contains(reportPaths, reportDir) {
+						reportPaths = append(reportPaths, reportDir)
+					}
 				}
 			}
 		}
@@ -153,6 +155,16 @@ func (s *Service) generatePDFPath(outputDir string, report *models.Report) strin
 		report.HunterUsername,
 	)
 	return filepath.Join(outputDir, report.Slug, filename)
+}
+
+// generatePDFPathWithReportID generates the output PDF file path using the actual report ID
+func (s *Service) generatePDFPathWithReportID(outputDir string, report *models.Report, reportID string) string {
+	filename := fmt.Sprintf("%s__%s__%s.pdf",
+		report.CompanyUsername,
+		reportID,
+		report.HunterUsername,
+	)
+	return filepath.Join(outputDir, reportID, filename)
 }
 
 // ProcessResult contains the result of processing a single report
