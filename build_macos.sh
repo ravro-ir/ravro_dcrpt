@@ -74,8 +74,11 @@ export PKG_CONFIG_PATH="$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
 export CGO_CFLAGS="-I$OPENSSL_PREFIX/include"
 export CGO_LDFLAGS="-L$OPENSSL_PREFIX/lib -lssl -lcrypto"
 
-# Set macOS deployment target to avoid version warnings
-export MACOSX_DEPLOYMENT_TARGET="11.0"
+# Set macOS deployment target to match OpenSSL version
+export MACOSX_DEPLOYMENT_TARGET="14.0"
+
+# Alternative: Try with current system version
+# export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f1-2)
 
 # Disable CGO for pure Go build (fallback option)
 # export CGO_ENABLED=0
