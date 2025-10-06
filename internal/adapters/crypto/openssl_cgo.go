@@ -6,8 +6,10 @@ package crypto
 /*
 #cgo linux pkg-config: openssl
 #cgo darwin pkg-config: openssl
-#cgo darwin CFLAGS: -I/opt/homebrew/include -I/usr/local/include -DOPENSSL_API_COMPAT=0x30000000
-#cgo darwin LDFLAGS: -L/opt/homebrew/lib -L/usr/local/lib -lssl -lcrypto
+#cgo darwin,amd64 CFLAGS: -I/usr/local/include -I/usr/local/Cellar/openssl@3/3.5.1/include -DOPENSSL_API_COMPAT=0x30000000
+#cgo darwin,amd64 LDFLAGS: -L/usr/local/lib -L/usr/local/Cellar/openssl@3/3.5.1/lib -lssl -lcrypto
+#cgo darwin,arm64 CFLAGS: -I/opt/homebrew/include -I/opt/homebrew/Cellar/openssl@3/3.5.1/include -DOPENSSL_API_COMPAT=0x30000000
+#cgo darwin,arm64 LDFLAGS: -L/opt/homebrew/lib -L/opt/homebrew/Cellar/openssl@3/3.5.1/lib -lssl -lcrypto
 
 #include <openssl/bio.h>
 #include <openssl/err.h>

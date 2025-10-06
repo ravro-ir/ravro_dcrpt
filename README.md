@@ -302,6 +302,18 @@ go build -ldflags="-s -w -H windowsgui" -o ravro_dcrpt_gui.exe ./cmd/gui
 - Cross-compilation guide
 - Troubleshooting common issues
 
+### 🍎 macOS Special Notes
+
+Due to recent changes in Homebrew, `wkhtmltopdf` has been deprecated. Use our special installation script:
+
+```bash
+# Install wkhtmltopdf for macOS
+./install_wkhtmltopdf_macos.sh
+
+# Then build the project
+./build_macos.sh
+```
+
 ## 🐧 Arch Linux Installation
 ```bash
 git clone https://aur.archlinux.org/ravro_dcrpt-git.git
