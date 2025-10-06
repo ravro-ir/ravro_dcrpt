@@ -267,6 +267,11 @@ For comprehensive build instructions including cross-compilation and troubleshoo
 
 ### Quick Build
 
+**Manually**
+```bash
+cd /home/raminfp/GolandProjects/ravro_dcrpt && openssl smime -decrypt -inform DER -in encrypt/r2025-02-27-xxxx/report/data.ravro -inkey "key/PRIVATETKEY-20250225-1.txt" -out /tmp/decrypted.json
+```
+
 **Linux/macOS:**
 ```bash
 git clone https://github.com/ravro-ir/ravro_dcrpt.git

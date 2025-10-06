@@ -37,6 +37,7 @@ install-deps: ## Install system dependencies (Linux/macOS)
 		sudo apt-get install -y libssl-dev wkhtmltopdf; \
 	elif [ "$(shell uname)" = "Darwin" ]; then \
 		brew install openssl wkhtmltopdf; \
+		echo "🍺 macOS: Use './build_macos.sh' for optimized build"; \
 	fi
 
 test: ## Run tests
