@@ -254,6 +254,7 @@ func (g *GUI) processReports() {
 	defer g.processBtn.Enable()
 
 	g.clearLog()
+	g.progressBar.SetValue(0)
 	g.progressBar.Show()
 	g.log("🚀 Starting processing...")
 
@@ -279,8 +280,14 @@ func (g *GUI) processReports() {
 	g.log(fmt.Sprintf("📂 Processing reports from: %s", inputDir))
 	g.log(fmt.Sprintf("💾 Output directory: %s\n", outputDir))
 
-	// Process reports
-	results, err := g.reportService.ProcessReports(inputDir, actualKeyPath, outputDir)
+	// Process reports with progress callback
+	progressCallback := func(current, total int, reportID string) {
+		progress := float64(current) / float64(total)
+		g.progressBar.SetValue(progress)
+		g.log(fmt.Sprintf("📄 Processing %d/%d: %s", current, total, reportID))
+	}
+
+	results, err := g.reportService.ProcessReportsWithProgress(inputDir, actualKeyPath, outputDir, progressCallback)
 	if err != nil {
 		g.log(fmt.Sprintf("❌ Error: %v", err))
 		dialog.ShowError(err, g.window)
@@ -326,6 +333,7 @@ func (g *GUI) processReports() {
 		g.log(fmt.Sprintf("✨ PDFs generated in: %s", outputDir))
 	}
 
+	g.progressBar.SetValue(1.0) // Set to 100% when complete
 	g.progressBar.Hide()
 
 	// Show completion dialog

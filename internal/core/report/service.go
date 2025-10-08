@@ -9,6 +9,9 @@ import (
 	"ravro_dcrpt/pkg/models"
 )
 
+// ProgressCallback is called during report processing
+type ProgressCallback func(current, total int, reportID string)
+
 // Service handles report processing operations
 type Service struct {
 	decryptService *decrypt.Service
@@ -86,6 +89,11 @@ func (s *Service) ProcessReport(reportPath string, keyPath string, outputDir str
 
 // ProcessReports processes multiple reports
 func (s *Service) ProcessReports(inputDir string, keyPath string, outputDir string) ([]*ProcessResult, error) {
+	return s.ProcessReportsWithProgress(inputDir, keyPath, outputDir, nil)
+}
+
+// ProcessReportsWithProgress processes multiple reports with progress callback
+func (s *Service) ProcessReportsWithProgress(inputDir string, keyPath string, outputDir string, progressCallback ProgressCallback) ([]*ProcessResult, error) {
 	var reportPaths []string
 	var results []*ProcessResult
 
@@ -138,8 +146,17 @@ func (s *Service) ProcessReports(inputDir string, keyPath string, outputDir stri
 		}
 	}
 
+	total := len(reportPaths)
+	
 	// Process each report
-	for _, reportPath := range reportPaths {
+	for i, reportPath := range reportPaths {
+		reportID := s.decryptService.GetReportID(reportPath)
+		
+		// Call progress callback
+		if progressCallback != nil {
+			progressCallback(i+1, total, reportID)
+		}
+		
 		result, _ := s.ProcessReport(reportPath, keyPath, outputDir)
 		results = append(results, result)
 	}
