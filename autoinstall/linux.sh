@@ -54,14 +54,14 @@ echo "[+++]"
 echo "[+++] wkhtmltopdf installation process completed."
 echo "[+++]"
 
-echo "[+++] Downloading Ravro Decrypt Tools..."
-wget -q https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/linux_x64_ravro_dcrpt.zip
+# echo "[+++] Downloading Ravro Decrypt Tools..."
+# wget -q https://github.com/ravro-ir/ravro_dcrpt/releases/download/v1.0.4/linux_x64_ravro_dcrpt.zip
 
-echo "[+++] Extracting Ravro Decrypt Tools..."
-unzip -q -o linux_x64_ravro_dcrpt.zip
-echo "[+++] Creating directories..."
-mkdir encrypt decrypt key
-echo "[+++] Cleanup..."
-rm -rf linux_x64_ravro_dcrpt.zip wkhtmltox_0.12.6-1.focal_amd64.deb
+# echo "[+++] Extracting Ravro Decrypt Tools..."
+# unzip -q -o linux_x64_ravro_dcrpt.zip
+# echo "[+++] Creating directories..."
+# mkdir encrypt decrypt key
+# echo "[+++] Cleanup..."
+# rm -rf linux_x64_ravro_dcrpt.zip wkhtmltox_0.12.6-1.focal_amd64.deb
 
 echo "[+++] Installation complete!"
