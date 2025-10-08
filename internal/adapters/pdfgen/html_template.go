@@ -6,7 +6,7 @@ const HTMLTemplate = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <title>گزارش آسیب‌پذیری - {{.ReportID}}</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+        /* Removed Google Fonts for security - using local fonts only */
 
         * {
             margin: 0;
@@ -15,7 +15,7 @@ const HTMLTemplate = `<!DOCTYPE html>
         }
 
         body {
-            font-family: 'Vazirmatn', 'B Nazanin', Tahoma, Arial, sans-serif;
+            font-family: 'Vazirmatn', 'B Nazanin', 'Iranian Sans', 'Tahoma', Arial, sans-serif;
             line-height: 1.6;
             color: #333333;
             background: #ffffff;

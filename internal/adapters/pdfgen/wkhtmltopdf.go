@@ -57,11 +57,28 @@ func (g *WKHTMLToPDFGenerator) GenerateReport(report *models.Report, judgment *m
 
 	g.body = buf.String()
 
-	// Clean up HTML entities
+	// Clean up HTML entities and sanitize content
 	g.body = strings.ReplaceAll(g.body, "&#34;&lt;", "<")
 	g.body = strings.ReplaceAll(g.body, "&gt;", ">")
 	g.body = strings.ReplaceAll(g.body, "&lt;", "<")
 	g.body = strings.ReplaceAll(g.body, "&#34;", "")
+
+	// Sanitize any potential file path references that might contain Persian text
+	// Replace any standalone Persian words that might be interpreted as file paths
+	g.body = strings.ReplaceAll(g.body, "file:///", "")
+	g.body = strings.ReplaceAll(g.body, "href=\"کردن", "href=\"#")
+	g.body = strings.ReplaceAll(g.body, "src=\"کردن", "src=\"#")
+
+	// More aggressive sanitization - remove any potential file references with Persian text
+	g.body = strings.ReplaceAll(g.body, "کردن", "انجام") // Replace with safe alternative
+
+	// Remove any malformed URLs or file references
+	g.body = strings.ReplaceAll(g.body, "href=\"\"", "href=\"#\"")
+	g.body = strings.ReplaceAll(g.body, "src=\"\"", "src=\"#\"")
+
+	// Ensure no empty or problematic attributes
+	g.body = strings.ReplaceAll(g.body, "href=", "href=\"#\" data-orig=")
+	g.body = strings.ReplaceAll(g.body, "src=", "src=\"#\" data-orig=")
 
 	// Generate PDF
 	return g.generatePDF(outputPath)
@@ -74,17 +91,21 @@ func (g *WKHTMLToPDFGenerator) generatePDF(pdfPath string) error {
 		return fmt.Errorf("HTML content is empty")
 	}
 
-	// Create temporary directory
-	tmpPath := "template/"
+	// Create temporary directory in system temp
+	tmpDir := os.TempDir()
+	tmpPath := filepath.Join(tmpDir, "ravro_template")
 	if _, err := os.Stat(tmpPath); os.IsNotExist(err) {
-		if err := os.Mkdir(tmpPath, 0755); err != nil {
+		if err := os.MkdirAll(tmpPath, 0755); err != nil {
 			return fmt.Errorf("failed to create temp directory: %w", err)
 		}
 	}
 
-	// Write HTML to temp file
+	// Write HTML to temp file with safe filename
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
-	htmlFileName := tmpPath + timestamp + ".html"
+	htmlFileName := filepath.Join(tmpPath, "report_"+timestamp+".html")
+
+	// Removed debug logging for cleaner output
+
 	if err := os.WriteFile(htmlFileName, []byte(g.body), 0644); err != nil {
 		return fmt.Errorf("failed to write HTML file: %w", err)
 	}
@@ -92,8 +113,7 @@ func (g *WKHTMLToPDFGenerator) generatePDF(pdfPath string) error {
 	// Remove HTML file after PDF generation
 	defer func() {
 		os.Remove(htmlFileName)
-		// Try to remove template directory if empty
-		os.Remove(tmpPath)
+		// Don't remove system temp directory
 	}()
 
 	// Create PDF generator
@@ -116,10 +136,24 @@ func (g *WKHTMLToPDFGenerator) generatePDF(pdfPath string) error {
 	page.FooterFontSize.Set(10)
 	page.Zoom.Set(0.95)
 
-	// Enable loading external resources (fonts from Google, etc.)
-	page.EnableLocalFileAccess.Set(true)
+	// Set base URL to prevent relative path resolution issues
+	page.Allow.Set(tmpPath)
+
+	// Security-first settings - disable all external access
+	page.EnableLocalFileAccess.Set(false) // Prevent access to local files
 	page.LoadErrorHandling.Set("ignore")
 	page.LoadMediaErrorHandling.Set("ignore")
+
+	// Disable JavaScript completely for security
+	page.DisableJavascript.Set(true)
+	page.DebugJavascript.Set(false)
+
+	// Disable all external connections
+	page.DisableExternalLinks.Set(true)
+	page.DisableInternalLinks.Set(true)
+
+	// Additional security settings
+	page.PrintMediaType.Set(true) // Use print media type for consistency
 
 	pdfg.AddPage(page)
 
