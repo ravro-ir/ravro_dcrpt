@@ -255,11 +255,6 @@ For comprehensive build instructions including cross-compilation and troubleshoo
 
 ### Quick Build
 
-**⚠️ Deprecated Manual Method**
-```bash
-# This manual method is deprecated - use the GUI or CLI application instead
-cd /home/raminfp/GolandProjects/ravro_dcrpt && openssl smime -decrypt -inform DER -in encrypt/r2025-02-27-xxxx/report/data.ravro -inkey "key/PRIVATETKEY-20250225-1.txt" -out /tmp/decrypted.json
-```
 
 **Linux/macOS:**
 ```bash
