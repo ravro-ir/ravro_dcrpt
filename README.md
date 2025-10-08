@@ -8,9 +8,10 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
 
 ## ⚡ Quick Start
 
-1. **Download** the latest release for your platform from [Releases](https://github.com/ravro-ir/ravro_dcrpt/releases)
-2. **For GUI users**: Double-click `ravro_dcrpt_gui.exe` and use the visual interface
-3. **For CLI users**: Run `./ravro_dcrpt -init` to set up directories, then `./ravro_dcrpt` for interactive mode
+1. **Install prerequisites** using the autoinstall scripts (see Installation section)
+2. **Download** the latest release for your platform from [Releases](https://github.com/ravro-ir/ravro_dcrpt/releases)
+3. **For GUI users**: Double-click `ravro_dcrpt_gui` and use the visual interface
+4. **For CLI users**: Run `./ravro_dcrpt -init` to set up directories, then `./ravro_dcrpt` for interactive mode
 
 ## ✨ Features
 
@@ -43,53 +44,36 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
 
 ## 🛠️ Installation
 
+### Prerequisites Installation
 
-### Automated Installation
+Before using ravro_dcrpt, you need to install the required dependencies on your system.
 
-#### Linux
+#### Linux (Ubuntu/Debian)
 ```bash
 wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/linux.sh -O - | sh
 ```
 
-#### Windows
-```bash
-Ps> curl -L -o win64.bat https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat
-
-Ps> .\win64.bat
-[+++] Downloading OpenSSL Libraries...
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 6445k  100 6445k    0     0  2571k      0  0:00:02  0:00:02 --:--:-- 8572k
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 1224k  100 1224k    0     0  46645      0  0:00:26  0:00:26 --:--:-- 51891
-[+++] Downloading wkhtmltox Library...
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 28.7M  100 28.7M    0     0  2247k      0  0:00:13  0:00:13 --:--:-- 1839k
-[+++] Downloading Ravro Decrypt Tools...
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 6100k  100 6100k    0     0  33418      0  0:03:06  0:03:06 --:--:-- 29295
-[+++] Extracting Ravro Decrypt Tools...
-[+++] Cleanup...
-[+++] Installation complete!
-
-```
-Or
-```bash
-Ps> Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ravro-tr/ravro_dcrpt/refs/heads/main/autoinstall/win64.bat" -OutFile "win64.bat"
-Ps> .\win64.bat
-```
+This script will install:
+- Build tools (build-essential, checkinstall, zlib1g-dev)
+- OpenSSL development libraries
+- wkhtmltopdf for PDF generation
+- Additional dependencies (unzip, wget, xfonts-75dpi)
 
 #### macOS
 ```bash
 wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/darwin.sh -O - | sh
 ```
+
+This script will install:
+- Homebrew dependencies (if Homebrew is available)
+- OpenSSL, unzip, wget, pkg-config
+- Required build tools
+
+**Note:** Make sure you have Homebrew installed first. Visit [https://brew.sh](https://brew.sh) for installation instructions.
+
+### Download Application
+
+After installing prerequisites, download the latest release for your platform from [Releases](https://github.com/ravro-ir/ravro_dcrpt/releases)
 
 ## 📂 Project Structure
 
@@ -142,7 +126,7 @@ ravro_dcrpt/
 
 ### GUI Application (Recommended for Desktop Users)
 
-Simply double-click `ravro_dcrpt_gui.exe` (Windows) or `ravro_dcrpt_gui` (Linux/macOS) to launch the graphical interface.
+Simply double-click `ravro_dcrpt_gui` to launch the graphical interface.
 
 **Features:**
 - 📁 **Large file browsers** (1000×700) - Browse and select directories/files easily
@@ -279,22 +263,6 @@ cd ravro_dcrpt
 make build
 ```
 
-**Windows:**
-```powershell
-git clone https://github.com/ravro-ir/ravro_dcrpt.git
-cd ravro_dcrpt
-
-# Set environment variables (one-time setup)
-$env:PATH="C:/OpenSSL-Win64/bin;C:/wkhtmltox/bin;$env:PATH"
-$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include -IC:/wkhtmltox/include"
-$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -LC:/wkhtmltox/lib -L/C:/wkhtmltox/bin -lssl -lcrypto -lws2_32 -lcrypt32 -lwkhtmltox"
-
-# Build CLI
-go build -ldflags="-s -w" -o ravro_dcrpt.exe ./cmd/cli
-
-# Build GUI (without console window)
-go build -ldflags="-s -w -H windowsgui" -o ravro_dcrpt_gui.exe ./cmd/gui
-```
 
 **📘 See [BUILD.md](BUILD.md) for:**
 - Prerequisites and dependencies
@@ -335,7 +303,6 @@ makepkg -sri
 #### 🎨 **GUI Improvements**
 - 🖥️ Added full-featured GUI application with Fyne framework
 - 📂 Large file browser dialogs (1000×700) for easier navigation
-- 🪟 Windows GUI without console window (`-H windowsgui` flag)
 - ✅ Real-time validation and status updates
 - 📊 Live processing logs and progress tracking
 - 🎯 Window size optimization (800×600 main window)
