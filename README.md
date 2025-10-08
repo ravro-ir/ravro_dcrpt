@@ -128,6 +128,8 @@ ravro_dcrpt/
 
 Simply double-click `ravro_dcrpt_gui` to launch the graphical interface.
 
+![GUI Screenshot](gui_screenshot.png)
+
 **Features:**
 - 📁 **Large file browsers** (1000×700) - Browse and select directories/files easily
 - 🔑 **Key validation** - Validate private key before processing
@@ -251,8 +253,9 @@ For comprehensive build instructions including cross-compilation and troubleshoo
 
 ### Quick Build
 
-**Manually**
+**⚠️ Deprecated Manual Method**
 ```bash
+# This manual method is deprecated - use the GUI or CLI application instead
 cd /home/raminfp/GolandProjects/ravro_dcrpt && openssl smime -decrypt -inform DER -in encrypt/r2025-02-27-xxxx/report/data.ravro -inkey "key/PRIVATETKEY-20250225-1.txt" -out /tmp/decrypted.json
 ```
 
@@ -282,12 +285,6 @@ Due to recent changes in Homebrew, `wkhtmltopdf` has been deprecated. Use our sp
 ./build_macos.sh
 ```
 
-## 🐧 Arch Linux Installation
-```bash
-git clone https://aur.archlinux.org/ravro_dcrpt-git.git
-cd ravro_dcrpt-git
-makepkg -sri
-```
 
 ## 📋 Changelog
 
