@@ -92,8 +92,12 @@ jobs:
 
       - name: Install macOS dependencies
         run: |
-          brew update
-          brew install openssl@3
+          # Install OpenSSL
+          if ! brew list openssl@3 &>/dev/null; then
+            brew install openssl@3
+          else
+            echo "OpenSSL@3 is already installed"
+          fi
           
           # Install wkhtmltopdf
           if ! command -v wkhtmltopdf &> /dev/null; then
