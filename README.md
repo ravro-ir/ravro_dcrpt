@@ -44,36 +44,61 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
 
 ## 🛠️ Installation
 
-### Prerequisites Installation
+### Quick Installation (Recommended)
 
-Before using ravro_dcrpt, you need to install the required dependencies on your system.
+We provide automated installation scripts that install all required dependencies for running the GUI application.
 
-#### Linux (Ubuntu/Debian)
+#### Linux
 ```bash
-wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/linux.sh -O - | sh
+# Download and run the installation script
+curl -O https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/install-linux.sh
+chmod +x install-linux.sh
+./install-linux.sh
 ```
 
-This script will install:
-- Build tools (build-essential, checkinstall, zlib1g-dev)
-- OpenSSL development libraries
-- wkhtmltopdf for PDF generation
-- Additional dependencies (unzip, wget, xfonts-75dpi)
+**Supported distributions:**
+- Ubuntu / Debian / Linux Mint / Pop!_OS
+- Fedora / RHEL / CentOS / Rocky / AlmaLinux  
+- Arch Linux / Manjaro
+- openSUSE / SLES
 
 #### macOS
 ```bash
-wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/darwin.sh -O - | sh
+# Download and run the installation script
+curl -O https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/install-macos.sh
+chmod +x install-macos.sh
+./install-macos.sh
 ```
 
-This script will install:
-- Homebrew dependencies (if Homebrew is available)
-- OpenSSL, unzip, wget, pkg-config
-- Required build tools
-
-**Note:** Make sure you have Homebrew installed first. Visit [https://brew.sh](https://brew.sh) for installation instructions.
+**Note:** The script will automatically install Homebrew if not present.
 
 ### Download Application
 
-After installing prerequisites, download the latest release for your platform from [Releases](https://github.com/ravro-ir/ravro_dcrpt/releases)
+After installing prerequisites, download the latest release for your platform:
+
+**Linux (x86_64):**
+```bash
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-linux-amd64.tar.gz
+tar -xzf ravro_dcrpt-linux-amd64.tar.gz
+chmod +x ravro_dcrpt_gui
+./ravro_dcrpt_gui
+```
+
+**macOS (Intel):**
+```bash
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-amd64.tar.gz
+tar -xzf ravro_dcrpt-darwin-amd64.tar.gz
+open "Ravro Decryption Tool.app"
+```
+
+**macOS (Apple Silicon):**
+```bash
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-arm64.tar.gz
+tar -xzf ravro_dcrpt-darwin-arm64.tar.gz
+open "Ravro Decryption Tool.app"
+```
+
+📖 **For detailed installation instructions, troubleshooting, and manual installation, see [INSTALL.md](INSTALL.md)**
 
 ## 📂 Project Structure
 
