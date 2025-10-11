@@ -172,40 +172,6 @@ Simply double-click `ravro_dcrpt_gui` to launch the graphical interface.
 4. Click "🚀 Start Processing" to decrypt and generate PDFs
 5. Check the log area for detailed progress and any errors
 
-### ⚠️ CLI Application (Deprecated - Legacy Version)
-
-**Note:** The CLI version is from older releases and is now deprecated. Please use the **GUI Application** above for the best experience with all latest features.
-
-#### Interactive Mode
-```bash
-$ ./ravro_dcrpt -init        # Initialize directories
-$ ./ravro_dcrpt              # Run in interactive mode
-```
-
-#### Command-Line Mode
-```bash
-# Process a single report
-$ ./ravro_dcrpt -in=encrypt/report.zip -out=decrypt -key=key/private.pem
-
-# Process multiple reports in a directory
-$ ./ravro_dcrpt -in=encrypt -out=decrypt -key=key
-
-# Process with JSON export
-$ ./ravro_dcrpt -in=encrypt -out=decrypt -key=key -json
-```
-
-#### Additional Commands
-```bash
-# Initialize directories (create encrypt/, decrypt/, key/)
-$ ./ravro_dcrpt -init
-
-# View version
-$ ./ravro_dcrpt -version
-
-# Get help
-$ ./ravro_dcrpt -help
-```
-
 ### 📄 Generated PDF Features
 
 The generated PDF reports include:
