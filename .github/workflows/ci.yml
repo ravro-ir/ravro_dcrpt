@@ -10,9 +10,6 @@ jobs:
   build-quick-linux:
     name: Quick Build (Linux)
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,8 +20,7 @@ jobs:
           go-version: '1.23'
           cache: true
 
-      - name: Install Linux dependencies (amd64)
-        if: matrix.arch == 'amd64'
+      - name: Install Linux dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -39,42 +35,15 @@ jobs:
             libssl-dev \
             pkg-config
 
-      - name: Install Linux dependencies (arm64)
-        if: matrix.arch == 'arm64'
-        run: |
-          sudo dpkg --add-architecture arm64
-          sudo apt-get update
-          sudo apt-get install -y \
-            gcc-aarch64-linux-gnu \
-            g++-aarch64-linux-gnu \
-            libgl1-mesa-dev:arm64 \
-            libx11-dev:arm64 \
-            libxcursor-dev:arm64 \
-            libxrandr-dev:arm64 \
-            libxinerama-dev:arm64 \
-            libxi-dev:arm64 \
-            libssl-dev:arm64 \
-            pkg-config
-
       - name: Install Go dependencies
         run: |
           go mod download
 
-      - name: Build GUI (amd64)
-        if: matrix.arch == 'amd64'
+      - name: Build GUI
         run: |
           CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui ./cmd/gui
 
-      - name: Build GUI (arm64)
-        if: matrix.arch == 'arm64'
-        env:
-          CC: aarch64-linux-gnu-gcc
-          CXX: aarch64-linux-gnu-g++
-        run: |
-          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o build/ravro_dcrpt_gui ./cmd/gui
-
-      - name: Verify GUI binary exists (amd64 only)
-        if: matrix.arch == 'amd64'
+      - name: Verify GUI binary exists
         run: |
           ls -lh build/ravro_dcrpt_gui
 
