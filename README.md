@@ -72,6 +72,16 @@ chmod +x install-macos.sh
 
 **Note:** The script will automatically install Homebrew if not present.
 
+#### Windows
+```powershell
+# Download the installation script from GitHub
+# Then run PowerShell as Administrator:
+Set-ExecutionPolicy Bypass -Scope Process -Force
+.\install-windows.ps1
+```
+
+**Note:** Must be run as Administrator. The script will install Chocolatey, OpenSSL, and wkhtmltopdf.
+
 ### Download Application
 
 After installing prerequisites, download the latest release for your platform:
@@ -96,6 +106,13 @@ open "Ravro Decryption Tool.app"
 wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-arm64.tar.gz
 tar -xzf ravro_dcrpt-darwin-arm64.tar.gz
 open "Ravro Decryption Tool.app"
+```
+
+**Windows:**
+```powershell
+# Download from GitHub Releases
+# Extract the zip file, then run:
+.\ravro_dcrpt_gui.exe
 ```
 
 📖 **For detailed installation instructions, troubleshooting, and manual installation, see [INSTALL.md](INSTALL.md)**

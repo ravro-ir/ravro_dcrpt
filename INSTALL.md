@@ -17,6 +17,11 @@
 - **OpenSSL@3**
 - **wkhtmltopdf** (برای تولید PDF)
 
+### Windows
+- **Chocolatey** (مدیر بسته Windows)
+- **OpenSSL** (libssl / libcrypto)
+- **wkhtmltopdf** (برای تولید PDF)
+
 ---
 
 ## 🚀 نصب خودکار (توصیه می‌شود)
@@ -58,6 +63,26 @@ chmod +x install-macos.sh
 - OpenSSL@3 را نصب می‌کند
 - wkhtmltopdf را نصب می‌کند
 
+### Windows
+
+1. دانلود اسکریپت نصب:
+   - به [صفحه GitHub](https://github.com/ravro-ir/ravro_dcrpt) بروید
+   - فایل `install-windows.ps1` را دانلود کنید
+
+2. اجرای اسکریپت نصب (به عنوان Administrator):
+```powershell
+# Right-click PowerShell → Run as Administrator
+Set-ExecutionPolicy Bypass -Scope Process -Force
+.\install-windows.ps1
+```
+
+این اسکریپت به صورت خودکار:
+- Chocolatey را نصب می‌کند (در صورت نیاز)
+- OpenSSL را نصب می‌کند
+- wkhtmltopdf را نصب می‌کند
+
+**نکته:** حتماً PowerShell را به عنوان Administrator اجرا کنید.
+
 ---
 
 ## 📦 دانلود نرم‌افزار
@@ -81,6 +106,9 @@ tar -xzf ravro_dcrpt-darwin-amd64.tar.gz
 wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-arm64.tar.gz
 tar -xzf ravro_dcrpt-darwin-arm64.tar.gz
 ```
+
+### Windows
+از صفحه [Releases](https://github.com/ravro-ir/ravro_dcrpt/releases) فایل `ravro_dcrpt-windows-amd64.zip` را دانلود کرده و Extract کنید.
 
 ---
 
@@ -109,6 +137,25 @@ open "Ravro Decryption Tool.app"
 1. به `System Preferences` → `Security & Privacy` بروید
 2. در تب `General` روی `Open Anyway` کلیک کنید
 3. دوباره برنامه را اجرا کنید
+
+### Windows
+
+```powershell
+# Extract کردن فایل zip
+Expand-Archive -Path ravro_dcrpt-windows-amd64.zip -DestinationPath ravro_dcrpt
+
+# اجرای برنامه
+cd ravro_dcrpt
+.\ravro_dcrpt_gui.exe
+```
+
+یا دابل‌کلیک روی `ravro_dcrpt_gui.exe` در File Explorer.
+
+**هشدار امنیتی Windows:**
+در اولین اجرا، Windows Defender SmartScreen ممکن است هشدار دهد:
+
+1. روی `More info` کلیک کنید
+2. روی `Run anyway` کلیک کنید
 
 ---
 
@@ -173,6 +220,19 @@ brew install openssl@3
 brew install --cask wkhtmltopdf
 ```
 
+### Windows (با Chocolatey)
+
+```powershell
+# نصب Chocolatey (در صورت نیاز) - به عنوان Administrator
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+# نصب dependencies
+choco install -y openssl
+choco install -y wkhtmltopdf
+```
+
 ---
 
 ## 🐛 عیب‌یابی
@@ -214,6 +274,26 @@ brew install --cask wkhtmltopdf
 **راه حل:**
 ```bash
 xattr -cr "Ravro Decryption Tool.app"
+```
+
+### Windows: DLL not found errors
+
+**راه حل:**
+اطمینان حاصل کنید که OpenSSL نصب شده است:
+```powershell
+choco install -y openssl
+```
+
+سپس فایل‌های DLL را کپی کنید:
+```powershell
+copy "C:\Program Files\OpenSSL-Win64\bin\*.dll" .
+```
+
+### Windows: wkhtmltopdf not found
+
+**راه حل:**
+```powershell
+choco install -y wkhtmltopdf
 ```
 
 ---

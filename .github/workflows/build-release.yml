@@ -186,9 +186,87 @@ jobs:
           path: build/ravro_dcrpt-darwin-${{ matrix.arch }}.tar.gz
           retention-days: 7
 
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install Windows dependencies
+        shell: powershell
+        run: |
+          # Install Chocolatey packages
+          choco install -y openssl
+          choco install -y wkhtmltopdf
+          
+          # Verify installations
+          Write-Host "Checking OpenSSL..."
+          Get-Command openssl
+          
+          Write-Host "Checking wkhtmltopdf..."
+          Get-Command wkhtmltopdf
+
+      - name: Set up environment variables
+        shell: powershell
+        run: |
+          # Set OpenSSL paths
+          $env:OPENSSL_DIR = "C:\Program Files\OpenSSL-Win64"
+          echo "OPENSSL_DIR=$env:OPENSSL_DIR" >> $env:GITHUB_ENV
+          
+          # Add to PATH
+          echo "C:\Program Files\OpenSSL-Win64\bin" >> $env:GITHUB_PATH
+          echo "C:\Program Files\wkhtmltopdf\bin" >> $env:GITHUB_PATH
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+          go mod tidy
+
+      - name: Build GUI for Windows
+        shell: powershell
+        run: |
+          $env:CGO_ENABLED = "1"
+          go build -ldflags="-s -w -H windowsgui" -o build/ravro_dcrpt_gui.exe ./cmd/gui
+
+      - name: Copy runtime DLLs
+        shell: powershell
+        run: |
+          # Create build directory if not exists
+          New-Item -ItemType Directory -Force -Path build
+          
+          # Copy OpenSSL DLLs
+          if (Test-Path "C:\Program Files\OpenSSL-Win64\bin\libssl-3-x64.dll") {
+            Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libssl-3-x64.dll" build/
+            Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libcrypto-3-x64.dll" build/
+          }
+          
+          # Copy any local DLLs from lib/ if they exist
+          if (Test-Path "lib\*.dll") {
+            Copy-Item lib\*.dll build\
+          }
+
+      - name: Create zip archive
+        shell: powershell
+        run: |
+          Compress-Archive -Path build\ravro_dcrpt_gui.exe, build\*.dll -DestinationPath build\ravro_dcrpt-windows-amd64.zip -Force
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-amd64
+          path: build/ravro_dcrpt-windows-amd64.zip
+          retention-days: 7
+
   create-release:
     name: Create GitHub Release
-    needs: [build-linux, build-macos]
+    needs: [build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -207,6 +285,7 @@ jobs:
             artifacts/linux-amd64/*.tar.gz
             artifacts/macos-amd64/*.tar.gz
             artifacts/macos-arm64/*.tar.gz
+            artifacts/windows-amd64/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true

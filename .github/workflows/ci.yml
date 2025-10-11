@@ -104,3 +104,45 @@ jobs:
         run: |
           ls -lh build/ravro_dcrpt_gui-${{ matrix.arch }}
 
+  build-quick-windows:
+    name: Quick Build (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install Windows dependencies
+        shell: powershell
+        run: |
+          choco install -y openssl
+          choco install -y wkhtmltopdf
+
+      - name: Set up environment variables
+        shell: powershell
+        run: |
+          $env:OPENSSL_DIR = "C:\Program Files\OpenSSL-Win64"
+          echo "OPENSSL_DIR=$env:OPENSSL_DIR" >> $env:GITHUB_ENV
+          echo "C:\Program Files\OpenSSL-Win64\bin" >> $env:GITHUB_PATH
+          echo "C:\Program Files\wkhtmltopdf\bin" >> $env:GITHUB_PATH
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+
+      - name: Build GUI
+        shell: powershell
+        run: |
+          $env:CGO_ENABLED = "1"
+          go build -o build/ravro_dcrpt_gui.exe ./cmd/gui
+
+      - name: Verify GUI binary exists
+        shell: powershell
+        run: |
+          Get-ChildItem build/ravro_dcrpt_gui.exe
+
