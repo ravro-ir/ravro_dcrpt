@@ -126,9 +126,18 @@ jobs:
       - name: Set up environment variables
         shell: powershell
         run: |
-          $env:OPENSSL_DIR = "C:\Program Files\OpenSSL-Win64"
-          echo "OPENSSL_DIR=$env:OPENSSL_DIR" >> $env:GITHUB_ENV
-          echo "C:\Program Files\OpenSSL-Win64\bin" >> $env:GITHUB_PATH
+          # Set OpenSSL paths
+          $OPENSSL_DIR = "C:\Program Files\OpenSSL-Win64"
+          echo "OPENSSL_DIR=$OPENSSL_DIR" >> $env:GITHUB_ENV
+          
+          # Set CGO flags for OpenSSL
+          $CGO_CFLAGS = "-I`"$OPENSSL_DIR\include`""
+          $CGO_LDFLAGS = "-L`"$OPENSSL_DIR\lib`" -lssl -lcrypto"
+          echo "CGO_CFLAGS=$CGO_CFLAGS" >> $env:GITHUB_ENV
+          echo "CGO_LDFLAGS=$CGO_LDFLAGS" >> $env:GITHUB_ENV
+          
+          # Add to PATH
+          echo "$OPENSSL_DIR\bin" >> $env:GITHUB_PATH
           echo "C:\Program Files\wkhtmltopdf\bin" >> $env:GITHUB_PATH
 
       - name: Install Go dependencies
