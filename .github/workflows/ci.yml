@@ -127,18 +127,19 @@ jobs:
         shell: powershell
         run: |
           # Set OpenSSL paths
-          $OPENSSL_DIR = "C:\Program Files\OpenSSL-Win64"
+          $OPENSSL_DIR = "C:/Program Files/OpenSSL-Win64"
+          $OPENSSL_INCLUDE = "$OPENSSL_DIR/include"
+          $OPENSSL_LIB = "$OPENSSL_DIR/lib"
+          
           echo "OPENSSL_DIR=$OPENSSL_DIR" >> $env:GITHUB_ENV
           
-          # Set CGO flags for OpenSSL
-          $CGO_CFLAGS = "-I`"$OPENSSL_DIR\include`""
-          $CGO_LDFLAGS = "-L`"$OPENSSL_DIR\lib`" -lssl -lcrypto"
-          echo "CGO_CFLAGS=$CGO_CFLAGS" >> $env:GITHUB_ENV
-          echo "CGO_LDFLAGS=$CGO_LDFLAGS" >> $env:GITHUB_ENV
+          # Set CGO flags for OpenSSL (use forward slashes and proper escaping)
+          echo "CGO_CFLAGS=-I`"$OPENSSL_INCLUDE`"" >> $env:GITHUB_ENV
+          echo "CGO_LDFLAGS=-L`"$OPENSSL_LIB`" -lssl -lcrypto" >> $env:GITHUB_ENV
           
-          # Add to PATH
-          echo "$OPENSSL_DIR\bin" >> $env:GITHUB_PATH
-          echo "C:\Program Files\wkhtmltopdf\bin" >> $env:GITHUB_PATH
+          # Add to PATH (use forward slashes)
+          echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
+          echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
 
       - name: Install Go dependencies
         run: |
