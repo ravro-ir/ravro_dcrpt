@@ -298,75 +298,7 @@ Due to recent changes in Homebrew, `wkhtmltopdf` has been deprecated. Use our sp
 
 ## 📋 Changelog
 
-### v2.0.0 - Major Rewrite (2025-02-02)
-
-#### 🏗️ **Architecture Overhaul**
-- ✨ Complete rewrite using **Clean Architecture** pattern
-- 📦 Modular design with clear separation of concerns
-- 🔌 Port & Adapter pattern for better testability
-- 🧹 Removed legacy code (23 old files cleaned up)
-- 📁 New project structure: `cmd/`, `internal/`, `pkg/`
-
-#### 🎨 **GUI Improvements**
-- 🖥️ Added full-featured GUI application with Fyne framework
-- 📂 Large file browser dialogs (1000×700) for easier navigation
-- ✅ Real-time validation and status updates
-- 📊 Live processing logs and progress tracking
-- 🎯 Window size optimization (800×600 main window)
-
-#### 📄 **PDF Generation Enhancements**
-- 📅 **Automatic date conversion** - Gregorian to Persian (Shamsi/Jalali)
-- 💰 **Formatted amounts** with thousand separators (e.g., 10,500,000 ریال)
-- 📎 **Attachment tables** - Files displayed in organized tables with types
-- 🎨 **Modern styling** - Professional design with Vazirmatn font
-- 🌐 **Google Fonts integration** - Beautiful Persian typography
-- ⚖️ **Conditional sections** - Judge info only shown when available
-- 🔧 **Improved wkhtmltopdf integration** with external resource loading
-
-#### 🔐 **Crypto & Security**
-- 🔧 Fixed OpenSSL Windows CGO integration
-- 📝 Added proper include headers for SSL initialization
-- 🔑 Improved key validation and error handling
-- 🛡️ PKCS7 decryption with native performance
-
-#### 📚 **Documentation**
-- 📝 Comprehensive [BUILD.md](BUILD.md) documentation
-- 🔨 Platform-specific build instructions
-- 🌍 Cross-compilation guide
-- 🐛 Troubleshooting section
-- 🏗️ Improved Makefile with clear targets
-
-#### 🐛 **Bug Fixes**
-- ✅ Fixed attachment decryption (all `.ravro` files now processed)
-- ✅ Fixed JSON field mapping (camelCase vs snake_case)
-- ✅ Fixed report directory detection (direct folder processing)
-- ✅ Removed unnecessary debug HTML files
-- ✅ Corrected PDF generation with proper data population
-
-#### 🛠️ **Developer Experience**
-- 🚀 Faster build times with optimized dependencies
-- 📦 `go mod tidy` for clean dependency management
-- 🎯 Better error messages and logging
-- 🔍 Improved code organization and readability
-
-### v1.0.4
-- Use CGO for OpenSSL and wkhtmltopdf
-
-### v1.0.3
-- Multi-zip file decryption support
-- Improved key selection process
-- Enhanced path handling
-- Comprehensive error handling
-- Code refactoring
-
-### v1.0.2
-- Added logging capabilities
-- Implemented loading spinner
-- Added update functionality
-- Improved PDF generation performance
-- JSON conversion support
-- Project packaging
-- Bug fixes
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes and version history.
 
 ## 📄 License
 
