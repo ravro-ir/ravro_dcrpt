@@ -120,70 +120,69 @@ jobs:
       - name: Install Windows dependencies
         shell: powershell
         run: |
-          choco install -y openssl
+          # Install wkhtmltopdf
           choco install -y wkhtmltopdf
-
-      - name: Debug OpenSSL installation
-        shell: powershell
-        run: |
-          Write-Host "=== Searching for OpenSSL installation ==="
           
-          # Check common locations
-          $locations = @(
-            "C:/Program Files/OpenSSL-Win64",
-            "C:/Program Files/OpenSSL",
-            "C:/OpenSSL-Win64",
-            "C:/OpenSSL"
-          )
+          # Download and install OpenSSL manually for more control
+          Write-Host "Downloading OpenSSL..."
+          $OPENSSL_VERSION = "3_4_0"
+          $OPENSSL_URL = "https://slproweb.com/download/Win64OpenSSL-${OPENSSL_VERSION}.exe"
+          $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
           
-          foreach ($loc in $locations) {
-            if (Test-Path $loc) {
-              Write-Host "Found: $loc"
-              Write-Host "Directory structure:"
-              Get-ChildItem -Path $loc -Recurse -Depth 2 | Select-Object FullName
-            }
-          }
+          Invoke-WebRequest -Uri $OPENSSL_URL -OutFile $OPENSSL_INSTALLER
           
-          # Check if openssl is in PATH
-          Write-Host "`n=== OpenSSL command check ==="
-          try {
-            $opensslPath = Get-Command openssl -ErrorAction Stop
-            Write-Host "OpenSSL executable: $($opensslPath.Source)"
-          } catch {
-            Write-Host "OpenSSL not found in PATH"
+          Write-Host "Installing OpenSSL to C:\OpenSSL-Win64..."
+          Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=C:\OpenSSL-Win64" -Wait -NoNewWindow
+          
+          Write-Host "OpenSSL installation complete"
+          
+          # Verify installation
+          if (Test-Path "C:\OpenSSL-Win64") {
+            Write-Host "✅ OpenSSL installed successfully at C:\OpenSSL-Win64"
+            Get-ChildItem "C:\OpenSSL-Win64" | Select-Object Name
+          } else {
+            Write-Host "❌ OpenSSL installation failed"
+            exit 1
           }
 
       - name: Set up environment variables
         shell: powershell
         run: |
-          # Find OpenSSL installation directory
-          $OPENSSL_FULL = "C:/Program Files/OpenSSL-Win64"
-          $OPENSSL_SHORT = "C:/PROGRA~1/OpenSSL-Win64"
+          # Set OpenSSL directory
+          $OPENSSL_DIR = "C:/OpenSSL-Win64"
           
-          # Check which path exists
-          if (Test-Path "$OPENSSL_FULL") {
-            $OPENSSL_DIR = $OPENSSL_FULL
-            Write-Host "Found OpenSSL at: $OPENSSL_FULL"
-          } elseif (Test-Path "$OPENSSL_SHORT") {
-            $OPENSSL_DIR = $OPENSSL_SHORT
-            Write-Host "Found OpenSSL at: $OPENSSL_SHORT"
-          } else {
-            Write-Host "OpenSSL not found in expected locations!"
+          if (-not (Test-Path "$OPENSSL_DIR")) {
+            Write-Host "❌ OpenSSL directory not found: $OPENSSL_DIR"
             exit 1
           }
           
-          # Check for lib directory structure
+          Write-Host "✅ Found OpenSSL at: $OPENSSL_DIR"
+          
+          # Find lib directory structure
           if (Test-Path "$OPENSSL_DIR/lib/VC/x64/MD") {
             $LIB_PATH = "$OPENSSL_DIR/lib/VC/x64/MD"
-            Write-Host "Using VC lib path: $LIB_PATH"
+            Write-Host "✅ Using VC lib path: $LIB_PATH"
+          } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
+            $LIB_PATH = "$OPENSSL_DIR/lib/VC"
+            Write-Host "✅ Using VC lib path: $LIB_PATH"
           } elseif (Test-Path "$OPENSSL_DIR/lib") {
             $LIB_PATH = "$OPENSSL_DIR/lib"
-            Write-Host "Using standard lib path: $LIB_PATH"
+            Write-Host "✅ Using standard lib path: $LIB_PATH"
           } else {
-            Write-Host "OpenSSL lib directory not found!"
+            Write-Host "❌ OpenSSL lib directory not found!"
+            Write-Host "Directory contents:"
+            Get-ChildItem -Path $OPENSSL_DIR -Recurse -Depth 2 | Select-Object FullName
             exit 1
           }
           
+          # Verify include directory
+          if (-not (Test-Path "$OPENSSL_DIR/include/openssl")) {
+            Write-Host "❌ OpenSSL include directory not found!"
+            exit 1
+          }
+          Write-Host "✅ Found OpenSSL headers at: $OPENSSL_DIR/include"
+          
+          # Set environment variables
           echo "OPENSSL_DIR=$OPENSSL_DIR" >> $env:GITHUB_ENV
           echo "CGO_CFLAGS=-I$OPENSSL_DIR/include" >> $env:GITHUB_ENV
           echo "CGO_LDFLAGS=-L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32" >> $env:GITHUB_ENV
@@ -191,6 +190,11 @@ jobs:
           # Add to PATH
           echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
           echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
+          
+          Write-Host "`n=== Environment Configuration ==="
+          Write-Host "OPENSSL_DIR: $OPENSSL_DIR"
+          Write-Host "CGO_CFLAGS: -I$OPENSSL_DIR/include"
+          Write-Host "CGO_LDFLAGS: -L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32"
 
       - name: Install Go dependencies
         run: |
