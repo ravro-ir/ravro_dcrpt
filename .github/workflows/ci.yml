@@ -10,6 +10,9 @@ jobs:
   build-quick-linux:
     name: Quick Build (Linux)
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,7 +23,8 @@ jobs:
           go-version: '1.23'
           cache: true
 
-      - name: Install Linux dependencies
+      - name: Install Linux dependencies (amd64)
+        if: matrix.arch == 'amd64'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -35,25 +39,55 @@ jobs:
             libssl-dev \
             pkg-config
 
+      - name: Install Linux dependencies (arm64)
+        if: matrix.arch == 'arm64'
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu \
+            g++-aarch64-linux-gnu \
+            libgl1-mesa-dev:arm64 \
+            libx11-dev:arm64 \
+            libxcursor-dev:arm64 \
+            libxrandr-dev:arm64 \
+            libxinerama-dev:arm64 \
+            libxi-dev:arm64 \
+            libssl-dev:arm64 \
+            pkg-config
+
       - name: Install Go dependencies
         run: |
           go mod download
 
-      - name: Build CLI
-        run: |
-          CGO_ENABLED=1 go build -o build/ravro_dcrpt ./cmd/cli
-
-      - name: Build GUI
+      - name: Build GUI (amd64)
+        if: matrix.arch == 'amd64'
         run: |
           CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui ./cmd/gui
 
-      - name: Test CLI binary
+      - name: Build GUI (arm64)
+        if: matrix.arch == 'arm64'
+        env:
+          CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
         run: |
-          ./build/ravro_dcrpt --help
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o build/ravro_dcrpt_gui ./cmd/gui
+
+      - name: Verify GUI binary exists (amd64 only)
+        if: matrix.arch == 'amd64'
+        run: |
+          ls -lh build/ravro_dcrpt_gui
 
   build-quick-macos:
     name: Quick Build (macOS)
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            arch: amd64
+          - os: macos-latest
+            arch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -69,14 +103,18 @@ jobs:
           brew update
           brew install openssl@3
 
-      - name: Set OpenSSL environment
+      - name: Set OpenSSL environment (Intel)
+        if: matrix.arch == 'amd64'
         run: |
-          if [[ $(uname -m) == "arm64" ]]; then
-            OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
-          else
-            OPENSSL_PREFIX="/usr/local/opt/openssl@3"
-          fi
-          
+          OPENSSL_PREFIX="/usr/local/opt/openssl@3"
+          echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
+
+      - name: Set OpenSSL environment (Apple Silicon)
+        if: matrix.arch == 'arm64'
+        run: |
+          OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
           echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
           echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
@@ -85,15 +123,11 @@ jobs:
         run: |
           go mod download
 
-      - name: Build CLI
-        run: |
-          CGO_ENABLED=1 go build -o build/ravro_dcrpt ./cmd/cli
-
       - name: Build GUI
         run: |
-          CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui ./cmd/gui
+          CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui-${{ matrix.arch }} ./cmd/gui
 
-      - name: Test CLI binary
+      - name: Verify GUI binary exists
         run: |
-          ./build/ravro_dcrpt --help
+          ls -lh build/ravro_dcrpt_gui-${{ matrix.arch }}
 

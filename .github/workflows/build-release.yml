@@ -18,6 +18,9 @@ jobs:
   build-linux:
     name: Build Linux
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,7 +31,8 @@ jobs:
           go-version: '1.23'
           cache: true
 
-      - name: Install Linux dependencies
+      - name: Install Linux dependencies (amd64)
+        if: matrix.arch == 'amd64'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -45,21 +49,44 @@ jobs:
             pkg-config \
             wkhtmltopdf
 
+      - name: Install Linux dependencies (arm64 cross-compile)
+        if: matrix.arch == 'arm64'
+        run: |
+          sudo dpkg --add-architecture arm64
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu \
+            g++-aarch64-linux-gnu \
+            libgl1-mesa-dev:arm64 \
+            libx11-dev:arm64 \
+            libxcursor-dev:arm64 \
+            libxrandr-dev:arm64 \
+            libxinerama-dev:arm64 \
+            libxi-dev:arm64 \
+            libxxf86vm-dev:arm64 \
+            libssl-dev:arm64 \
+            pkg-config
+
       - name: Install Go dependencies
         run: |
           go mod download
           go mod tidy
 
-      - name: Build CLI for Linux
+      - name: Build GUI for Linux (amd64)
+        if: matrix.arch == 'amd64'
         run: |
           CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
           go build -ldflags="-s -w" \
-          -o build/ravro_dcrpt \
-          ./cmd/cli
+          -o build/ravro_dcrpt_gui \
+          ./cmd/gui
 
-      - name: Build GUI for Linux
+      - name: Build GUI for Linux (arm64)
+        if: matrix.arch == 'arm64'
+        env:
+          CC: aarch64-linux-gnu-gcc
+          CXX: aarch64-linux-gnu-g++
         run: |
-          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 \
           go build -ldflags="-s -w" \
           -o build/ravro_dcrpt_gui \
           ./cmd/gui
@@ -67,22 +94,26 @@ jobs:
       - name: Create tarball
         run: |
           cd build
-          tar -czf ravro_dcrpt-linux-amd64.tar.gz ravro_dcrpt ravro_dcrpt_gui
+          tar -czf ravro_dcrpt-linux-${{ matrix.arch }}.tar.gz ravro_dcrpt_gui
           cd ..
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-amd64
-          path: build/ravro_dcrpt-linux-amd64.tar.gz
+          name: linux-${{ matrix.arch }}
+          path: build/ravro_dcrpt-linux-${{ matrix.arch }}.tar.gz
           retention-days: 7
 
   build-macos:
     name: Build macOS
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        include:
+          - os: macos-13
+            arch: amd64
+          - os: macos-latest
+            arch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -110,14 +141,18 @@ jobs:
             }
           fi
 
-      - name: Set OpenSSL environment variables
+      - name: Set OpenSSL environment variables (Intel)
+        if: matrix.arch == 'amd64'
         run: |
-          if [[ $(uname -m) == "arm64" ]]; then
-            OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
-          else
-            OPENSSL_PREFIX="/usr/local/opt/openssl@3"
-          fi
-          
+          OPENSSL_PREFIX="/usr/local/opt/openssl@3"
+          echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
+
+      - name: Set OpenSSL environment variables (Apple Silicon)
+        if: matrix.arch == 'arm64'
+        run: |
+          OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
           echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
           echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
           echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
@@ -127,16 +162,9 @@ jobs:
           go mod download
           go mod tidy
 
-      - name: Build CLI for macOS
-        run: |
-          CGO_ENABLED=1 GOOS=darwin GOARCH=${{ matrix.arch }} \
-          go build -ldflags="-s -w" \
-          -o build/ravro_dcrpt-${{ matrix.arch }} \
-          ./cmd/cli
-
       - name: Build GUI for macOS
         run: |
-          CGO_ENABLED=1 GOOS=darwin GOARCH=${{ matrix.arch }} \
+          CGO_ENABLED=1 \
           go build -ldflags="-s -w" \
           -o build/ravro_dcrpt_gui-${{ matrix.arch }} \
           ./cmd/gui
@@ -178,7 +206,6 @@ jobs:
         run: |
           cd build
           tar -czf ravro_dcrpt-darwin-${{ matrix.arch }}.tar.gz \
-            ravro_dcrpt-${{ matrix.arch }} \
             "Ravro Decryption Tool.app"
           cd ..
 
@@ -208,6 +235,7 @@ jobs:
         with:
           files: |
             artifacts/linux-amd64/*.tar.gz
+            artifacts/linux-arm64/*.tar.gz
             artifacts/macos-amd64/*.tar.gz
             artifacts/macos-arm64/*.tar.gz
           draft: false
