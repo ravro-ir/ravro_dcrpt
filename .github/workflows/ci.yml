@@ -1,0 +1,256 @@
+name: CI - Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-quick-linux:
+    name: Quick Build (Linux)
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            libgl1-mesa-dev \
+            xorg-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxi-dev \
+            libssl-dev \
+            pkg-config
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+
+      - name: Build GUI
+        run: |
+          CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui ./cmd/gui
+
+      - name: Verify GUI binary exists
+        run: |
+          ls -lh build/ravro_dcrpt_gui
+
+  build-quick-macos:
+    name: Quick Build (macOS)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-13
+            arch: amd64
+          - os: macos-latest
+            arch: arm64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install macOS dependencies
+        run: |
+          # Install OpenSSL
+          if ! brew list openssl@3 &>/dev/null; then
+            brew install openssl@3
+          else
+            echo "OpenSSL@3 is already installed"
+          fi
+
+      - name: Set OpenSSL environment (Intel)
+        if: matrix.arch == 'amd64'
+        run: |
+          OPENSSL_PREFIX="/usr/local/opt/openssl@3"
+          echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
+
+      - name: Set OpenSSL environment (Apple Silicon)
+        if: matrix.arch == 'arm64'
+        run: |
+          OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
+          echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+
+      - name: Build GUI
+        run: |
+          CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui-${{ matrix.arch }} ./cmd/gui
+
+      - name: Verify GUI binary exists
+        run: |
+          ls -lh build/ravro_dcrpt_gui-${{ matrix.arch }}
+
+  build-quick-windows:
+    name: Quick Build (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install Windows dependencies
+        shell: powershell
+        run: |
+          # Install wkhtmltopdf
+          choco install -y wkhtmltopdf
+          
+          # Try to download and install OpenSSL manually
+          Write-Host "Attempting to install OpenSSL..."
+          
+          # Try different versions
+          $OPENSSL_VERSIONS = @("3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
+          $OPENSSL_INSTALLED = $false
+          
+          foreach ($VERSION in $OPENSSL_VERSIONS) {
+            try {
+              Write-Host "Trying OpenSSL version $VERSION..."
+              $OPENSSL_URL = "https://slproweb.com/download/Win64OpenSSL-${VERSION}.exe"
+              $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
+              
+              # Try to download
+              Invoke-WebRequest -Uri $OPENSSL_URL -OutFile $OPENSSL_INSTALLER -ErrorAction Stop
+              
+              Write-Host "✅ Downloaded OpenSSL $VERSION"
+              Write-Host "Installing OpenSSL to C:\OpenSSL-Win64..."
+              
+              Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=C:\OpenSSL-Win64" -Wait -NoNewWindow
+              
+              if (Test-Path "C:\OpenSSL-Win64") {
+                Write-Host "✅ OpenSSL $VERSION installed successfully at C:\OpenSSL-Win64"
+                Get-ChildItem "C:\OpenSSL-Win64" | Select-Object Name
+                $OPENSSL_INSTALLED = $true
+                break
+              }
+            } catch {
+              Write-Host "⚠️ Version $VERSION not available, trying next..."
+              continue
+            }
+          }
+          
+          # Fallback to chocolatey if direct download failed
+          if (-not $OPENSSL_INSTALLED) {
+            Write-Host "Direct download failed, using chocolatey..."
+            choco install -y openssl
+            
+            # Check common chocolatey installation paths
+            $chocoLocations = @(
+              "C:\Program Files\OpenSSL-Win64",
+              "C:\Program Files\OpenSSL",
+              "C:\OpenSSL-Win64",
+              "C:\OpenSSL"
+            )
+            
+            foreach ($loc in $chocoLocations) {
+              if (Test-Path $loc) {
+                Write-Host "✅ Found OpenSSL at: $loc"
+                # Create symlink to standard location if needed
+                if ($loc -ne "C:\OpenSSL-Win64" -and -not (Test-Path "C:\OpenSSL-Win64")) {
+                  New-Item -ItemType Junction -Path "C:\OpenSSL-Win64" -Target $loc
+                  Write-Host "✅ Created junction from C:\OpenSSL-Win64 to $loc"
+                }
+                $OPENSSL_INSTALLED = $true
+                break
+              }
+            }
+          }
+          
+          if (-not $OPENSSL_INSTALLED) {
+            Write-Host "❌ Failed to install OpenSSL"
+            exit 1
+          }
+
+      - name: Set up environment variables
+        shell: powershell
+        run: |
+          # Set OpenSSL directory
+          $OPENSSL_DIR = "C:/OpenSSL-Win64"
+          
+          if (-not (Test-Path "$OPENSSL_DIR")) {
+            Write-Host "❌ OpenSSL directory not found: $OPENSSL_DIR"
+            exit 1
+          }
+          
+          Write-Host "✅ Found OpenSSL at: $OPENSSL_DIR"
+          
+          # Find lib directory structure
+          if (Test-Path "$OPENSSL_DIR/lib/VC/x64/MD") {
+            $LIB_PATH = "$OPENSSL_DIR/lib/VC/x64/MD"
+            Write-Host "✅ Using VC lib path: $LIB_PATH"
+          } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
+            $LIB_PATH = "$OPENSSL_DIR/lib/VC"
+            Write-Host "✅ Using VC lib path: $LIB_PATH"
+          } elseif (Test-Path "$OPENSSL_DIR/lib") {
+            $LIB_PATH = "$OPENSSL_DIR/lib"
+            Write-Host "✅ Using standard lib path: $LIB_PATH"
+          } else {
+            Write-Host "❌ OpenSSL lib directory not found!"
+            Write-Host "Directory contents:"
+            Get-ChildItem -Path $OPENSSL_DIR -Recurse -Depth 2 | Select-Object FullName
+            exit 1
+          }
+          
+          # Verify include directory
+          if (-not (Test-Path "$OPENSSL_DIR/include/openssl")) {
+            Write-Host "❌ OpenSSL include directory not found!"
+            exit 1
+          }
+          Write-Host "✅ Found OpenSSL headers at: $OPENSSL_DIR/include"
+          
+          # Set environment variables
+          echo "OPENSSL_DIR=$OPENSSL_DIR" >> $env:GITHUB_ENV
+          echo "CGO_CFLAGS=-I$OPENSSL_DIR/include" >> $env:GITHUB_ENV
+          echo "CGO_LDFLAGS=-L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32" >> $env:GITHUB_ENV
+          
+          # Add to PATH
+          echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
+          echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
+          
+          Write-Host "`n=== Environment Configuration ==="
+          Write-Host "OPENSSL_DIR: $OPENSSL_DIR"
+          Write-Host "CGO_CFLAGS: -I$OPENSSL_DIR/include"
+          Write-Host "CGO_LDFLAGS: -L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32"
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+
+      - name: Build GUI
+        shell: powershell
+        run: |
+          $env:CGO_ENABLED = "1"
+          go build -o build/ravro_dcrpt_gui.exe ./cmd/gui
+
+      - name: Verify GUI binary exists
+        shell: powershell
+        run: |
+          Get-ChildItem build/ravro_dcrpt_gui.exe
+

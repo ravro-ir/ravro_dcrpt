@@ -44,36 +44,83 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
 
 ## 🛠️ Installation
 
-### Prerequisites Installation
+### Quick Installation (Recommended)
 
-Before using ravro_dcrpt, you need to install the required dependencies on your system.
+We provide automated installation scripts that install all required dependencies for running the GUI application.
 
-#### Linux (Ubuntu/Debian)
+#### Linux
 ```bash
-wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/linux.sh -O - | sh
+# Download and run the installation script
+curl -O https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/install-linux.sh
+chmod +x install-linux.sh
+./install-linux.sh
 ```
 
-This script will install:
-- Build tools (build-essential, checkinstall, zlib1g-dev)
-- OpenSSL development libraries
-- wkhtmltopdf for PDF generation
-- Additional dependencies (unzip, wget, xfonts-75dpi)
+**Supported distributions:**
+- Ubuntu / Debian / Linux Mint / Pop!_OS
+- Fedora / RHEL / CentOS / Rocky / AlmaLinux  
+- Arch Linux / Manjaro
+- openSUSE / SLES
 
 #### macOS
 ```bash
-wget https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/refs/heads/main/autoinstall/darwin.sh -O - | sh
+# Download and run the installation script
+curl -O https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/install-macos.sh
+chmod +x install-macos.sh
+./install-macos.sh
 ```
 
-This script will install:
-- Homebrew dependencies (if Homebrew is available)
-- OpenSSL, unzip, wget, pkg-config
-- Required build tools
+**Note:** The script will automatically install Homebrew if not present.
 
-**Note:** Make sure you have Homebrew installed first. Visit [https://brew.sh](https://brew.sh) for installation instructions.
+#### Windows
+```powershell
+# Download the installation script from GitHub
+# Then run PowerShell as Administrator:
+Set-ExecutionPolicy Bypass -Scope Process -Force
+.\install-windows.ps1
+```
+
+**Note:** Must be run as Administrator. The script will:
+- Install Chocolatey (if not present)
+- Try to install OpenSSL from multiple sources (versions 3.3.2, 3.3.1, 3.3.0, 3.2.0, 3.1.0)
+- Fallback to Chocolatey if direct download fails
+- Install wkhtmltopdf for PDF generation
+- Automatically configure system PATH
 
 ### Download Application
 
-After installing prerequisites, download the latest release for your platform from [Releases](https://github.com/ravro-ir/ravro_dcrpt/releases)
+After installing prerequisites, download the latest release for your platform:
+
+**Linux (x86_64):**
+```bash
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-linux-amd64.tar.gz
+tar -xzf ravro_dcrpt-linux-amd64.tar.gz
+chmod +x ravro_dcrpt_gui
+./ravro_dcrpt_gui
+```
+
+**macOS (Intel):**
+```bash
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-amd64.tar.gz
+tar -xzf ravro_dcrpt-darwin-amd64.tar.gz
+open "Ravro Decryption Tool.app"
+```
+
+**macOS (Apple Silicon):**
+```bash
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-arm64.tar.gz
+tar -xzf ravro_dcrpt-darwin-arm64.tar.gz
+open "Ravro Decryption Tool.app"
+```
+
+**Windows:**
+```powershell
+# Download from GitHub Releases
+# Extract the zip file, then run:
+.\ravro_dcrpt_gui.exe
+```
+
+📖 **For detailed installation instructions, troubleshooting, and manual installation, see [INSTALL.md](INSTALL.md)**
 
 ## 📂 Project Structure
 
@@ -146,40 +193,6 @@ Simply double-click `ravro_dcrpt_gui` to launch the graphical interface.
 3. (Optional) Click "🔍 Validate Key" to verify your key
 4. Click "🚀 Start Processing" to decrypt and generate PDFs
 5. Check the log area for detailed progress and any errors
-
-### ⚠️ CLI Application (Deprecated - Legacy Version)
-
-**Note:** The CLI version is from older releases and is now deprecated. Please use the **GUI Application** above for the best experience with all latest features.
-
-#### Interactive Mode
-```bash
-$ ./ravro_dcrpt -init        # Initialize directories
-$ ./ravro_dcrpt              # Run in interactive mode
-```
-
-#### Command-Line Mode
-```bash
-# Process a single report
-$ ./ravro_dcrpt -in=encrypt/report.zip -out=decrypt -key=key/private.pem
-
-# Process multiple reports in a directory
-$ ./ravro_dcrpt -in=encrypt -out=decrypt -key=key
-
-# Process with JSON export
-$ ./ravro_dcrpt -in=encrypt -out=decrypt -key=key -json
-```
-
-#### Additional Commands
-```bash
-# Initialize directories (create encrypt/, decrypt/, key/)
-$ ./ravro_dcrpt -init
-
-# View version
-$ ./ravro_dcrpt -version
-
-# Get help
-$ ./ravro_dcrpt -help
-```
 
 ### 📄 Generated PDF Features
 
