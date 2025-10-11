@@ -77,11 +77,20 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 ```
 
 این اسکریپت به صورت خودکار:
-- Chocolatey را نصب می‌کند (در صورت نیاز)
-- OpenSSL را نصب می‌کند
-- wkhtmltopdf را نصب می‌کند
+- **Chocolatey** را نصب می‌کند (در صورت نیاز)
+- **OpenSSL** را با استراتژی چندلایه نصب می‌کند:
+  - ابتدا سعی می‌کند مستقیماً از slproweb.com نسخه‌های 3.3.2, 3.3.1, 3.3.0, 3.2.0 یا 3.1.0 را دانلود کند
+  - در صورت عدم موفقیت، از Chocolatey استفاده می‌کند
+  - در صورت نصب در مسیر غیراستاندارد، یک junction به `C:\OpenSSL-Win64` ایجاد می‌کند
+- **wkhtmltopdf** را برای تولید PDF نصب می‌کند
+- مسیرها را به صورت خودکار در PATH سیستم تنظیم می‌کند
+- نمایش خلاصه نصب و مسیرهای نصب شده
 
-**نکته:** حتماً PowerShell را به عنوان Administrator اجرا کنید.
+**نکات مهم:**
+- ✅ حتماً PowerShell را به عنوان Administrator اجرا کنید
+- ✅ بعد از نصب، ممکن است نیاز به restart کردن terminal یا سیستم باشد
+- ✅ اسکریپت به صورت هوشمند OpenSSL را در `C:\OpenSSL-Win64` نصب می‌کند
+- ✅ در صورت بروز مشکل در دانلود، fallback به Chocolatey وجود دارد
 
 ---
 
@@ -220,7 +229,9 @@ brew install openssl@3
 brew install --cask wkhtmltopdf
 ```
 
-### Windows (با Chocolatey)
+### Windows
+
+#### روش اول: استفاده از Chocolatey (آسان‌تر)
 
 ```powershell
 # نصب Chocolatey (در صورت نیاز) - به عنوان Administrator
@@ -232,6 +243,36 @@ iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocola
 choco install -y openssl
 choco install -y wkhtmltopdf
 ```
+
+#### روش دوم: نصب دستی OpenSSL (توصیه می‌شود)
+
+اگر Chocolatey مشکل داشت، می‌توانید OpenSSL را مستقیماً دانلود کنید:
+
+1. **دانلود OpenSSL:**
+   - به https://slproweb.com/products/Win32OpenSSL.html بروید
+   - یکی از نسخه‌های زیر را دانلود کنید:
+     - `Win64 OpenSSL v3.3.2` (توصیه می‌شود)
+     - `Win64 OpenSSL v3.3.1`
+     - `Win64 OpenSSL v3.3.0`
+   - نسخه **Light** کافی نیست، نسخه کامل را دانلود کنید
+
+2. **نصب OpenSSL:**
+   - فایل `.exe` دانلود شده را اجرا کنید
+   - در مسیر نصب، حتماً `C:\OpenSSL-Win64` را انتخاب کنید
+   - گزینه "Copy OpenSSL DLLs to Windows system directory" را انتخاب **نکنید**
+   - در پایان، "Add OpenSSL to PATH" را انتخاب کنید
+
+3. **دانلود wkhtmltopdf:**
+   - به https://wkhtmltopdf.org/downloads.html بروید
+   - نسخه Windows (64-bit) را دانلود و نصب کنید
+
+4. **تنظیم PATH (اختیاری):**
+   ```powershell
+   # اضافه کردن به PATH سیستم (به عنوان Administrator)
+   [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\OpenSSL-Win64\bin;C:\Program Files\wkhtmltopdf\bin", "Machine")
+   ```
+
+**نکته:** بعد از نصب، ممکن است نیاز به restart کردن PowerShell یا سیستم باشید.
 
 ---
 
@@ -276,15 +317,37 @@ brew install --cask wkhtmltopdf
 xattr -cr "Ravro Decryption Tool.app"
 ```
 
-### Windows: DLL not found errors
+### Windows: خطاهای DLL (libssl-3-x64.dll یا libcrypto-3-x64.dll)
 
-**راه حل:**
-اطمینان حاصل کنید که OpenSSL نصب شده است:
+این خطا زمانی رخ می‌دهد که Windows نمی‌تواند فایل‌های DLL مورد نیاز OpenSSL را پیدا کند.
+
+**راه حل 1: بررسی نصب OpenSSL**
 ```powershell
+# بررسی اینکه OpenSSL نصب شده است
+openssl version
+
+# اگر خطا داد، OpenSSL را نصب کنید
+# روش 1: استفاده از install-windows.ps1 (توصیه می‌شود)
+.\install-windows.ps1
+
+# روش 2: نصب دستی
 choco install -y openssl
 ```
 
-سپس فایل‌های DLL را کپی کنید:
+**راه حل 2: بررسی PATH**
+```powershell
+# بررسی PATH
+$env:Path
+
+# اضافه کردن OpenSSL به PATH (به عنوان Administrator)
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\OpenSSL-Win64\bin", "Machine")
+
+# Restart PowerShell بعد از تغییر PATH
+```
+
+**راه حل 3: کپی کردن DLL ها (موقتی)**
+
+اگر OpenSSL در مسیری غیر از `C:\OpenSSL-Win64` نصب شده، DLL ها را کپی کنید:
 ```powershell
 copy "C:\Program Files\OpenSSL-Win64\bin\*.dll" .
 ```
@@ -293,8 +356,26 @@ copy "C:\Program Files\OpenSSL-Win64\bin\*.dll" .
 
 **راه حل:**
 ```powershell
+# روش 1: استفاده از Chocolatey
 choco install -y wkhtmltopdf
+
+# روش 2: دانلود و نصب دستی
+# 1. به https://wkhtmltopdf.org/downloads.html بروید
+# 2. نسخه Windows (64-bit) را دانلود و نصب کنید
+# 3. به PATH اضافه کنید:
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\wkhtmltopdf\bin", "Machine")
 ```
+
+### Windows: خطا در هنگام نصب با اسکریپت
+
+**اگر `install-windows.ps1` خطای 404 داد:**
+
+این خطا ممکن است به دلیل عدم دسترسی به نسخه خاصی از OpenSSL باشد. اسکریپت به صورت خودکار نسخه‌های مختلف را امتحان می‌کند و در صورت نیاز به Chocolatey fallback می‌کند.
+
+**راه حل:**
+1. مطمئن شوید که به اینترنت متصل هستید
+2. PowerShell را به عنوان Administrator اجرا کرده‌اید
+3. اگر مشکل ادامه داشت، به صورت دستی نصب کنید (راه حل 2 در بالا)
 
 ---
 
@@ -305,8 +386,3 @@ choco install -y wkhtmltopdf
 - [مشاهده مستندات کامل](https://github.com/ravro-ir/ravro_dcrpt)
 
 ---
-
-## 📝 لایسنس
-
-این نرم‌افزار تحت لایسنس [LICENSE] منتشر شده است.
-

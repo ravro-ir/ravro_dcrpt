@@ -80,7 +80,12 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 .\install-windows.ps1
 ```
 
-**Note:** Must be run as Administrator. The script will install Chocolatey, OpenSSL, and wkhtmltopdf.
+**Note:** Must be run as Administrator. The script will:
+- Install Chocolatey (if not present)
+- Try to install OpenSSL from multiple sources (versions 3.3.2, 3.3.1, 3.3.0, 3.2.0, 3.1.0)
+- Fallback to Chocolatey if direct download fails
+- Install wkhtmltopdf for PDF generation
+- Automatically configure system PATH
 
 ### Download Application
 
