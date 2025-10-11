@@ -205,25 +205,68 @@ jobs:
           # Install wkhtmltopdf
           choco install -y wkhtmltopdf
           
-          # Download and install OpenSSL manually for more control
-          Write-Host "Downloading OpenSSL..."
-          $OPENSSL_VERSION = "3_4_0"
-          $OPENSSL_URL = "https://slproweb.com/download/Win64OpenSSL-${OPENSSL_VERSION}.exe"
-          $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
+          # Try to download and install OpenSSL manually
+          Write-Host "Attempting to install OpenSSL..."
           
-          Invoke-WebRequest -Uri $OPENSSL_URL -OutFile $OPENSSL_INSTALLER
+          # Try different versions
+          $OPENSSL_VERSIONS = @("3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
+          $OPENSSL_INSTALLED = $false
           
-          Write-Host "Installing OpenSSL to C:\OpenSSL-Win64..."
-          Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=C:\OpenSSL-Win64" -Wait -NoNewWindow
+          foreach ($VERSION in $OPENSSL_VERSIONS) {
+            try {
+              Write-Host "Trying OpenSSL version $VERSION..."
+              $OPENSSL_URL = "https://slproweb.com/download/Win64OpenSSL-${VERSION}.exe"
+              $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
+              
+              # Try to download
+              Invoke-WebRequest -Uri $OPENSSL_URL -OutFile $OPENSSL_INSTALLER -ErrorAction Stop
+              
+              Write-Host "✅ Downloaded OpenSSL $VERSION"
+              Write-Host "Installing OpenSSL to C:\OpenSSL-Win64..."
+              
+              Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=C:\OpenSSL-Win64" -Wait -NoNewWindow
+              
+              if (Test-Path "C:\OpenSSL-Win64") {
+                Write-Host "✅ OpenSSL $VERSION installed successfully at C:\OpenSSL-Win64"
+                Get-ChildItem "C:\OpenSSL-Win64" | Select-Object Name
+                $OPENSSL_INSTALLED = $true
+                break
+              }
+            } catch {
+              Write-Host "⚠️ Version $VERSION not available, trying next..."
+              continue
+            }
+          }
           
-          Write-Host "OpenSSL installation complete"
+          # Fallback to chocolatey if direct download failed
+          if (-not $OPENSSL_INSTALLED) {
+            Write-Host "Direct download failed, using chocolatey..."
+            choco install -y openssl
+            
+            # Check common chocolatey installation paths
+            $chocoLocations = @(
+              "C:\Program Files\OpenSSL-Win64",
+              "C:\Program Files\OpenSSL",
+              "C:\OpenSSL-Win64",
+              "C:\OpenSSL"
+            )
+            
+            foreach ($loc in $chocoLocations) {
+              if (Test-Path $loc) {
+                Write-Host "✅ Found OpenSSL at: $loc"
+                # Create symlink to standard location if needed
+                if ($loc -ne "C:\OpenSSL-Win64" -and -not (Test-Path "C:\OpenSSL-Win64")) {
+                  New-Item -ItemType Junction -Path "C:\OpenSSL-Win64" -Target $loc
+                  Write-Host "✅ Created junction from C:\OpenSSL-Win64 to $loc"
+                }
+                $OPENSSL_INSTALLED = $true
+                break
+              }
+            }
+          }
           
-          # Verify installation
-          if (Test-Path "C:\OpenSSL-Win64") {
-            Write-Host "✅ OpenSSL installed successfully at C:\OpenSSL-Win64"
-            Get-ChildItem "C:\OpenSSL-Win64" | Select-Object Name
-          } else {
-            Write-Host "❌ OpenSSL installation failed"
+          if (-not $OPENSSL_INSTALLED) {
+            Write-Host "❌ Failed to install OpenSSL"
             exit 1
           }
 
