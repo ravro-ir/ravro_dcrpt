@@ -1,0 +1,161 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            libssl-dev \
+            pkg-config
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.txt
+          fail_ci_if_error: false
+
+  build-quick-linux:
+    name: Quick Build (Linux)
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc \
+            libgl1-mesa-dev \
+            xorg-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxi-dev \
+            libssl-dev \
+            pkg-config
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+
+      - name: Build CLI
+        run: |
+          CGO_ENABLED=1 go build -o build/ravro_dcrpt ./cmd/cli
+
+      - name: Build GUI
+        run: |
+          CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui ./cmd/gui
+
+      - name: Test CLI binary
+        run: |
+          ./build/ravro_dcrpt --help
+
+  build-quick-macos:
+    name: Quick Build (macOS)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install macOS dependencies
+        run: |
+          brew update
+          brew install openssl@3
+
+      - name: Set OpenSSL environment
+        run: |
+          if [[ $(uname -m) == "arm64" ]]; then
+            OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
+          else
+            OPENSSL_PREFIX="/usr/local/opt/openssl@3"
+          fi
+          
+          echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
+          echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
+
+      - name: Install Go dependencies
+        run: |
+          go mod download
+
+      - name: Build CLI
+        run: |
+          CGO_ENABLED=1 go build -o build/ravro_dcrpt ./cmd/cli
+
+      - name: Build GUI
+        run: |
+          CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui ./cmd/gui
+
+      - name: Test CLI binary
+        run: |
+          ./build/ravro_dcrpt --help
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc libssl-dev pkg-config
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          args: --timeout=5m
+
