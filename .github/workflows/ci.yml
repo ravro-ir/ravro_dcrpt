@@ -123,19 +123,74 @@ jobs:
           choco install -y openssl
           choco install -y wkhtmltopdf
 
+      - name: Debug OpenSSL installation
+        shell: powershell
+        run: |
+          Write-Host "=== Searching for OpenSSL installation ==="
+          
+          # Check common locations
+          $locations = @(
+            "C:/Program Files/OpenSSL-Win64",
+            "C:/Program Files/OpenSSL",
+            "C:/OpenSSL-Win64",
+            "C:/OpenSSL"
+          )
+          
+          foreach ($loc in $locations) {
+            if (Test-Path $loc) {
+              Write-Host "Found: $loc"
+              Write-Host "Directory structure:"
+              Get-ChildItem -Path $loc -Recurse -Depth 2 | Select-Object FullName
+            }
+          }
+          
+          # Check if openssl is in PATH
+          Write-Host "`n=== OpenSSL command check ==="
+          try {
+            $opensslPath = Get-Command openssl -ErrorAction Stop
+            Write-Host "OpenSSL executable: $($opensslPath.Source)"
+          } catch {
+            Write-Host "OpenSSL not found in PATH"
+          }
+
       - name: Set up environment variables
         shell: powershell
         run: |
-          # Use short path format (8.3) to avoid spaces
-          $OPENSSL_DIR = "C:/PROGRA~1/OpenSSL-Win64"
+          # Find OpenSSL installation directory
+          $OPENSSL_FULL = "C:/Program Files/OpenSSL-Win64"
+          $OPENSSL_SHORT = "C:/PROGRA~1/OpenSSL-Win64"
+          
+          # Check which path exists
+          if (Test-Path "$OPENSSL_FULL") {
+            $OPENSSL_DIR = $OPENSSL_FULL
+            Write-Host "Found OpenSSL at: $OPENSSL_FULL"
+          } elseif (Test-Path "$OPENSSL_SHORT") {
+            $OPENSSL_DIR = $OPENSSL_SHORT
+            Write-Host "Found OpenSSL at: $OPENSSL_SHORT"
+          } else {
+            Write-Host "OpenSSL not found in expected locations!"
+            exit 1
+          }
+          
+          # Check for lib directory structure
+          if (Test-Path "$OPENSSL_DIR/lib/VC/x64/MD") {
+            $LIB_PATH = "$OPENSSL_DIR/lib/VC/x64/MD"
+            Write-Host "Using VC lib path: $LIB_PATH"
+          } elseif (Test-Path "$OPENSSL_DIR/lib") {
+            $LIB_PATH = "$OPENSSL_DIR/lib"
+            Write-Host "Using standard lib path: $LIB_PATH"
+          } else {
+            Write-Host "OpenSSL lib directory not found!"
+            exit 1
+          }
           
           echo "OPENSSL_DIR=$OPENSSL_DIR" >> $env:GITHUB_ENV
           echo "CGO_CFLAGS=-I$OPENSSL_DIR/include" >> $env:GITHUB_ENV
-          echo "CGO_LDFLAGS=-L$OPENSSL_DIR/lib -lssl -lcrypto" >> $env:GITHUB_ENV
+          echo "CGO_LDFLAGS=-L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32" >> $env:GITHUB_ENV
           
           # Add to PATH
-          echo "C:/PROGRA~1/OpenSSL-Win64/bin" >> $env:GITHUB_PATH
-          echo "C:/PROGRA~1/wkhtmltopdf/bin" >> $env:GITHUB_PATH
+          echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
+          echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
 
       - name: Install Go dependencies
         run: |
