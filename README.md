@@ -142,7 +142,7 @@ ravro_dcrpt/
 │   └── ports/                   # Interface definitions
 ├── pkg/                         # Public packages
 │   └── models/                  # Data models
-├── lib/                         # Native libraries (DLLs)
+├── .github/workflows/           # CI/CD pipelines
 ├── BUILD.md                     # Comprehensive build guide
 └── README.md                    # This file
 ```

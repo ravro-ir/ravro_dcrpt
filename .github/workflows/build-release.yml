@@ -338,16 +338,30 @@ jobs:
           # Create build directory if not exists
           New-Item -ItemType Directory -Force -Path build
           
-          # Copy OpenSSL DLLs
-          if (Test-Path "C:\Program Files\OpenSSL-Win64\bin\libssl-3-x64.dll") {
+          # Copy OpenSSL DLLs from system installation
+          if (Test-Path "C:\OpenSSL-Win64\bin\libssl-3-x64.dll") {
+            Copy-Item "C:\OpenSSL-Win64\bin\libssl-3-x64.dll" build/
+            Copy-Item "C:\OpenSSL-Win64\bin\libcrypto-3-x64.dll" build/
+            Write-Host "✅ Copied OpenSSL DLLs from C:\OpenSSL-Win64\bin"
+          } elseif (Test-Path "C:\Program Files\OpenSSL-Win64\bin\libssl-3-x64.dll") {
             Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libssl-3-x64.dll" build/
             Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libcrypto-3-x64.dll" build/
+            Write-Host "✅ Copied OpenSSL DLLs from C:\Program Files\OpenSSL-Win64\bin"
+          } else {
+            Write-Host "⚠️ OpenSSL DLLs not found in expected locations"
           }
           
-          # Copy any local DLLs from lib/ if they exist
-          if (Test-Path "lib\*.dll") {
-            Copy-Item lib\*.dll build\
+          # Copy wkhtmltopdf DLLs from chocolatey installation
+          if (Test-Path "C:\Program Files\wkhtmltopdf\bin\wkhtmltox.dll") {
+            Copy-Item "C:\Program Files\wkhtmltopdf\bin\wkhtmltox.dll" build/
+            Write-Host "✅ Copied wkhtmltox.dll from system installation"
+          } else {
+            Write-Host "⚠️ wkhtmltox.dll not found in system installation"
           }
+          
+          # List copied files for verification
+          Write-Host "`n=== Copied DLLs ==="
+          Get-ChildItem build\*.dll | ForEach-Object { Write-Host "  $($_.Name)" }
 
       - name: Create zip archive
         shell: powershell
