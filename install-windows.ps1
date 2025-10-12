@@ -171,16 +171,12 @@ if (-not $opensslFound) {
 
 # Install wkhtmltopdf
 Print-Status "Installing wkhtmltopdf..."
-if (Test-Path "C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe") {
-    Print-Success "wkhtmltopdf is already installed"
+choco install wkhtmltopdf -y --force
+if ($LASTEXITCODE -eq 0) {
+    Print-Success "wkhtmltopdf installed successfully"
 } else {
-    choco install wkhtmltopdf -y
-    if ($LASTEXITCODE -eq 0) {
-        Print-Success "wkhtmltopdf installed successfully"
-    } else {
-        Print-Error "Failed to install wkhtmltopdf"
-        exit 1
-    }
+    Print-Error "Failed to install wkhtmltopdf"
+    exit 1
 }
 
 # Verify installations
