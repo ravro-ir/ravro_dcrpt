@@ -1,4 +1,4 @@
-# Ravro Decryption Tool - Windows Installation Script
+﻿# Ravro Decryption Tool - Windows Installation Script
 # This script installs all required dependencies for running the GUI
 
 # Check if running as Administrator
@@ -21,36 +21,36 @@ if (-not $isAdmin) {
 }
 
 Write-Host ""
-Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Blue
-Write-Host "║   Ravro Decryption Tool - Dependency Installation    ║" -ForegroundColor Blue
-Write-Host "║                    Windows                            ║" -ForegroundColor Blue
-Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Blue
+Write-Host "â•"â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—" -ForegroundColor Blue
+Write-Host "â•'   Ravro Decryption Tool - Dependency Installation    â•'" -ForegroundColor Blue
+Write-Host "â•'                    Windows                            â•'" -ForegroundColor Blue
+Write-Host "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•" -ForegroundColor Blue
 Write-Host ""
 
 # Function to print status
 function Print-Status {
     param([string]$message)
-    Write-Host "→ $message" -ForegroundColor Blue
+    Write-Host "â†' $message" -ForegroundColor Blue
 }
 
 function Print-Success {
     param([string]$message)
-    Write-Host "✓ $message" -ForegroundColor Green
+    Write-Host "âœ" $message" -ForegroundColor Green
 }
 
 function Print-Warning {
     param([string]$message)
-    Write-Host "⚠ $message" -ForegroundColor Yellow
+    Write-Host "âš  $message" -ForegroundColor Yellow
 }
 
 function Print-Error {
     param([string]$message)
-    Write-Host "✗ $message" -ForegroundColor Red
+    Write-Host "âœ— $message" -ForegroundColor Red
 }
 
 # Check Windows version
 $osVersion = [System.Environment]::OSVersion.Version
-Write-Host "✓ Windows Version: $($osVersion.Major).$($osVersion.Minor)" -ForegroundColor Green
+Write-Host "âœ" Windows Version: $($osVersion.Major).$($osVersion.Minor)" -ForegroundColor Green
 Write-Host ""
 
 # Check if Chocolatey is installed
@@ -67,7 +67,7 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     
     # Refresh environment
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
     
     Print-Success "Chocolatey installed"
 } else {
@@ -104,7 +104,7 @@ if (-not $opensslFound) {
     
     foreach ($VERSION in $OPENSSL_VERSIONS) {
         try {
-            Write-Host "  → Trying OpenSSL version $VERSION..." -ForegroundColor Cyan
+            Write-Host "  â†' Trying OpenSSL version $VERSION..." -ForegroundColor Cyan
             $OPENSSL_URL = "https://slproweb.com/download/Win64OpenSSL-${VERSION}.exe"
             $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
             
@@ -131,7 +131,7 @@ if (-not $opensslFound) {
                 break
             }
         } catch {
-            Write-Host "  ⚠ Version $VERSION not available, trying next..." -ForegroundColor Yellow
+            Write-Host "  âš  Version $VERSION not available, trying next..." -ForegroundColor Yellow
             continue
         }
     }
@@ -186,7 +186,7 @@ Write-Host ""
 Print-Status "Verifying installations..."
 
 # Refresh environment PATH
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 # Check OpenSSL
 $opensslFound = $false
@@ -221,14 +221,14 @@ if (Get-Command wkhtmltopdf -ErrorAction SilentlyContinue) {
 }
 
 Write-Host ""
-Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║        Dependencies installed successfully! 🎉        ║" -ForegroundColor Green
-Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host "â•"â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—" -ForegroundColor Green
+Write-Host "â•'        Dependencies installed successfully! ðŸŽ‰        â•'" -ForegroundColor Green
+Write-Host "â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•" -ForegroundColor Green
 Write-Host ""
 
 # Show installation paths
 Write-Host "Installation Summary:" -ForegroundColor Blue
-Write-Host "════════════════════" -ForegroundColor Blue
+Write-Host "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•" -ForegroundColor Blue
 
 # OpenSSL location
 foreach ($loc in $opensslLocations) {
@@ -247,13 +247,13 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Blue
 Write-Host "  1. Download the latest release from GitHub" -ForegroundColor Cyan
 Write-Host "  2. Extract the zip file:" -ForegroundColor Cyan
-Write-Host "     Right-click → Extract All" -ForegroundColor Cyan
+Write-Host "     Right-click â†' Extract All" -ForegroundColor Cyan
 Write-Host "  3. Run the GUI:" -ForegroundColor Cyan
 Write-Host "     Double-click ravro_dcrpt_gui.exe" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Important:" -ForegroundColor Yellow
-Write-Host "  • Restart your terminal or PowerShell for PATH changes" -ForegroundColor Yellow
-Write-Host "  • If the app shows DLL errors, make sure all dependencies" -ForegroundColor Yellow
+Write-Host "  â€¢ Restart your terminal or PowerShell for PATH changes" -ForegroundColor Yellow
+Write-Host "  â€¢ If the app shows DLL errors, make sure all dependencies" -ForegroundColor Yellow
 Write-Host "    are in PATH or in the same folder as the executable" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Download link:" -ForegroundColor Blue
@@ -268,4 +268,5 @@ if ($openBrowser -eq "Y" -or $openBrowser -eq "y") {
 
 Write-Host ""
 pause
+
 

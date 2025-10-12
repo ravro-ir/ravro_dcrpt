@@ -74,15 +74,15 @@ chmod +x install-macos.sh
 
 #### Windows
 ```powershell
-# Download the installation script from GitHub
-# Then run PowerShell as Administrator:
-Set-ExecutionPolicy Bypass -Scope Process -Force
-.\install-windows.ps1
+# Download and run the installation script
+# Run PowerShell as Administrator, then:
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ravro-ir/ravro_dcrpt/main/install-windows.ps1" -OutFile "install-windows.ps1" -UseBasicParsing
+powershell -ExecutionPolicy Bypass -File "install-windows.ps1"
 ```
 
 **Note:** Must be run as Administrator. The script will:
 - Install Chocolatey (if not present)
-- Try to install OpenSSL from multiple sources (versions 3.3.2, 3.3.1, 3.3.0, 3.2.0, 3.1.0)
+- Try to install OpenSSL from multiple sources (versions 3.4.0, 3.3.2, 3.3.1, 3.3.0, 3.2.0, 3.1.0)
 - Fallback to Chocolatey if direct download fails
 - Install wkhtmltopdf for PDF generation
 - Automatically configure system PATH
