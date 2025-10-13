@@ -187,8 +187,21 @@ jobs:
           retention-days: 7
 
   build-windows:
-    name: Build Windows
+    name: Build Windows (${{ matrix.arch }})
     runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            goarch: amd64
+            mingw: mingw64
+            openssl_url_prefix: Win64OpenSSL
+            openssl_dir: C:\OpenSSL-Win64
+          - arch: 386
+            goarch: 386
+            mingw: mingw32
+            openssl_url_prefix: Win32OpenSSL
+            openssl_dir: C:\OpenSSL-Win32
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -199,6 +212,26 @@ jobs:
           go-version: '1.23'
           cache: true
 
+      - name: Install MinGW for ${{ matrix.arch }}
+        shell: powershell
+        run: |
+          if ("${{ matrix.arch }}" -eq "386") {
+            Write-Host "Installing MinGW 32-bit..."
+            choco install -y mingw --forcex86 --force
+            
+            # Verify installation
+            if (Test-Path "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32") {
+              Write-Host "✅ MinGW 32-bit installed"
+              echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin" >> $env:GITHUB_PATH
+            } else {
+              Write-Host "❌ MinGW 32-bit installation failed"
+              exit 1
+            }
+          } else {
+            Write-Host "Using default MinGW 64-bit"
+            # MinGW 64-bit is usually pre-installed
+          }
+
       - name: Install Windows dependencies
         shell: powershell
         run: |
@@ -206,7 +239,7 @@ jobs:
           choco install -y wkhtmltopdf
           
           # Try to download and install OpenSSL manually
-          Write-Host "Attempting to install OpenSSL..."
+          Write-Host "Attempting to install OpenSSL for ${{ matrix.arch }}..."
           
           # Try different versions
           $OPENSSL_VERSIONS = @("3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
@@ -215,53 +248,26 @@ jobs:
           foreach ($VERSION in $OPENSSL_VERSIONS) {
             try {
               Write-Host "Trying OpenSSL version $VERSION..."
-              $OPENSSL_URL = "https://slproweb.com/download/Win64OpenSSL-${VERSION}.exe"
+              $OPENSSL_URL = "https://slproweb.com/download/${{ matrix.openssl_url_prefix }}-${VERSION}.exe"
               $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
               
               # Try to download
               Invoke-WebRequest -Uri $OPENSSL_URL -OutFile $OPENSSL_INSTALLER -ErrorAction Stop
               
               Write-Host "✅ Downloaded OpenSSL $VERSION"
-              Write-Host "Installing OpenSSL to C:\OpenSSL-Win64..."
+              Write-Host "Installing OpenSSL to ${{ matrix.openssl_dir }}..."
               
-              Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=C:\OpenSSL-Win64" -Wait -NoNewWindow
+              Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=${{ matrix.openssl_dir }}" -Wait -NoNewWindow
               
-              if (Test-Path "C:\OpenSSL-Win64") {
-                Write-Host "✅ OpenSSL $VERSION installed successfully at C:\OpenSSL-Win64"
-                Get-ChildItem "C:\OpenSSL-Win64" | Select-Object Name
+              if (Test-Path "${{ matrix.openssl_dir }}") {
+                Write-Host "✅ OpenSSL $VERSION installed successfully at ${{ matrix.openssl_dir }}"
+                Get-ChildItem "${{ matrix.openssl_dir }}" | Select-Object Name
                 $OPENSSL_INSTALLED = $true
                 break
               }
             } catch {
               Write-Host "⚠️ Version $VERSION not available, trying next..."
               continue
-            }
-          }
-          
-          # Fallback to chocolatey if direct download failed
-          if (-not $OPENSSL_INSTALLED) {
-            Write-Host "Direct download failed, using chocolatey..."
-            choco install -y openssl
-            
-            # Check common chocolatey installation paths
-            $chocoLocations = @(
-              "C:\Program Files\OpenSSL-Win64",
-              "C:\Program Files\OpenSSL",
-              "C:\OpenSSL-Win64",
-              "C:\OpenSSL"
-            )
-            
-            foreach ($loc in $chocoLocations) {
-              if (Test-Path $loc) {
-                Write-Host "✅ Found OpenSSL at: $loc"
-                # Create symlink to standard location if needed
-                if ($loc -ne "C:\OpenSSL-Win64" -and -not (Test-Path "C:\OpenSSL-Win64")) {
-                  New-Item -ItemType Junction -Path "C:\OpenSSL-Win64" -Target $loc
-                  Write-Host "✅ Created junction from C:\OpenSSL-Win64 to $loc"
-                }
-                $OPENSSL_INSTALLED = $true
-                break
-              }
             }
           }
           
@@ -274,7 +280,7 @@ jobs:
         shell: powershell
         run: |
           # Set OpenSSL directory
-          $OPENSSL_DIR = "C:/OpenSSL-Win64"
+          $OPENSSL_DIR = "${{ matrix.openssl_dir }}"
           
           if (-not (Test-Path "$OPENSSL_DIR")) {
             Write-Host "❌ OpenSSL directory not found: $OPENSSL_DIR"
@@ -283,21 +289,41 @@ jobs:
           
           Write-Host "✅ Found OpenSSL at: $OPENSSL_DIR"
           
-          # Find lib directory structure
-          if (Test-Path "$OPENSSL_DIR/lib/VC/x64/MD") {
-            $LIB_PATH = "$OPENSSL_DIR/lib/VC/x64/MD"
-            Write-Host "✅ Using VC lib path: $LIB_PATH"
-          } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
-            $LIB_PATH = "$OPENSSL_DIR/lib/VC"
-            Write-Host "✅ Using VC lib path: $LIB_PATH"
-          } elseif (Test-Path "$OPENSSL_DIR/lib") {
-            $LIB_PATH = "$OPENSSL_DIR/lib"
-            Write-Host "✅ Using standard lib path: $LIB_PATH"
+          # Find lib directory structure based on architecture
+          if ("${{ matrix.arch }}" -eq "386") {
+            # For 32-bit, look for x86 libraries
+            if (Test-Path "$OPENSSL_DIR/lib/VC/x86/MD") {
+              $LIB_PATH = "$OPENSSL_DIR/lib/VC/x86/MD"
+              Write-Host "✅ Using VC x86 lib path: $LIB_PATH"
+            } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
+              $LIB_PATH = "$OPENSSL_DIR/lib/VC"
+              Write-Host "✅ Using VC lib path: $LIB_PATH"
+            } elseif (Test-Path "$OPENSSL_DIR/lib") {
+              $LIB_PATH = "$OPENSSL_DIR/lib"
+              Write-Host "✅ Using standard lib path: $LIB_PATH"
+            } else {
+              Write-Host "❌ OpenSSL lib directory not found!"
+              Write-Host "Directory contents:"
+              Get-ChildItem -Path $OPENSSL_DIR -Recurse -Depth 2 | Select-Object FullName
+              exit 1
+            }
           } else {
-            Write-Host "❌ OpenSSL lib directory not found!"
-            Write-Host "Directory contents:"
-            Get-ChildItem -Path $OPENSSL_DIR -Recurse -Depth 2 | Select-Object FullName
-            exit 1
+            # For 64-bit, look for x64 libraries
+            if (Test-Path "$OPENSSL_DIR/lib/VC/x64/MD") {
+              $LIB_PATH = "$OPENSSL_DIR/lib/VC/x64/MD"
+              Write-Host "✅ Using VC x64 lib path: $LIB_PATH"
+            } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
+              $LIB_PATH = "$OPENSSL_DIR/lib/VC"
+              Write-Host "✅ Using VC lib path: $LIB_PATH"
+            } elseif (Test-Path "$OPENSSL_DIR/lib") {
+              $LIB_PATH = "$OPENSSL_DIR/lib"
+              Write-Host "✅ Using standard lib path: $LIB_PATH"
+            } else {
+              Write-Host "❌ OpenSSL lib directory not found!"
+              Write-Host "Directory contents:"
+              Get-ChildItem -Path $OPENSSL_DIR -Recurse -Depth 2 | Select-Object FullName
+              exit 1
+            }
           }
           
           # Verify include directory
@@ -311,12 +337,15 @@ jobs:
           echo "OPENSSL_DIR=$OPENSSL_DIR" >> $env:GITHUB_ENV
           echo "CGO_CFLAGS=-I$OPENSSL_DIR/include" >> $env:GITHUB_ENV
           echo "CGO_LDFLAGS=-L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32" >> $env:GITHUB_ENV
+          echo "GOARCH=${{ matrix.goarch }}" >> $env:GITHUB_ENV
           
           # Add to PATH
           echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
           echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
           
           Write-Host "`n=== Environment Configuration ==="
+          Write-Host "Architecture: ${{ matrix.arch }}"
+          Write-Host "GOARCH: ${{ matrix.goarch }}"
           Write-Host "OPENSSL_DIR: $OPENSSL_DIR"
           Write-Host "CGO_CFLAGS: -I$OPENSSL_DIR/include"
           Write-Host "CGO_LDFLAGS: -L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32"
@@ -330,7 +359,16 @@ jobs:
         shell: powershell
         run: |
           $env:CGO_ENABLED = "1"
-          go build -ldflags="-s -w -H windowsgui" -o build/ravro_dcrpt_gui.exe ./cmd/gui
+          $env:GOOS = "windows"
+          $env:GOARCH = "${{ matrix.goarch }}"
+          
+          if ("${{ matrix.arch }}" -eq "386") {
+            $OUTPUT_NAME = "build/ravro_dcrpt_gui-386.exe"
+          } else {
+            $OUTPUT_NAME = "build/ravro_dcrpt_gui.exe"
+          }
+          
+          go build -ldflags="-s -w -H windowsgui" -o $OUTPUT_NAME ./cmd/gui
 
       - name: Copy runtime DLLs
         shell: powershell
@@ -338,10 +376,25 @@ jobs:
           # Create build directory if not exists
           New-Item -ItemType Directory -Force -Path build
           
-          # Copy OpenSSL DLLs
-          if (Test-Path "C:\Program Files\OpenSSL-Win64\bin\libssl-3-x64.dll") {
-            Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libssl-3-x64.dll" build/
-            Copy-Item "C:\Program Files\OpenSSL-Win64\bin\libcrypto-3-x64.dll" build/
+          # Determine DLL suffix based on architecture
+          if ("${{ matrix.arch }}" -eq "386") {
+            $DLL_SUFFIX = "x86"
+          } else {
+            $DLL_SUFFIX = "x64"
+          }
+          
+          # Copy OpenSSL DLLs from installed location
+          $OPENSSL_BIN = "${{ matrix.openssl_dir }}\bin"
+          if (Test-Path "$OPENSSL_BIN\libssl-3-${DLL_SUFFIX}.dll") {
+            Copy-Item "$OPENSSL_BIN\libssl-3-${DLL_SUFFIX}.dll" build/
+            Copy-Item "$OPENSSL_BIN\libcrypto-3-${DLL_SUFFIX}.dll" build/
+            Write-Host "✅ Copied OpenSSL DLLs (${DLL_SUFFIX})"
+          } elseif (Test-Path "$OPENSSL_BIN\libssl-3.dll") {
+            Copy-Item "$OPENSSL_BIN\libssl-3.dll" build/
+            Copy-Item "$OPENSSL_BIN\libcrypto-3.dll" build/
+            Write-Host "✅ Copied OpenSSL DLLs (generic)"
+          } else {
+            Write-Host "⚠️ OpenSSL DLLs not found in $OPENSSL_BIN"
           }
           
           # Copy any local DLLs from lib/ if they exist
@@ -352,13 +405,27 @@ jobs:
       - name: Create zip archive
         shell: powershell
         run: |
-          Compress-Archive -Path build\ravro_dcrpt_gui.exe, build\*.dll -DestinationPath build\ravro_dcrpt-windows-amd64.zip -Force
+          if ("${{ matrix.arch }}" -eq "386") {
+            $EXE_NAME = "ravro_dcrpt_gui-386.exe"
+            $ZIP_NAME = "ravro_dcrpt-windows-386.zip"
+          } else {
+            $EXE_NAME = "ravro_dcrpt_gui.exe"
+            $ZIP_NAME = "ravro_dcrpt-windows-amd64.zip"
+          }
+          
+          # Include all DLLs in build directory
+          $files = @("build\$EXE_NAME")
+          if (Test-Path "build\*.dll") {
+            $files += Get-ChildItem "build\*.dll" | ForEach-Object { $_.FullName }
+          }
+          
+          Compress-Archive -Path $files -DestinationPath "build\$ZIP_NAME" -Force
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-amd64
-          path: build/ravro_dcrpt-windows-amd64.zip
+          name: windows-${{ matrix.arch }}
+          path: build/ravro_dcrpt-windows-${{ matrix.arch }}.zip
           retention-days: 7
 
   create-release:
