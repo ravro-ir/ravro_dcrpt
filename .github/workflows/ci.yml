@@ -137,12 +137,39 @@ jobs:
             Write-Host "Installing MinGW 32-bit..."
             choco install -y mingw --forcex86 --force
             
-            # Verify installation
-            if (Test-Path "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32") {
-              Write-Host "✅ MinGW 32-bit installed"
-              echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin" >> $env:GITHUB_PATH
-            } else {
-              Write-Host "❌ MinGW 32-bit installation failed"
+            # Find MinGW 32-bit installation
+            $MINGW_PATHS = @(
+              "C:\ProgramData\mingw64\mingw32\bin",
+              "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin",
+              "C:\ProgramData\mingw32\bin",
+              "C:\mingw32\bin"
+            )
+            
+            $MINGW_FOUND = $false
+            foreach ($path in $MINGW_PATHS) {
+              if (Test-Path $path) {
+                Write-Host "✅ Found MinGW 32-bit at: $path"
+                echo "$path" >> $env:GITHUB_PATH
+                $MINGW_FOUND = $true
+                break
+              }
+            }
+            
+            if (-not $MINGW_FOUND) {
+              Write-Host "Searching for MinGW 32-bit in ProgramData..."
+              $found = Get-ChildItem "C:\ProgramData" -Recurse -Directory -Filter "mingw32" -ErrorAction SilentlyContinue | Where-Object { Test-Path "$($_.FullName)\bin\gcc.exe" } | Select-Object -First 1
+              if ($found) {
+                $mingwPath = "$($found.FullName)\bin"
+                Write-Host "✅ Found MinGW 32-bit at: $mingwPath"
+                echo "$mingwPath" >> $env:GITHUB_PATH
+                $MINGW_FOUND = $true
+              }
+            }
+            
+            if (-not $MINGW_FOUND) {
+              Write-Host "❌ MinGW 32-bit installation failed - could not find mingw32 directory"
+              Write-Host "Listing C:\ProgramData contents:"
+              Get-ChildItem "C:\ProgramData" -Directory | Select-Object Name
               exit 1
             }
           } else {
