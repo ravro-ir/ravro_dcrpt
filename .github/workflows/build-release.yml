@@ -70,6 +70,76 @@ jobs:
           path: build/ravro_dcrpt-linux-amd64.tar.gz
           retention-days: 7
 
+  build-kali:
+    name: Build Kali Linux
+    runs-on: ubuntu-22.04
+    container:
+      image: kalilinux/kali-rolling:latest
+    steps:
+      - name: Update Kali repositories
+        run: |
+          apt-get update
+          apt-get install -y ca-certificates
+
+      - name: Install Git and basic tools
+        run: |
+          apt-get install -y git curl wget
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        run: |
+          wget https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
+          tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
+          echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+          export PATH=$PATH:/usr/local/go/bin
+          go version
+
+      - name: Install Kali Linux dependencies
+        run: |
+          # Install basic dependencies first
+          apt-get install -y \
+            gcc \
+            libgl1-mesa-dev \
+            xorg-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxi-dev \
+            libssl-dev \
+            pkg-config
+          
+          # Install wkhtmltopdf from external source for Kali
+          wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+          dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb || apt-get install -f -y
+          rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+
+      - name: Install Go dependencies
+        run: |
+          export PATH=$PATH:/usr/local/go/bin
+          go mod download
+          go mod tidy
+
+      - name: Build GUI for Kali
+        run: |
+          export PATH=$PATH:/usr/local/go/bin
+          CGO_ENABLED=1 go build -buildvcs=false -ldflags="-s -w" -o build/ravro_dcrpt_gui ./cmd/gui
+
+      - name: Create tarball
+        run: |
+          cd build
+          tar -czf ravro_dcrpt-kali-linux-amd64.tar.gz ravro_dcrpt_gui
+          cd ..
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: kali-linux-amd64
+          path: build/ravro_dcrpt-kali-linux-amd64.tar.gz
+          retention-days: 7
+
   build-macos:
     name: Build macOS
     runs-on: ${{ matrix.os }}
@@ -366,7 +436,7 @@ jobs:
 
   create-release:
     name: Create GitHub Release
-    needs: [build-linux, build-macos, build-windows]
+    needs: [build-linux, build-kali, build-macos, build-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -383,6 +453,7 @@ jobs:
         with:
           files: |
             artifacts/linux-amd64/*.tar.gz
+            artifacts/kali-linux-amd64/*.tar.gz
             artifacts/macos-amd64/*.tar.gz
             artifacts/macos-arm64/*.tar.gz
             artifacts/windows-amd64/*.zip
