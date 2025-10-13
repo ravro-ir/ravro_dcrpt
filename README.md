@@ -1,4 +1,4 @@
-# ravro_dcrpt
+# Ravro Decryption Tool
 
 A versatile Go-based tool for decrypting and converting Ravro platform bug bounty reports to PDF.
 
