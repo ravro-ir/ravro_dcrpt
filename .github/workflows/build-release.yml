@@ -187,21 +187,8 @@ jobs:
           retention-days: 7
 
   build-windows:
-    name: Build Windows (${{ matrix.arch }})
+    name: Build Windows
     runs-on: windows-latest
-    strategy:
-      matrix:
-        include:
-          - arch: amd64
-            goarch: amd64
-            mingw: mingw64
-            openssl_url_prefix: Win64OpenSSL
-            openssl_dir: C:\OpenSSL-Win64
-          - arch: 386
-            goarch: 386
-            mingw: mingw32
-            openssl_url_prefix: Win32OpenSSL
-            openssl_dir: C:\OpenSSL-Win32
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -212,75 +199,15 @@ jobs:
           go-version: '1.23'
           cache: true
 
-      - name: Install MinGW for ${{ matrix.arch }}
-        shell: powershell
-        run: |
-          if ("${{ matrix.arch }}" -eq "386") {
-            Write-Host "Installing MinGW 32-bit..."
-            choco install -y mingw --forcex86 --force
-            
-            # Find MinGW 32-bit installation
-            $MINGW_PATHS = @(
-              "C:\ProgramData\mingw64\mingw32\bin",
-              "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin",
-              "C:\ProgramData\mingw32\bin",
-              "C:\mingw32\bin"
-            )
-            
-            $MINGW_FOUND = $false
-            foreach ($path in $MINGW_PATHS) {
-              if (Test-Path $path) {
-                Write-Host "✅ Found MinGW 32-bit at: $path"
-                echo "$path" >> $env:GITHUB_PATH
-                $MINGW_FOUND = $true
-                break
-              }
-            }
-            
-            if (-not $MINGW_FOUND) {
-              Write-Host "Searching for MinGW 32-bit in ProgramData..."
-              $found = Get-ChildItem "C:\ProgramData" -Recurse -Directory -Filter "mingw32" -ErrorAction SilentlyContinue | Where-Object { Test-Path "$($_.FullName)\bin\gcc.exe" } | Select-Object -First 1
-              if ($found) {
-                $mingwPath = "$($found.FullName)\bin"
-                Write-Host "✅ Found MinGW 32-bit at: $mingwPath"
-                echo "$mingwPath" >> $env:GITHUB_PATH
-                $MINGW_FOUND = $true
-              }
-            }
-            
-            if (-not $MINGW_FOUND) {
-              Write-Host "❌ MinGW 32-bit installation failed - could not find mingw32 directory"
-              Write-Host "Listing C:\ProgramData contents:"
-              Get-ChildItem "C:\ProgramData" -Directory | Select-Object Name
-              exit 1
-            }
-          } else {
-            Write-Host "Using default MinGW 64-bit"
-            # MinGW 64-bit is usually pre-installed
-          }
-
       - name: Install Windows dependencies
         shell: powershell
         run: |
           # Install wkhtmltopdf
           choco install -y wkhtmltopdf
           
-          # Install OpenSSL via chocolatey (more reliable)
+          # Install OpenSSL (64-bit only)
           Write-Host "Installing OpenSSL via Chocolatey..."
-          
-          if ("${{ matrix.arch }}" -eq "386") {
-            # For 32-bit, we need to use a different approach
-            Write-Host "Installing OpenSSL (will install 64-bit, but we'll handle libs separately)..."
-            choco install -y openssl
-            
-            # Try to find and setup 32-bit libs
-            # Note: Windows OpenSSL from chocolatey typically installs 64-bit
-            # For 32-bit builds, we may need to compile or use pre-built libs
-            Write-Host "⚠️ Note: 32-bit OpenSSL may require manual library setup"
-          } else {
-            # For 64-bit, straightforward chocolatey install
-            choco install -y openssl
-          }
+          choco install -y openssl
           
           # Check common installation paths
           $OPENSSL_PATHS = @(
@@ -303,10 +230,7 @@ jobs:
           }
           
           if (-not $OPENSSL_FOUND) {
-            Write-Host "❌ OpenSSL not found in common locations"
-            Write-Host "Searching for OpenSSL..."
-            
-            # Search in Program Files
+            Write-Host "Searching for OpenSSL in Program Files..."
             $found = Get-ChildItem "C:\Program Files" -Directory -Filter "*OpenSSL*" -ErrorAction SilentlyContinue | Select-Object -First 1
             if ($found) {
               $ACTUAL_OPENSSL_DIR = $found.FullName
@@ -320,97 +244,50 @@ jobs:
             exit 1
           }
           
-          # Create symlink/junction to expected location if needed
-          if ($ACTUAL_OPENSSL_DIR -ne "${{ matrix.openssl_dir }}") {
-            if (-not (Test-Path "${{ matrix.openssl_dir }}")) {
-              Write-Host "Creating junction from ${{ matrix.openssl_dir }} to $ACTUAL_OPENSSL_DIR"
-              New-Item -ItemType Junction -Path "${{ matrix.openssl_dir }}" -Target $ACTUAL_OPENSSL_DIR -Force | Out-Null
+          # Create junction to C:\OpenSSL-Win64 if needed
+          if ($ACTUAL_OPENSSL_DIR -ne "C:\OpenSSL-Win64") {
+            if (-not (Test-Path "C:\OpenSSL-Win64")) {
+              Write-Host "Creating junction from C:\OpenSSL-Win64 to $ACTUAL_OPENSSL_DIR"
+              New-Item -ItemType Junction -Path "C:\OpenSSL-Win64" -Target $ACTUAL_OPENSSL_DIR -Force | Out-Null
               Write-Host "✅ Junction created"
             }
           }
           
-          # Verify installation
-          if (Test-Path "${{ matrix.openssl_dir }}") {
-            Write-Host "✅ OpenSSL ready at ${{ matrix.openssl_dir }}"
-            Get-ChildItem "${{ matrix.openssl_dir }}" | Select-Object Name
-          } else {
-            Write-Host "❌ OpenSSL setup failed"
-            exit 1
-          }
+          Write-Host "✅ OpenSSL ready"
 
       - name: Set up environment variables
         shell: powershell
         run: |
-          # Set OpenSSL directory
-          $OPENSSL_DIR = "${{ matrix.openssl_dir }}"
+          # Set OpenSSL directory (64-bit)
+          $OPENSSL_DIR = "C:\OpenSSL-Win64"
           
           if (-not (Test-Path "$OPENSSL_DIR")) {
             Write-Host "❌ OpenSSL directory not found: $OPENSSL_DIR"
             exit 1
           }
           
-          Write-Host "✅ Found OpenSSL at: $OPENSSL_DIR"
-          
-          # Find lib directory structure based on architecture
-          if ("${{ matrix.arch }}" -eq "386") {
-            # For 32-bit, look for x86 libraries
-            if (Test-Path "$OPENSSL_DIR/lib/VC/x86/MD") {
-              $LIB_PATH = "$OPENSSL_DIR/lib/VC/x86/MD"
-              Write-Host "✅ Using VC x86 lib path: $LIB_PATH"
-            } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
-              $LIB_PATH = "$OPENSSL_DIR/lib/VC"
-              Write-Host "✅ Using VC lib path: $LIB_PATH"
-            } elseif (Test-Path "$OPENSSL_DIR/lib") {
-              $LIB_PATH = "$OPENSSL_DIR/lib"
-              Write-Host "✅ Using standard lib path: $LIB_PATH"
-            } else {
-              Write-Host "❌ OpenSSL lib directory not found!"
-              Write-Host "Directory contents:"
-              Get-ChildItem -Path $OPENSSL_DIR -Recurse -Depth 2 | Select-Object FullName
-              exit 1
-            }
+          # Find lib directory structure
+          if (Test-Path "$OPENSSL_DIR/lib/VC/x64/MD") {
+            $LIB_PATH = "$OPENSSL_DIR/lib/VC/x64/MD"
+          } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
+            $LIB_PATH = "$OPENSSL_DIR/lib/VC"
+          } elseif (Test-Path "$OPENSSL_DIR/lib") {
+            $LIB_PATH = "$OPENSSL_DIR/lib"
           } else {
-            # For 64-bit, look for x64 libraries
-            if (Test-Path "$OPENSSL_DIR/lib/VC/x64/MD") {
-              $LIB_PATH = "$OPENSSL_DIR/lib/VC/x64/MD"
-              Write-Host "✅ Using VC x64 lib path: $LIB_PATH"
-            } elseif (Test-Path "$OPENSSL_DIR/lib/VC") {
-              $LIB_PATH = "$OPENSSL_DIR/lib/VC"
-              Write-Host "✅ Using VC lib path: $LIB_PATH"
-            } elseif (Test-Path "$OPENSSL_DIR/lib") {
-              $LIB_PATH = "$OPENSSL_DIR/lib"
-              Write-Host "✅ Using standard lib path: $LIB_PATH"
-            } else {
-              Write-Host "❌ OpenSSL lib directory not found!"
-              Write-Host "Directory contents:"
-              Get-ChildItem -Path $OPENSSL_DIR -Recurse -Depth 2 | Select-Object FullName
-              exit 1
-            }
-          }
-          
-          # Verify include directory
-          if (-not (Test-Path "$OPENSSL_DIR/include/openssl")) {
-            Write-Host "❌ OpenSSL include directory not found!"
+            Write-Host "❌ OpenSSL lib directory not found!"
             exit 1
           }
-          Write-Host "✅ Found OpenSSL headers at: $OPENSSL_DIR/include"
+          
+          Write-Host "✅ Using OpenSSL lib path: $LIB_PATH"
           
           # Set environment variables
           echo "OPENSSL_DIR=$OPENSSL_DIR" >> $env:GITHUB_ENV
           echo "CGO_CFLAGS=-I$OPENSSL_DIR/include" >> $env:GITHUB_ENV
           echo "CGO_LDFLAGS=-L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32" >> $env:GITHUB_ENV
-          echo "GOARCH=${{ matrix.goarch }}" >> $env:GITHUB_ENV
           
           # Add to PATH
           echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
           echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
-          
-          Write-Host "`n=== Environment Configuration ==="
-          Write-Host "Architecture: ${{ matrix.arch }}"
-          Write-Host "GOARCH: ${{ matrix.goarch }}"
-          Write-Host "OPENSSL_DIR: $OPENSSL_DIR"
-          Write-Host "CGO_CFLAGS: -I$OPENSSL_DIR/include"
-          Write-Host "CGO_LDFLAGS: -L$LIB_PATH -lssl -lcrypto -lws2_32 -lcrypt32"
 
       - name: Install Go dependencies
         run: |
@@ -421,16 +298,7 @@ jobs:
         shell: powershell
         run: |
           $env:CGO_ENABLED = "1"
-          $env:GOOS = "windows"
-          $env:GOARCH = "${{ matrix.goarch }}"
-          
-          if ("${{ matrix.arch }}" -eq "386") {
-            $OUTPUT_NAME = "build/ravro_dcrpt_gui-386.exe"
-          } else {
-            $OUTPUT_NAME = "build/ravro_dcrpt_gui.exe"
-          }
-          
-          go build -ldflags="-s -w -H windowsgui" -o $OUTPUT_NAME ./cmd/gui
+          go build -ldflags="-s -w -H windowsgui" -o build/ravro_dcrpt_gui.exe ./cmd/gui
 
       - name: Copy runtime DLLs
         shell: powershell
@@ -438,25 +306,18 @@ jobs:
           # Create build directory if not exists
           New-Item -ItemType Directory -Force -Path build
           
-          # Determine DLL suffix based on architecture
-          if ("${{ matrix.arch }}" -eq "386") {
-            $DLL_SUFFIX = "x86"
-          } else {
-            $DLL_SUFFIX = "x64"
-          }
-          
-          # Copy OpenSSL DLLs from installed location
-          $OPENSSL_BIN = "${{ matrix.openssl_dir }}\bin"
-          if (Test-Path "$OPENSSL_BIN\libssl-3-${DLL_SUFFIX}.dll") {
-            Copy-Item "$OPENSSL_BIN\libssl-3-${DLL_SUFFIX}.dll" build/
-            Copy-Item "$OPENSSL_BIN\libcrypto-3-${DLL_SUFFIX}.dll" build/
-            Write-Host "✅ Copied OpenSSL DLLs (${DLL_SUFFIX})"
+          # Copy OpenSSL DLLs (64-bit)
+          $OPENSSL_BIN = "C:\OpenSSL-Win64\bin"
+          if (Test-Path "$OPENSSL_BIN\libssl-3-x64.dll") {
+            Copy-Item "$OPENSSL_BIN\libssl-3-x64.dll" build/
+            Copy-Item "$OPENSSL_BIN\libcrypto-3-x64.dll" build/
+            Write-Host "✅ Copied OpenSSL DLLs"
           } elseif (Test-Path "$OPENSSL_BIN\libssl-3.dll") {
             Copy-Item "$OPENSSL_BIN\libssl-3.dll" build/
             Copy-Item "$OPENSSL_BIN\libcrypto-3.dll" build/
-            Write-Host "✅ Copied OpenSSL DLLs (generic)"
+            Write-Host "✅ Copied OpenSSL DLLs"
           } else {
-            Write-Host "⚠️ OpenSSL DLLs not found in $OPENSSL_BIN"
+            Write-Host "⚠️ OpenSSL DLLs not found"
           }
           
           # Copy any local DLLs from lib/ if they exist
@@ -467,27 +328,19 @@ jobs:
       - name: Create zip archive
         shell: powershell
         run: |
-          if ("${{ matrix.arch }}" -eq "386") {
-            $EXE_NAME = "ravro_dcrpt_gui-386.exe"
-            $ZIP_NAME = "ravro_dcrpt-windows-386.zip"
-          } else {
-            $EXE_NAME = "ravro_dcrpt_gui.exe"
-            $ZIP_NAME = "ravro_dcrpt-windows-amd64.zip"
-          }
-          
-          # Include all DLLs in build directory
-          $files = @("build\$EXE_NAME")
+          # Include all files in build directory
+          $files = @("build\ravro_dcrpt_gui.exe")
           if (Test-Path "build\*.dll") {
             $files += Get-ChildItem "build\*.dll" | ForEach-Object { $_.FullName }
           }
           
-          Compress-Archive -Path $files -DestinationPath "build\$ZIP_NAME" -Force
+          Compress-Archive -Path $files -DestinationPath "build\ravro_dcrpt-windows-amd64.zip" -Force
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-${{ matrix.arch }}
-          path: build/ravro_dcrpt-windows-${{ matrix.arch }}.zip
+          name: windows-amd64
+          path: build/ravro_dcrpt-windows-amd64.zip
           retention-days: 7
 
   create-release:
