@@ -261,7 +261,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        arch: [amd64, 386]
+        arch: [amd64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -374,15 +374,9 @@ jobs:
         run: |
           $env:CGO_ENABLED = "1"
           $env:GOOS = "windows"
-          $env:GOARCH = "${{ matrix.arch }}"
+          $env:GOARCH = "amd64"
           
-          if ("${{ matrix.arch }}" -eq "386") {
-            $OUTPUT_NAME = "build/ravro_dcrpt_gui-386.exe"
-          } else {
-            $OUTPUT_NAME = "build/ravro_dcrpt_gui.exe"
-          }
-          
-          go build -ldflags="-s -w -H windowsgui" -o $OUTPUT_NAME ./cmd/gui
+          go build -ldflags="-s -w -H windowsgui" -o build/ravro_dcrpt_gui.exe ./cmd/gui
 
       - name: Copy runtime DLLs
         shell: powershell
@@ -430,8 +424,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-${{ matrix.arch }}
-          path: build/ravro_dcrpt-windows-${{ matrix.arch }}.zip
+          name: windows-amd64
+          path: build/ravro_dcrpt-windows-amd64.zip
           retention-days: 7
 
   create-release:
@@ -457,7 +451,6 @@ jobs:
             artifacts/macos-amd64/*.tar.gz
             artifacts/macos-arm64/*.tar.gz
             artifacts/windows-amd64/*.zip
-            artifacts/windows-386/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true
