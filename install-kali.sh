@@ -105,8 +105,15 @@ print_success "OpenSSL installed"
 
 # Install PDF generation tools
 print_status "Installing PDF tools..."
-sudo apt-get install -y wkhtmltopdf
-print_success "PDF tools installed"
+if ! sudo apt-get install -y wkhtmltopdf 2>/dev/null; then
+    print_warning "wkhtmltopdf not available in repositories, installing from external source..."
+    wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb -O /tmp/wkhtmltox.deb
+    sudo dpkg -i /tmp/wkhtmltox.deb || sudo apt-get install -f -y
+    rm /tmp/wkhtmltox.deb
+    print_success "PDF tools installed from external source"
+else
+    print_success "PDF tools installed"
+fi
 
 # Install additional Kali-specific tools that might be useful
 print_status "Installing additional forensics tools..."

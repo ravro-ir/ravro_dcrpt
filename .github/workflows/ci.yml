@@ -253,6 +253,7 @@ jobs:
 
       - name: Install Kali Linux dependencies
         run: |
+          # Install basic dependencies first
           apt-get install -y \
             gcc \
             libgl1-mesa-dev \
@@ -263,8 +264,12 @@ jobs:
             libxinerama-dev \
             libxi-dev \
             libssl-dev \
-            pkg-config \
-            wkhtmltopdf
+            pkg-config
+          
+          # Install wkhtmltopdf from external source for Kali
+          wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
+          dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb || apt-get install -f -y
+          rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
 
       - name: Install Go dependencies
         run: |
