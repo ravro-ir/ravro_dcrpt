@@ -43,7 +43,11 @@ jobs:
             libxxf86vm-dev \
             libssl-dev \
             pkg-config \
-            wkhtmltopdf
+            wkhtmltopdf \
+            fuse \
+            libfuse2 \
+            file \
+            desktop-file-utils
 
       - name: Install Go dependencies
         run: |
@@ -57,6 +61,133 @@ jobs:
           -o build/ravro_dcrpt_gui \
           ./cmd/gui
 
+      - name: Create desktop file
+        run: |
+          mkdir -p build/appimage
+          cat > build/appimage/ravro-decryption-tool.desktop << 'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=Ravro Decryption Tool
+          Comment=Decrypt and manage Ravro encrypted files
+          Exec=ravro_dcrpt_gui
+          Icon=ravro-decryption-tool
+          Terminal=false
+          Categories=Utility;Security;
+          EOF
+
+      - name: Create AppImage icon
+        run: |
+          # Create a simple PNG icon (you should replace this with your actual icon)
+          mkdir -p build/appimage
+          # Using a placeholder - you should add your actual icon to the repo
+          if [ -f "assets/icon.png" ]; then
+            cp assets/icon.png build/appimage/ravro-decryption-tool.png
+          else
+            # Create a placeholder icon
+            echo "Creating placeholder icon..."
+            convert -size 256x256 xc:blue -fill white -pointsize 72 -gravity center \
+              -annotate +0+0 "R" build/appimage/ravro-decryption-tool.png 2>/dev/null || \
+            echo "Icon creation skipped (imagemagick not available)"
+          fi
+
+      - name: Download appimagetool
+        run: |
+          wget -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool
+
+      - name: Create AppImage structure
+        run: |
+          mkdir -p build/AppDir/usr/bin
+          mkdir -p build/AppDir/usr/share/applications
+          mkdir -p build/AppDir/usr/share/icons/hicolor/256x256/apps
+          
+          # Copy binary
+          cp build/ravro_dcrpt_gui build/AppDir/usr/bin/
+          
+          # Copy desktop file
+          cp build/appimage/ravro-decryption-tool.desktop build/AppDir/usr/share/applications/
+          
+          # Copy icon if exists
+          if [ -f "build/appimage/ravro-decryption-tool.png" ]; then
+            cp build/appimage/ravro-decryption-tool.png build/AppDir/usr/share/icons/hicolor/256x256/apps/
+            cp build/appimage/ravro-decryption-tool.png build/AppDir/ravro-decryption-tool.png
+          fi
+          
+          # Create AppRun
+          cat > build/AppDir/AppRun << 'APPRUN_EOF'
+          #!/bin/bash
+          SELF=$(readlink -f "$0")
+          HERE=${SELF%/*}
+          export PATH="${HERE}/usr/bin:${PATH}"
+          export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH}"
+          exec "${HERE}/usr/bin/ravro_dcrpt_gui" "$@"
+          APPRUN_EOF
+          
+          chmod +x build/AppDir/AppRun
+
+      - name: Build AppImage
+        run: |
+          ARCH=x86_64 ./appimagetool build/AppDir build/Ravro_Decryption_Tool-x86_64.AppImage
+        env:
+          NO_APPSTREAM: 1
+
+      - name: Create DEB package structure
+        run: |
+          mkdir -p build/deb/ravro-decryption-tool-amd64/DEBIAN
+          mkdir -p build/deb/ravro-decryption-tool-amd64/usr/bin
+          mkdir -p build/deb/ravro-decryption-tool-amd64/usr/share/applications
+          mkdir -p build/deb/ravro-decryption-tool-amd64/usr/share/icons/hicolor/256x256/apps
+          mkdir -p build/deb/ravro-decryption-tool-amd64/usr/share/doc/ravro-decryption-tool
+          
+          # Get version from git tag or use default
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF_NAME" ]; then
+            VERSION="1.0.0"
+          fi
+          
+          # Create control file
+          cat > build/deb/ravro-decryption-tool-amd64/DEBIAN/control << EOF
+          Package: ravro-decryption-tool
+          Version: ${VERSION}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Depends: libc6, libgl1, libx11-6, libssl3
+          Maintainer: Ravro Team <support@ravro.ir>
+          Description: Ravro Decryption Tool
+           A GUI application for decrypting and managing Ravro encrypted files.
+           This tool provides an easy-to-use interface for working with
+           encrypted data and generating reports.
+          EOF
+          
+          # Copy binary
+          cp build/ravro_dcrpt_gui build/deb/ravro-decryption-tool-amd64/usr/bin/
+          chmod 755 build/deb/ravro-decryption-tool-amd64/usr/bin/ravro_dcrpt_gui
+          
+          # Copy desktop file
+          cp build/appimage/ravro-decryption-tool.desktop build/deb/ravro-decryption-tool-amd64/usr/share/applications/
+          
+          # Copy icon if exists
+          if [ -f "build/appimage/ravro-decryption-tool.png" ]; then
+            cp build/appimage/ravro-decryption-tool.png build/deb/ravro-decryption-tool-amd64/usr/share/icons/hicolor/256x256/apps/
+          fi
+          
+          # Create copyright file
+          cat > build/deb/ravro-decryption-tool-amd64/usr/share/doc/ravro-decryption-tool/copyright << 'EOF'
+          Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+          Upstream-Name: ravro-decryption-tool
+          Source: https://github.com/ravro-ir/ravro_dcrpt
+          
+          Files: *
+          Copyright: 2024 Ravro Team
+          License: Proprietary
+          EOF
+
+      - name: Build DEB package
+        run: |
+          dpkg-deb --build build/deb/ravro-decryption-tool-amd64
+          mv build/deb/ravro-decryption-tool-amd64.deb build/ravro-decryption-tool-amd64.deb
+
       - name: Create tarball
         run: |
           cd build
@@ -67,7 +198,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-amd64
-          path: build/ravro_dcrpt-linux-amd64.tar.gz
+          path: |
+            build/ravro_dcrpt-linux-amd64.tar.gz
+            build/Ravro_Decryption_Tool-x86_64.AppImage
+            build/ravro-decryption-tool-amd64.deb
           retention-days: 7
 
   build-macos:
@@ -362,6 +496,8 @@ jobs:
         with:
           files: |
             artifacts/linux-amd64/*.tar.gz
+            artifacts/linux-amd64/*.AppImage
+            artifacts/linux-amd64/*.deb
             artifacts/macos-amd64/*.tar.gz
             artifacts/macos-arm64/*.tar.gz
             artifacts/windows-amd64/*.zip
