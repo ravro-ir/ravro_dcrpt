@@ -189,6 +189,9 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [amd64, 386]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -208,7 +211,7 @@ jobs:
           # Install OpenSSL (64-bit only)
           Write-Host "Installing OpenSSL via Chocolatey..."
           choco install -y openssl
-          
+       
           # Check common installation paths
           $OPENSSL_PATHS = @(
             "C:\Program Files\OpenSSL-Win64",
@@ -258,8 +261,10 @@ jobs:
       - name: Set up environment variables
         shell: powershell
         run: |
+
           # Set OpenSSL directory (64-bit)
           $OPENSSL_DIR = "C:\OpenSSL-Win64"
+
           
           if (-not (Test-Path "$OPENSSL_DIR")) {
             Write-Host "❌ OpenSSL directory not found: $OPENSSL_DIR"
@@ -298,7 +303,16 @@ jobs:
         shell: powershell
         run: |
           $env:CGO_ENABLED = "1"
-          go build -ldflags="-s -w -H windowsgui" -o build/ravro_dcrpt_gui.exe ./cmd/gui
+          $env:GOOS = "windows"
+          $env:GOARCH = "${{ matrix.arch }}"
+          
+          if ("${{ matrix.arch }}" -eq "386") {
+            $OUTPUT_NAME = "build/ravro_dcrpt_gui-386.exe"
+          } else {
+            $OUTPUT_NAME = "build/ravro_dcrpt_gui.exe"
+          }
+          
+          go build -ldflags="-s -w -H windowsgui" -o $OUTPUT_NAME ./cmd/gui
 
       - name: Copy runtime DLLs
         shell: powershell
@@ -320,10 +334,17 @@ jobs:
             Write-Host "⚠️ OpenSSL DLLs not found"
           }
           
-          # Copy any local DLLs from lib/ if they exist
-          if (Test-Path "lib\*.dll") {
-            Copy-Item lib\*.dll build\
+          # Copy wkhtmltopdf DLLs from chocolatey installation
+          if (Test-Path "C:\Program Files\wkhtmltopdf\bin\wkhtmltox.dll") {
+            Copy-Item "C:\Program Files\wkhtmltopdf\bin\wkhtmltox.dll" build/
+            Write-Host "✅ Copied wkhtmltox.dll from system installation"
+          } else {
+            Write-Host "⚠️ wkhtmltox.dll not found in system installation"
           }
+          
+          # List copied files for verification
+          Write-Host "`n=== Copied DLLs ==="
+          Get-ChildItem build\*.dll | ForEach-Object { Write-Host "  $($_.Name)" }
 
       - name: Create zip archive
         shell: powershell
@@ -339,8 +360,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-amd64
-          path: build/ravro_dcrpt-windows-amd64.zip
+          name: windows-${{ matrix.arch }}
+          path: build/ravro_dcrpt-windows-${{ matrix.arch }}.zip
           retention-days: 7
 
   create-release:
@@ -365,6 +386,7 @@ jobs:
             artifacts/macos-amd64/*.tar.gz
             artifacts/macos-arm64/*.tar.gz
             artifacts/windows-amd64/*.zip
+            artifacts/windows-386/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true

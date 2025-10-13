@@ -1,4 +1,4 @@
-# Ravro Decryption Tool - Windows Installation Script
+﻿# Ravro Decryption Tool - Windows Installation Script
 # This script installs all required dependencies for running the GUI
 
 # Check if running as Administrator
@@ -67,7 +67,9 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     
     # Refresh environment
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    $machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+    $userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    $env:Path = $machinePath + ";" + $userPath
     
     Print-Success "Chocolatey installed"
 } else {
@@ -99,7 +101,7 @@ if (-not $opensslFound) {
     Print-Status "Attempting to install OpenSSL..."
     
     # Try different versions from slproweb.com
-    $OPENSSL_VERSIONS = @("3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
+    $OPENSSL_VERSIONS = @("3_4_0", "3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
     $OPENSSL_INSTALLED = $false
     
     foreach ($VERSION in $OPENSSL_VERSIONS) {
@@ -169,16 +171,12 @@ if (-not $opensslFound) {
 
 # Install wkhtmltopdf
 Print-Status "Installing wkhtmltopdf..."
-if (Test-Path "C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe") {
-    Print-Success "wkhtmltopdf is already installed"
+choco install wkhtmltopdf -y --force
+if ($LASTEXITCODE -eq 0) {
+    Print-Success "wkhtmltopdf installed successfully"
 } else {
-    choco install wkhtmltopdf -y
-    if ($LASTEXITCODE -eq 0) {
-        Print-Success "wkhtmltopdf installed successfully"
-    } else {
-        Print-Error "Failed to install wkhtmltopdf"
-        exit 1
-    }
+    Print-Error "Failed to install wkhtmltopdf"
+    exit 1
 }
 
 # Verify installations
@@ -186,7 +184,9 @@ Write-Host ""
 Print-Status "Verifying installations..."
 
 # Refresh environment PATH
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+$machinePath = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+$userPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+$env:Path = $machinePath + ";" + $userPath
 
 # Check OpenSSL
 $opensslFound = $false
@@ -268,4 +268,3 @@ if ($openBrowser -eq "Y" -or $openBrowser -eq "y") {
 
 Write-Host ""
 pause
-
