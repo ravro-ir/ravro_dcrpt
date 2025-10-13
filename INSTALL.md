@@ -1,61 +1,10 @@
 # نصب Ravro Decryption Tool
 
-این راهنما روش‌های مختلف نصب Ravro Decryption Tool را در پلتفرم‌های مختلف توضیح می‌دهد.
+این راهنما روش نصب Ravro Decryption Tool را در پلتفرم‌های مختلف توضیح می‌دهد.
 
 ## 📦 Linux
 
-### روش 1: AppImage (توصیه می‌شود)
-
-AppImage یک فایل قابل اجرای مستقل است که نیازی به نصب ندارد:
-
-```bash
-# دانلود AppImage
-wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/Ravro_Decryption_Tool-x86_64.AppImage
-
-# قابل اجرا کردن
-chmod +x Ravro_Decryption_Tool-x86_64.AppImage
-
-# اجرا
-./Ravro_Decryption_Tool-x86_64.AppImage
-```
-
-**مزایا:**
-- ✅ نیازی به نصب ندارد
-- ✅ همه dependency ها داخل آن است
-- ✅ روی تمام توزیع‌های Linux کار می‌کند
-- ✅ می‌توانید در هر مسیری اجرا کنید
-
-### روش 2: DEB Package (Ubuntu/Debian)
-
-برای Ubuntu، Debian و توزیع‌های مبتنی بر آن‌ها:
-
-```bash
-# دانلود DEB package
-wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro-decryption-tool-amd64.deb
-
-# نصب
-sudo dpkg -i ravro-decryption-tool-amd64.deb
-
-# رفع مشکل dependency ها (در صورت نیاز)
-sudo apt-get install -f
-
-# اجرا
-ravro_dcrpt_gui
-```
-
-**مزایا:**
-- ✅ یکپارچه با سیستم
-- ✅ می‌توانید از Application Menu اجرا کنید
-- ✅ به راحتی قابل حذف است (`sudo apt remove ravro-decryption-tool`)
-
-**حذف:**
-```bash
-sudo apt remove ravro-decryption-tool
-```
-
-### روش 3: Tarball (همه توزیع‌ها)
-
-برای نصب دستی:
+### دانلود و نصب
 
 ```bash
 # دانلود tarball
@@ -68,7 +17,7 @@ tar -xzf ravro_dcrpt-linux-amd64.tar.gz
 ./ravro_dcrpt_gui
 ```
 
-**توجه:** ممکن است نیاز به نصب dependency ها باشد:
+**نصب dependency ها:**
 ```bash
 # Ubuntu/Debian
 sudo apt-get install libgl1 libx11-6 libssl3
@@ -156,15 +105,6 @@ xattr -cr "/Applications/Ravro Decryption Tool.app"
 sudo apt-get install libgl1-mesa-glx libx11-6 libssl3
 ```
 
-### Linux: AppImage اجرا نمی‌شود
-
-```bash
-# نصب FUSE
-sudo apt-get install fuse libfuse2
-
-# یا اجرا با extract mode
-./Ravro_Decryption_Tool-x86_64.AppImage --appimage-extract-and-run
-```
 
 ### macOS: "damaged and can't be opened"
 
@@ -208,13 +148,11 @@ ravro_dcrpt_gui.exe --version
 
 ## 📦 فرمت‌های Package
 
-| فرمت | پلتفرم | مزایا |
-|------|--------|-------|
-| `.AppImage` | Linux | قابل حمل، بدون نیاز به نصب |
-| `.deb` | Ubuntu/Debian | یکپارچه با سیستم، قابل update |
-| `.tar.gz` | همه | ساده، قابل کنترل |
-| `.app` | macOS | Native macOS application |
-| `.zip` | Windows | استاندارد Windows |
+| فرمت | پلتفرم | توضیحات |
+|------|--------|---------|
+| `.tar.gz` | Linux | Binary + dependencies |
+| `.tar.gz` | macOS | Application bundle |
+| `.zip` | Windows | Executable + DLLs |
 
 ---
 
