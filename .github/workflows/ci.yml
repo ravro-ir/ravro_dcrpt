@@ -107,9 +107,6 @@ jobs:
   build-quick-windows:
     name: Quick Build (Windows)
     runs-on: windows-latest
-    strategy:
-      matrix:
-        arch: [amd64, 386]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -219,22 +216,12 @@ jobs:
         run: |
           $env:CGO_ENABLED = "1"
           $env:GOOS = "windows"
-          $env:GOARCH = "${{ matrix.arch }}"
+          $env:GOARCH = "amd64"
           
-          if ("${{ matrix.arch }}" -eq "386") {
-            $OUTPUT_NAME = "build/ravro_dcrpt_gui-386.exe"
-          } else {
-            $OUTPUT_NAME = "build/ravro_dcrpt_gui.exe"
-          }
-          
-          go build -o $OUTPUT_NAME ./cmd/gui
+          go build -o build/ravro_dcrpt_gui.exe ./cmd/gui
 
       - name: Verify GUI binary exists
         shell: powershell
         run: |
-          if ("${{ matrix.arch }}" -eq "386") {
-            Get-ChildItem build/ravro_dcrpt_gui-386.exe
-          } else {
-            Get-ChildItem build/ravro_dcrpt_gui.exe
-          }
+          Get-ChildItem build/ravro_dcrpt_gui.exe
 
