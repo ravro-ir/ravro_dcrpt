@@ -276,24 +276,18 @@ jobs:
           export PATH=$PATH:/usr/local/go/bin
           go mod download
 
-      - name: Build CLI for Kali
-        run: |
-          export PATH=$PATH:/usr/local/go/bin
-          CGO_ENABLED=1 go build -ldflags="-s -w" -o build/ravro_dcrpt_kali ./cmd/cli
-
       - name: Build GUI for Kali
         run: |
           export PATH=$PATH:/usr/local/go/bin
-          CGO_ENABLED=1 go build -ldflags="-s -w" -o build/ravro_dcrpt_gui_kali ./cmd/gui
+          CGO_ENABLED=1 go build -buildvcs=false -ldflags="-s -w" -o build/ravro_dcrpt_gui_kali ./cmd/gui
 
       - name: Verify Kali binaries exist
         run: |
-          ls -lh build/ravro_dcrpt_kali build/ravro_dcrpt_gui_kali
+          ls -lh build/ravro_dcrpt_gui_kali
 
       - name: Create Kali package
         run: |
           mkdir -p build/kali-package
-          cp build/ravro_dcrpt_kali build/kali-package/ravro_dcrpt
           cp build/ravro_dcrpt_gui_kali build/kali-package/ravro_dcrpt_gui
           cd build/kali-package && tar -czf ../ravro_dcrpt-kali-linux-amd64.tar.gz *
 
@@ -303,6 +297,5 @@ jobs:
           name: kali-linux-binaries
           path: |
             build/ravro_dcrpt-kali-linux-amd64.tar.gz
-            build/ravro_dcrpt_kali
             build/ravro_dcrpt_gui_kali
 

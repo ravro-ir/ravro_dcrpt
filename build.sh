@@ -227,20 +227,14 @@ if [[ "$BUILD_DARWIN" == true ]]; then
     fi
 fi
 
-# Build for Kali Linux
+# Build for Kali Linux (GUI only)
 if [[ "$BUILD_KALI" == true ]]; then
-    print_info "Building for Kali Linux..."
+    print_info "Building GUI for Kali Linux..."
     mkdir -p "$BUILD_DIR/kali"
-    
-    if [[ "$BUILD_CLI" == true ]]; then
-        print_info "Building CLI for Kali Linux..."
-        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o "$BUILD_DIR/kali/$APP_NAME" ./cmd/cli
-        print_success "Kali CLI built: $BUILD_DIR/kali/$APP_NAME"
-    fi
     
     if [[ "$BUILD_GUI" == true ]]; then
         print_info "Building GUI for Kali Linux..."
-        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o "$BUILD_DIR/kali/$APP_NAME-gui" ./cmd/gui
+        GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-s -w" -o "$BUILD_DIR/kali/$APP_NAME-gui" ./cmd/gui
         print_success "Kali GUI built: $BUILD_DIR/kali/$APP_NAME-gui"
     fi
     
