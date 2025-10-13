@@ -104,13 +104,15 @@ jobs:
           # Copy binary
           cp build/ravro_dcrpt_gui build/AppDir/usr/bin/
           
-          # Copy desktop file
+          # Copy desktop file to multiple locations (AppImage needs it in root too)
           cp build/appimage/ravro-decryption-tool.desktop build/AppDir/usr/share/applications/
+          cp build/appimage/ravro-decryption-tool.desktop build/AppDir/
           
           # Copy icon if exists
           if [ -f "build/appimage/ravro-decryption-tool.png" ]; then
             cp build/appimage/ravro-decryption-tool.png build/AppDir/usr/share/icons/hicolor/256x256/apps/
             cp build/appimage/ravro-decryption-tool.png build/AppDir/ravro-decryption-tool.png
+            cp build/appimage/ravro-decryption-tool.png build/AppDir/.DirIcon
           fi
           
           # Create AppRun
@@ -124,6 +126,11 @@ jobs:
           APPRUN_EOF
           
           chmod +x build/AppDir/AppRun
+          
+          # Debug: List AppDir structure
+          echo "=== AppDir structure ==="
+          find build/AppDir -type f
+          echo "========================"
 
       - name: Build AppImage
         run: |
