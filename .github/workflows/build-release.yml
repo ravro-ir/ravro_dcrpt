@@ -40,18 +40,31 @@ jobs:
       - name: Set up cross-compilation for ARM64
         if: matrix.arch == 'arm64'
         run: |
+          sudo dpkg --add-architecture arm64
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu \
+            g++-aarch64-linux-gnu
 
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
           if [ "${{ matrix.arch }}" = "arm64" ]; then
-            # For ARM64 cross-compilation, install basic tools
+            # For ARM64 cross-compilation - install ARM64 libraries
             sudo apt-get install -y \
-              gcc-aarch64-linux-gnu \
-              pkg-config \
-              libssl-dev
+              libgl1-mesa-dev:arm64 \
+              libx11-dev:arm64 \
+              libxcursor-dev:arm64 \
+              libxrandr-dev:arm64 \
+              libxinerama-dev:arm64 \
+              libxi-dev:arm64 \
+              libssl-dev:arm64 \
+              libxxf86vm-dev:arm64 \
+              pkg-config
+            
+            # Set PKG_CONFIG_PATH for cross-compilation
+            echo "PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig" >> $GITHUB_ENV
+            echo "PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig" >> $GITHUB_ENV
           else
             # For AMD64 native build
             sudo apt-get install -y \
