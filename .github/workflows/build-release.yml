@@ -238,41 +238,76 @@ jobs:
           # Install wkhtmltopdf
           choco install -y wkhtmltopdf
           
-          # Try to download and install OpenSSL manually
-          Write-Host "Attempting to install OpenSSL for ${{ matrix.arch }}..."
+          # Install OpenSSL via chocolatey (more reliable)
+          Write-Host "Installing OpenSSL via Chocolatey..."
           
-          # Try different versions
-          $OPENSSL_VERSIONS = @("3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
-          $OPENSSL_INSTALLED = $false
+          if ("${{ matrix.arch }}" -eq "386") {
+            # For 32-bit, we need to use a different approach
+            Write-Host "Installing OpenSSL (will install 64-bit, but we'll handle libs separately)..."
+            choco install -y openssl
+            
+            # Try to find and setup 32-bit libs
+            # Note: Windows OpenSSL from chocolatey typically installs 64-bit
+            # For 32-bit builds, we may need to compile or use pre-built libs
+            Write-Host "⚠️ Note: 32-bit OpenSSL may require manual library setup"
+          } else {
+            # For 64-bit, straightforward chocolatey install
+            choco install -y openssl
+          }
           
-          foreach ($VERSION in $OPENSSL_VERSIONS) {
-            try {
-              Write-Host "Trying OpenSSL version $VERSION..."
-              $OPENSSL_URL = "https://slproweb.com/download/${{ matrix.openssl_url_prefix }}-${VERSION}.exe"
-              $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
-              
-              # Try to download
-              Invoke-WebRequest -Uri $OPENSSL_URL -OutFile $OPENSSL_INSTALLER -ErrorAction Stop
-              
-              Write-Host "✅ Downloaded OpenSSL $VERSION"
-              Write-Host "Installing OpenSSL to ${{ matrix.openssl_dir }}..."
-              
-              Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=${{ matrix.openssl_dir }}" -Wait -NoNewWindow
-              
-              if (Test-Path "${{ matrix.openssl_dir }}") {
-                Write-Host "✅ OpenSSL $VERSION installed successfully at ${{ matrix.openssl_dir }}"
-                Get-ChildItem "${{ matrix.openssl_dir }}" | Select-Object Name
-                $OPENSSL_INSTALLED = $true
-                break
-              }
-            } catch {
-              Write-Host "⚠️ Version $VERSION not available, trying next..."
-              continue
+          # Check common installation paths
+          $OPENSSL_PATHS = @(
+            "C:\Program Files\OpenSSL-Win64",
+            "C:\Program Files\OpenSSL",
+            "C:\OpenSSL-Win64",
+            "C:\OpenSSL"
+          )
+          
+          $OPENSSL_FOUND = $false
+          $ACTUAL_OPENSSL_DIR = ""
+          
+          foreach ($path in $OPENSSL_PATHS) {
+            if (Test-Path $path) {
+              Write-Host "✅ Found OpenSSL at: $path"
+              $ACTUAL_OPENSSL_DIR = $path
+              $OPENSSL_FOUND = $true
+              break
             }
           }
           
-          if (-not $OPENSSL_INSTALLED) {
-            Write-Host "❌ Failed to install OpenSSL"
+          if (-not $OPENSSL_FOUND) {
+            Write-Host "❌ OpenSSL not found in common locations"
+            Write-Host "Searching for OpenSSL..."
+            
+            # Search in Program Files
+            $found = Get-ChildItem "C:\Program Files" -Directory -Filter "*OpenSSL*" -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($found) {
+              $ACTUAL_OPENSSL_DIR = $found.FullName
+              Write-Host "✅ Found OpenSSL at: $ACTUAL_OPENSSL_DIR"
+              $OPENSSL_FOUND = $true
+            }
+          }
+          
+          if (-not $OPENSSL_FOUND) {
+            Write-Host "❌ Failed to find OpenSSL installation"
+            exit 1
+          }
+          
+          # Create symlink/junction to expected location if needed
+          if ($ACTUAL_OPENSSL_DIR -ne "${{ matrix.openssl_dir }}") {
+            if (-not (Test-Path "${{ matrix.openssl_dir }}")) {
+              Write-Host "Creating junction from ${{ matrix.openssl_dir }} to $ACTUAL_OPENSSL_DIR"
+              New-Item -ItemType Junction -Path "${{ matrix.openssl_dir }}" -Target $ACTUAL_OPENSSL_DIR -Force | Out-Null
+              Write-Host "✅ Junction created"
+            }
+          }
+          
+          # Verify installation
+          if (Test-Path "${{ matrix.openssl_dir }}") {
+            Write-Host "✅ OpenSSL ready at ${{ matrix.openssl_dir }}"
+            Get-ChildItem "${{ matrix.openssl_dir }}" | Select-Object Name
+          } else {
+            Write-Host "❌ OpenSSL setup failed"
             exit 1
           }
 
