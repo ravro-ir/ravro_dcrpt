@@ -19,14 +19,72 @@ tar -xzf ravro_dcrpt-linux-amd64.tar.gz
 
 **نصب dependency ها:**
 ```bash
-# Ubuntu/Debian
+# Ubuntu/Debian/Kali Linux
 sudo apt-get install libgl1 libx11-6 libssl3
+
+# Kali Linux (نصب کامل dependency ها)
+sudo apt-get update
+sudo apt-get install -y \
+    libgl1-mesa-dev \
+    libx11-dev \
+    libxcursor-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxi-dev \
+    libssl-dev \
+    wkhtmltopdf
 
 # Fedora/RHEL
 sudo dnf install mesa-libGL libX11 openssl-libs
 
 # Arch Linux
 sudo pacman -S mesa libx11 openssl
+```
+
+---
+
+## 🐉 Kali Linux
+
+### نصب ویژه برای Kali Linux
+
+```bash
+# دانلود نسخه مخصوص Kali
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-kali-linux-amd64.tar.gz
+
+# استخراج
+tar -xzf ravro_dcrpt-kali-linux-amd64.tar.gz
+
+# نصب dependency های Kali
+sudo apt-get update
+sudo apt-get install -y \
+    libgl1-mesa-dev \
+    libgl1-mesa-glx \
+    xorg-dev \
+    libx11-dev \
+    libxcursor-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxi-dev \
+    libssl-dev \
+    pkg-config \
+    wkhtmltopdf
+
+# اجرا
+./ravro_dcrpt_gui
+```
+
+**نکات مهم برای Kali Linux:**
+- اطمینان حاصل کنید که X11 یا Wayland در حال اجرا است
+- برای استفاده در محیط headless، از VNC یا X11 forwarding استفاده کنید
+- برای penetration testing، فایل‌های رمزگذاری شده را در محیط ایزوله بررسی کنید
+
+**استفاده در محیط CLI:**
+```bash
+# رمزگشایی فایل
+./ravro_dcrpt decrypt input.ravro output.pdf --key key.private
+
+# نمایش اطلاعات فایل
+./ravro_dcrpt info input.ravro
 ```
 
 ---
@@ -151,6 +209,7 @@ ravro_dcrpt_gui.exe --version
 | فرمت | پلتفرم | توضیحات |
 |------|--------|---------|
 | `.tar.gz` | Linux | Binary + dependencies |
+| `.tar.gz` | Kali Linux | Optimized for Kali + dependencies |
 | `.tar.gz` | macOS | Application bundle |
 | `.zip` | Windows | Executable + DLLs |
 

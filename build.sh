@@ -55,6 +55,7 @@ BUILD_GUI=true
 BUILD_LINUX=false
 BUILD_WINDOWS=false
 BUILD_DARWIN=false
+BUILD_KALI=false
 BUILD_ALL=false
 
 while [[ $# -gt 0 ]]; do
@@ -79,11 +80,16 @@ while [[ $# -gt 0 ]]; do
             BUILD_DARWIN=true
             shift
             ;;
+        --kali)
+            BUILD_KALI=true
+            shift
+            ;;
         --all)
             BUILD_ALL=true
             BUILD_LINUX=true
             BUILD_WINDOWS=true
             BUILD_DARWIN=true
+            BUILD_KALI=true
             shift
             ;;
         --help)
@@ -95,6 +101,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --linux         Build for Linux"
             echo "  --windows       Build for Windows"
             echo "  --darwin        Build for macOS"
+            echo "  --kali          Build for Kali Linux"
             echo "  --all           Build for all platforms"
             echo "  --help          Show this help message"
             echo ""
@@ -109,7 +116,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If no platform specified, build for current platform
-if [[ "$BUILD_LINUX" == false && "$BUILD_WINDOWS" == false && "$BUILD_DARWIN" == false ]]; then
+if [[ "$BUILD_LINUX" == false && "$BUILD_WINDOWS" == false && "$BUILD_DARWIN" == false && "$BUILD_KALI" == false ]]; then
     CURRENT_OS=$(go env GOOS)
     case $CURRENT_OS in
         linux)
@@ -217,6 +224,31 @@ if [[ "$BUILD_DARWIN" == true ]]; then
         tar -czf "../$APP_NAME-$VERSION-darwin-arm64.tar.gz" *-arm64
         cd ../..
         print_success "Packages created"
+    fi
+fi
+
+# Build for Kali Linux
+if [[ "$BUILD_KALI" == true ]]; then
+    print_info "Building for Kali Linux..."
+    mkdir -p "$BUILD_DIR/kali"
+    
+    if [[ "$BUILD_CLI" == true ]]; then
+        print_info "Building CLI for Kali Linux..."
+        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o "$BUILD_DIR/kali/$APP_NAME" ./cmd/cli
+        print_success "Kali CLI built: $BUILD_DIR/kali/$APP_NAME"
+    fi
+    
+    if [[ "$BUILD_GUI" == true ]]; then
+        print_info "Building GUI for Kali Linux..."
+        GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o "$BUILD_DIR/kali/$APP_NAME-gui" ./cmd/gui
+        print_success "Kali GUI built: $BUILD_DIR/kali/$APP_NAME-gui"
+    fi
+    
+    # Create tarball
+    if [[ "$BUILD_ALL" == true ]]; then
+        print_info "Creating Kali Linux package..."
+        cd "$BUILD_DIR/kali" && tar -czf "../$APP_NAME-$VERSION-kali-linux-amd64.tar.gz" * && cd ../..
+        print_success "Package created: $BUILD_DIR/$APP_NAME-$VERSION-kali-linux-amd64.tar.gz"
     fi
 fi
 

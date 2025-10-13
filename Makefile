@@ -40,6 +40,23 @@ install-deps: ## Install system dependencies (Linux/macOS)
 		echo "🍺 macOS: Use './build_macos.sh' for optimized build"; \
 	fi
 
+install-deps-kali: ## Install system dependencies for Kali Linux
+	@echo "📦 Installing Kali Linux dependencies..."
+	sudo apt-get update
+	sudo apt-get install -y \
+		gcc \
+		libgl1-mesa-dev \
+		xorg-dev \
+		libx11-dev \
+		libxcursor-dev \
+		libxrandr-dev \
+		libxinerama-dev \
+		libxi-dev \
+		libssl-dev \
+		pkg-config \
+		wkhtmltopdf
+	@echo "✅ Kali dependencies installed"
+
 test: ## Run tests
 	$(GOTEST) -v ./...
 
@@ -105,7 +122,21 @@ build-macos-cli: ## Build CLI for macOS
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o build/$(APP_NAME)-darwin-amd64 ./cmd/cli
 	@echo "✅ macOS CLI built"
 
-build-all-platforms: build build-macos-cli ## Build for all platforms
+build-kali-cli: ## Build CLI for Kali Linux
+	@echo "🔨 Building CLI for Kali Linux..."
+	@mkdir -p build
+	GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o build/$(APP_NAME)-kali ./cmd/cli
+	@echo "✅ Kali CLI built: build/$(APP_NAME)-kali"
+
+build-kali-gui: ## Build GUI for Kali Linux
+	@echo "🔨 Building GUI for Kali Linux..."
+	@mkdir -p build
+	GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o build/$(APP_NAME)_gui-kali ./cmd/gui
+	@echo "✅ Kali GUI built: build/$(APP_NAME)_gui-kali"
+
+build-kali: build-kali-cli build-kali-gui ## Build both CLI and GUI for Kali Linux
+
+build-all-platforms: build build-macos-cli build-kali ## Build for all platforms
 	@echo "✅ All platforms built!"
 
 ##@ Docker
@@ -135,6 +166,9 @@ release: clean ## Create release builds
 	# Linux
 	$(GOBUILD) $(LDFLAGS) -o build/release/$(APP_NAME)-linux-amd64 ./cmd/cli
 	$(GOBUILD) $(LDFLAGS) -o build/release/$(APP_NAME)_gui-linux-amd64 ./cmd/gui
+	# Kali Linux
+	GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o build/release/$(APP_NAME)-kali-linux-amd64 ./cmd/cli
+	GOOS=linux GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o build/release/$(APP_NAME)_gui-kali-linux-amd64 ./cmd/gui
 	# macOS
 	GOOS=darwin GOARCH=arm64 $(GOBUILD) $(LDFLAGS) -o build/release/$(APP_NAME)-darwin-arm64 ./cmd/cli
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) $(LDFLAGS) -o build/release/$(APP_NAME)-darwin-amd64 ./cmd/cli

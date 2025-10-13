@@ -57,8 +57,8 @@ print_error() {
 
 # Install dependencies based on distribution
 case "$OS" in
-    ubuntu|debian|linuxmint|pop)
-        print_status "Installing dependencies for Ubuntu/Debian..."
+    ubuntu|debian|linuxmint|pop|kali)
+        print_status "Installing dependencies for Ubuntu/Debian/Kali..."
         
         sudo apt-get update
         
