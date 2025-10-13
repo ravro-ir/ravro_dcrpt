@@ -16,8 +16,17 @@ permissions:
 
 jobs:
   build-linux:
-    name: Build Linux
+    name: Build Linux (${{ matrix.arch }})
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            goarch: amd64
+            cc: gcc
+          - arch: arm64
+            goarch: arm64
+            cc: aarch64-linux-gnu-gcc
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,22 +37,37 @@ jobs:
           go-version: '1.23'
           cache: true
 
+      - name: Set up cross-compilation for ARM64
+        if: matrix.arch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            gcc \
-            libgl1-mesa-dev \
-            xorg-dev \
-            libx11-dev \
-            libxcursor-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libxi-dev \
-            libxxf86vm-dev \
-            libssl-dev \
-            pkg-config \
-            wkhtmltopdf
+          if [ "${{ matrix.arch }}" = "arm64" ]; then
+            # For ARM64 cross-compilation, install basic tools
+            sudo apt-get install -y \
+              gcc-aarch64-linux-gnu \
+              pkg-config \
+              libssl-dev
+          else
+            # For AMD64 native build
+            sudo apt-get install -y \
+              gcc \
+              libgl1-mesa-dev \
+              xorg-dev \
+              libx11-dev \
+              libxcursor-dev \
+              libxrandr-dev \
+              libxinerama-dev \
+              libxi-dev \
+              libxxf86vm-dev \
+              libssl-dev \
+              pkg-config \
+              wkhtmltopdf
+          fi
 
       - name: Install Go dependencies
         run: |
@@ -51,23 +75,27 @@ jobs:
           go mod tidy
 
       - name: Build GUI for Linux
+        env:
+          CGO_ENABLED: 1
+          GOOS: linux
+          GOARCH: ${{ matrix.goarch }}
+          CC: ${{ matrix.cc }}
         run: |
-          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
           go build -ldflags="-s -w" \
-          -o build/ravro_dcrpt_gui \
+          -o build/ravro_dcrpt_gui-${{ matrix.arch }} \
           ./cmd/gui
 
       - name: Create tarball
         run: |
           cd build
-          tar -czf ravro_dcrpt-linux-amd64.tar.gz ravro_dcrpt_gui
+          tar -czf ravro_dcrpt-linux-${{ matrix.arch }}.tar.gz ravro_dcrpt_gui-${{ matrix.arch }}
           cd ..
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-amd64
-          path: build/ravro_dcrpt-linux-amd64.tar.gz
+          name: linux-${{ matrix.arch }}
+          path: build/ravro_dcrpt-linux-${{ matrix.arch }}.tar.gz
           retention-days: 7
 
   build-macos:

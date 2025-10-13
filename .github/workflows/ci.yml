@@ -8,8 +8,17 @@ on:
 
 jobs:
   build-quick-linux:
-    name: Quick Build (Linux)
-    runs-on: ubuntu-22.04
+    name: Quick Build (Linux) (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            arch: amd64
+            goarch: amd64
+          - os: ubuntu-22.04
+            arch: arm64
+            goarch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,32 +29,59 @@ jobs:
           go-version: '1.23'
           cache: true
 
+      - name: Set up cross-compilation for ARM64
+        if: matrix.arch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            gcc \
-            libgl1-mesa-dev \
-            xorg-dev \
-            libx11-dev \
-            libxcursor-dev \
-            libxrandr-dev \
-            libxinerama-dev \
-            libxi-dev \
-            libssl-dev \
-            pkg-config
+          if [ "${{ matrix.arch }}" = "arm64" ]; then
+            sudo apt-get install -y \
+              libgl1-mesa-dev:arm64 \
+              libx11-dev:arm64 \
+              libxcursor-dev:arm64 \
+              libxrandr-dev:arm64 \
+              libxinerama-dev:arm64 \
+              libxi-dev:arm64 \
+              libssl-dev:arm64 \
+              pkg-config || \
+            sudo apt-get install -y \
+              gcc-aarch64-linux-gnu \
+              pkg-config \
+              libssl-dev
+          else
+            sudo apt-get install -y \
+              gcc \
+              libgl1-mesa-dev \
+              xorg-dev \
+              libx11-dev \
+              libxcursor-dev \
+              libxrandr-dev \
+              libxinerama-dev \
+              libxi-dev \
+              libssl-dev \
+              pkg-config
+          fi
 
       - name: Install Go dependencies
         run: |
           go mod download
 
       - name: Build GUI
+        env:
+          CGO_ENABLED: 1
+          GOOS: linux
+          GOARCH: ${{ matrix.goarch }}
+          CC: ${{ matrix.arch == 'arm64' && 'aarch64-linux-gnu-gcc' || 'gcc' }}
         run: |
-          CGO_ENABLED=1 go build -o build/ravro_dcrpt_gui ./cmd/gui
+          go build -o build/ravro_dcrpt_gui-${{ matrix.arch }} ./cmd/gui
 
       - name: Verify GUI binary exists
         run: |
-          ls -lh build/ravro_dcrpt_gui
+          ls -lh build/ravro_dcrpt_gui-${{ matrix.arch }}
 
   build-quick-macos:
     name: Quick Build (macOS)
