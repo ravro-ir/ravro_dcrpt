@@ -107,6 +107,9 @@ jobs:
   build-quick-windows:
     name: Quick Build (Windows)
     runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [amd64, 386]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -127,26 +130,35 @@ jobs:
           Write-Host "Attempting to install OpenSSL..."
           
           # Try different versions
-          $OPENSSL_VERSIONS = @("3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
+          $OPENSSL_VERSIONS = @("3_4_0", "3_3_2", "3_3_1", "3_3_0", "3_2_0", "3_1_0")
           $OPENSSL_INSTALLED = $false
+          
+          # Determine architecture-specific URLs and paths
+          if ("${{ matrix.arch }}" -eq "386") {
+            $ARCH_SUFFIX = "Win32"
+            $OPENSSL_DIR = "C:\OpenSSL-Win32"
+          } else {
+            $ARCH_SUFFIX = "Win64"
+            $OPENSSL_DIR = "C:\OpenSSL-Win64"
+          }
           
           foreach ($VERSION in $OPENSSL_VERSIONS) {
             try {
-              Write-Host "Trying OpenSSL version $VERSION..."
-              $OPENSSL_URL = "https://slproweb.com/download/Win64OpenSSL-${VERSION}.exe"
+              Write-Host "Trying OpenSSL version $VERSION for ${{ matrix.arch }}..."
+              $OPENSSL_URL = "https://slproweb.com/download/${ARCH_SUFFIX}OpenSSL-${VERSION}.exe"
               $OPENSSL_INSTALLER = "$env:TEMP\openssl-installer.exe"
               
               # Try to download
               Invoke-WebRequest -Uri $OPENSSL_URL -OutFile $OPENSSL_INSTALLER -ErrorAction Stop
               
               Write-Host "✅ Downloaded OpenSSL $VERSION"
-              Write-Host "Installing OpenSSL to C:\OpenSSL-Win64..."
+              Write-Host "Installing OpenSSL to $OPENSSL_DIR..."
               
-              Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=C:\OpenSSL-Win64" -Wait -NoNewWindow
+              Start-Process -FilePath $OPENSSL_INSTALLER -ArgumentList "/VERYSILENT /SP- /SUPPRESSMSGBOXES /DIR=$OPENSSL_DIR" -Wait -NoNewWindow
               
-              if (Test-Path "C:\OpenSSL-Win64") {
-                Write-Host "✅ OpenSSL $VERSION installed successfully at C:\OpenSSL-Win64"
-                Get-ChildItem "C:\OpenSSL-Win64" | Select-Object Name
+              if (Test-Path "$OPENSSL_DIR") {
+                Write-Host "✅ OpenSSL $VERSION installed successfully at $OPENSSL_DIR"
+                Get-ChildItem "$OPENSSL_DIR" | Select-Object Name
                 $OPENSSL_INSTALLED = $true
                 break
               }
@@ -162,20 +174,31 @@ jobs:
             choco install -y openssl
             
             # Check common chocolatey installation paths
-            $chocoLocations = @(
-              "C:\Program Files\OpenSSL-Win64",
-              "C:\Program Files\OpenSSL",
-              "C:\OpenSSL-Win64",
-              "C:\OpenSSL"
-            )
+            if ("${{ matrix.arch }}" -eq "386") {
+              $chocoLocations = @(
+                "C:\Program Files (x86)\OpenSSL-Win32",
+                "C:\Program Files\OpenSSL-Win32", 
+                "C:\OpenSSL-Win32",
+                "C:\Program Files (x86)\OpenSSL",
+                "C:\Program Files\OpenSSL",
+                "C:\OpenSSL"
+              )
+            } else {
+              $chocoLocations = @(
+                "C:\Program Files\OpenSSL-Win64",
+                "C:\Program Files\OpenSSL",
+                "C:\OpenSSL-Win64",
+                "C:\OpenSSL"
+              )
+            }
             
             foreach ($loc in $chocoLocations) {
               if (Test-Path $loc) {
                 Write-Host "✅ Found OpenSSL at: $loc"
                 # Create symlink to standard location if needed
-                if ($loc -ne "C:\OpenSSL-Win64" -and -not (Test-Path "C:\OpenSSL-Win64")) {
-                  New-Item -ItemType Junction -Path "C:\OpenSSL-Win64" -Target $loc
-                  Write-Host "✅ Created junction from C:\OpenSSL-Win64 to $loc"
+                if ($loc -ne "$OPENSSL_DIR" -and -not (Test-Path "$OPENSSL_DIR")) {
+                  New-Item -ItemType Junction -Path "$OPENSSL_DIR" -Target $loc
+                  Write-Host "✅ Created junction from $OPENSSL_DIR to $loc"
                 }
                 $OPENSSL_INSTALLED = $true
                 break
@@ -191,8 +214,12 @@ jobs:
       - name: Set up environment variables
         shell: powershell
         run: |
-          # Set OpenSSL directory
-          $OPENSSL_DIR = "C:/OpenSSL-Win64"
+          # Set OpenSSL directory based on architecture
+          if ("${{ matrix.arch }}" -eq "386") {
+            $OPENSSL_DIR = "C:/OpenSSL-Win32"
+          } else {
+            $OPENSSL_DIR = "C:/OpenSSL-Win64"
+          }
           
           if (-not (Test-Path "$OPENSSL_DIR")) {
             Write-Host "❌ OpenSSL directory not found: $OPENSSL_DIR"
@@ -247,10 +274,23 @@ jobs:
         shell: powershell
         run: |
           $env:CGO_ENABLED = "1"
-          go build -o build/ravro_dcrpt_gui.exe ./cmd/gui
+          $env:GOOS = "windows"
+          $env:GOARCH = "${{ matrix.arch }}"
+          
+          if ("${{ matrix.arch }}" -eq "386") {
+            $OUTPUT_NAME = "build/ravro_dcrpt_gui-386.exe"
+          } else {
+            $OUTPUT_NAME = "build/ravro_dcrpt_gui.exe"
+          }
+          
+          go build -o $OUTPUT_NAME ./cmd/gui
 
       - name: Verify GUI binary exists
         shell: powershell
         run: |
-          Get-ChildItem build/ravro_dcrpt_gui.exe
+          if ("${{ matrix.arch }}" -eq "386") {
+            Get-ChildItem build/ravro_dcrpt_gui-386.exe
+          } else {
+            Get-ChildItem build/ravro_dcrpt_gui.exe
+          }
 
