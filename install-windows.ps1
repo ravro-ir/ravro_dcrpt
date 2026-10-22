@@ -169,16 +169,6 @@ if (-not $opensslFound) {
     }
 }
 
-# Install wkhtmltopdf
-Print-Status "Installing wkhtmltopdf..."
-choco install wkhtmltopdf -y --force
-if ($LASTEXITCODE -eq 0) {
-    Print-Success "wkhtmltopdf installed successfully"
-} else {
-    Print-Error "Failed to install wkhtmltopdf"
-    exit 1
-}
-
 # Verify installations
 Write-Host ""
 Print-Status "Verifying installations..."
@@ -212,14 +202,6 @@ if (Get-Command openssl -ErrorAction SilentlyContinue) {
     }
 }
 
-# Check wkhtmltopdf
-if (Get-Command wkhtmltopdf -ErrorAction SilentlyContinue) {
-    $wkhtmlVersion = & wkhtmltopdf --version 2>&1 | Select-String "wkhtmltopdf" | Select-Object -First 1
-    Print-Success "wkhtmltopdf: $wkhtmlVersion"
-} else {
-    Print-Warning "wkhtmltopdf not found in PATH. You may need to restart your terminal."
-}
-
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Green
 Write-Host "║        Dependencies installed successfully! 🎉        ║" -ForegroundColor Green
@@ -236,11 +218,6 @@ foreach ($loc in $opensslLocations) {
         Write-Host "  OpenSSL: $loc" -ForegroundColor Cyan
         break
     }
-}
-
-# wkhtmltopdf location
-if (Test-Path "C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe") {
-    Write-Host "  wkhtmltopdf: C:\Program Files\wkhtmltopdf" -ForegroundColor Cyan
 }
 
 Write-Host ""

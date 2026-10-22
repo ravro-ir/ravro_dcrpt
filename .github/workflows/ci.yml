@@ -120,9 +120,6 @@ jobs:
       - name: Install Windows dependencies
         shell: powershell
         run: |
-          # Install wkhtmltopdf
-          choco install -y wkhtmltopdf
-          
           # Install OpenSSL (64-bit only)
           Write-Host "Installing OpenSSL via Chocolatey..."
           choco install -y openssl
@@ -205,7 +202,6 @@ jobs:
           
           # Add to PATH
           echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
-          echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
 
       - name: Install Go dependencies
         run: |
@@ -265,11 +261,6 @@ jobs:
             libxi-dev \
             libssl-dev \
             pkg-config
-          
-          # Install wkhtmltopdf from external source for Kali
-          wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
-          dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb || apt-get install -f -y
-          rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
 
       - name: Install Go dependencies
         run: |

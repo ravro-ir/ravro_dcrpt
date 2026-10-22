@@ -42,8 +42,7 @@ jobs:
             libxi-dev \
             libxxf86vm-dev \
             libssl-dev \
-            pkg-config \
-            wkhtmltopdf
+            pkg-config
 
       - name: Install Go dependencies
         run: |
@@ -110,11 +109,6 @@ jobs:
             libxi-dev \
             libssl-dev \
             pkg-config
-          
-          # Install wkhtmltopdf from external source for Kali
-          wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
-          dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb || apt-get install -f -y
-          rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb
 
       - name: Install Go dependencies
         run: |
@@ -167,18 +161,6 @@ jobs:
             brew install openssl@3
           else
             echo "OpenSSL@3 is already installed"
-          fi
-          
-          # Install wkhtmltopdf
-          if ! command -v wkhtmltopdf &> /dev/null; then
-            brew install --cask wkhtmltopdf || {
-              echo "Cask install failed, trying direct download..."
-              WKHTMLTOPDF_VERSION="0.12.6-1"
-              DOWNLOAD_URL="https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox-${WKHTMLTOPDF_VERSION}.macos-cocoa.pkg"
-              curl -L -o /tmp/wkhtmltox.pkg "$DOWNLOAD_URL"
-              sudo installer -pkg /tmp/wkhtmltox.pkg -target /
-              rm -f /tmp/wkhtmltox.pkg
-            }
           fi
 
       - name: Set OpenSSL environment variables (Intel)
@@ -275,9 +257,6 @@ jobs:
       - name: Install Windows dependencies
         shell: powershell
         run: |
-          # Install wkhtmltopdf
-          choco install -y wkhtmltopdf
-          
           # Install OpenSSL (64-bit only)
           Write-Host "Installing OpenSSL via Chocolatey..."
           choco install -y openssl
@@ -362,7 +341,6 @@ jobs:
           
           # Add to PATH
           echo "$OPENSSL_DIR/bin" >> $env:GITHUB_PATH
-          echo "C:/Program Files/wkhtmltopdf/bin" >> $env:GITHUB_PATH
 
       - name: Install Go dependencies
         run: |
@@ -396,14 +374,6 @@ jobs:
             Write-Host "✅ Copied OpenSSL DLLs"
           } else {
             Write-Host "⚠️ OpenSSL DLLs not found"
-          }
-          
-          # Copy wkhtmltopdf DLLs from chocolatey installation
-          if (Test-Path "C:\Program Files\wkhtmltopdf\bin\wkhtmltox.dll") {
-            Copy-Item "C:\Program Files\wkhtmltopdf\bin\wkhtmltox.dll" build/
-            Write-Host "✅ Copied wkhtmltox.dll from system installation"
-          } else {
-            Write-Host "⚠️ wkhtmltox.dll not found in system installation"
           }
           
           # List copied files for verification

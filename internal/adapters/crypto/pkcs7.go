@@ -9,8 +9,6 @@ import (
 	"os"
 
 	"ravro_dcrpt/internal/ports"
-
-	"go.mozilla.org/pkcs7"
 )
 
 // PKCS7Service implements the CryptoService interface using Pure Go
@@ -29,18 +27,12 @@ func (s *PKCS7Service) DecryptPKCS7(encryptedData []byte, privateKeyPath string)
 		return nil, fmt.Errorf("failed to load private key: %w", err)
 	}
 
-	// Parse PKCS7 structure
-	p7, err := pkcs7.Parse(encryptedData)
+	// OpenSSL PKCS7_decrypt with a NULL cert tries every recipient.
+	// go.mozilla.org/pkcs7 panics on Decrypt(nil, key), so unwrap recipients ourselves.
+	decrypted, err := decryptPKCS7WithKey(encryptedData, privateKey)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse PKCS7 data: %w", err)
+		return nil, err
 	}
-
-	// Decrypt the data
-	decrypted, err := p7.Decrypt(nil, privateKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt data: %w", err)
-	}
-
 	return decrypted, nil
 }
 

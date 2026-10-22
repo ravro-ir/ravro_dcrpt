@@ -34,9 +34,9 @@ install-deps: ## Install system dependencies (Linux/macOS)
 	@echo "📦 Installing system dependencies..."
 	@if [ "$(shell uname)" = "Linux" ]; then \
 		sudo apt-get update && \
-		sudo apt-get install -y libssl-dev wkhtmltopdf; \
+		sudo apt-get install -y libssl-dev; \
 	elif [ "$(shell uname)" = "Darwin" ]; then \
-		brew install openssl wkhtmltopdf; \
+		brew install openssl; \
 		echo "🍺 macOS: Use './build_macos.sh' for optimized build"; \
 	fi
 
@@ -54,13 +54,6 @@ install-deps-kali: ## Install system dependencies for Kali Linux
 		libxi-dev \
 		libssl-dev \
 		pkg-config
-	@echo "📄 Installing wkhtmltopdf for Kali..."
-	@if ! sudo apt-get install -y wkhtmltopdf 2>/dev/null; then \
-		echo "⚠️  Installing wkhtmltopdf from external source..."; \
-		wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb -O /tmp/wkhtmltox.deb; \
-		sudo dpkg -i /tmp/wkhtmltox.deb || sudo apt-get install -f -y; \
-		rm /tmp/wkhtmltox.deb; \
-	fi
 	@echo "✅ Kali dependencies installed"
 
 test: ## Run tests

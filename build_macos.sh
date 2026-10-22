@@ -22,32 +22,6 @@ else
     echo "✅ OpenSSL is already installed"
 fi
 
-# Check if wkhtmltopdf is installed
-if ! command -v wkhtmltopdf &> /dev/null; then
-    echo "📦 Installing wkhtmltopdf via Homebrew Cask..."
-    # Try cask first (recommended method)
-    if brew install --cask wkhtmltopdf 2>/dev/null; then
-        echo "✅ wkhtmltopdf installed via cask"
-    else
-        echo "⚠️  Cask installation failed, trying direct download..."
-        # Fallback: Download directly from GitHub releases
-        WKHTMLTOPDF_VERSION="0.12.6-1"
-        DOWNLOAD_URL="https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox-${WKHTMLTOPDF_VERSION}.macos-cocoa.pkg"
-        
-        echo "📥 Downloading wkhtmltopdf from GitHub..."
-        curl -L -o /tmp/wkhtmltox.pkg "$DOWNLOAD_URL"
-        
-        echo "🔧 Installing wkhtmltopdf package..."
-        sudo installer -pkg /tmp/wkhtmltox.pkg -target /
-        
-        # Clean up
-        rm -f /tmp/wkhtmltox.pkg
-        echo "✅ wkhtmltopdf installed via direct download"
-    fi
-else
-    echo "✅ wkhtmltopdf is already installed"
-fi
-
 # Set OpenSSL paths for both Intel and Apple Silicon Macs
 if [[ $(uname -m) == "arm64" ]]; then
     # Apple Silicon Mac

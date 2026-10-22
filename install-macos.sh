@@ -72,33 +72,6 @@ else
     print_success "OpenSSL@3 is already installed"
 fi
 
-# Install wkhtmltopdf
-print_status "Installing wkhtmltopdf..."
-if ! command -v wkhtmltopdf &> /dev/null; then
-    # Try cask first
-    if brew install --cask wkhtmltopdf 2>/dev/null; then
-        print_success "wkhtmltopdf installed via Homebrew Cask"
-    else
-        print_warning "Cask installation failed, trying direct download..."
-        
-        # Fallback: Download directly from GitHub releases
-        WKHTMLTOPDF_VERSION="0.12.6-1"
-        DOWNLOAD_URL="https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOPDF_VERSION}/wkhtmltox-${WKHTMLTOPDF_VERSION}.macos-cocoa.pkg"
-        
-        print_status "Downloading wkhtmltopdf from GitHub..."
-        curl -L -o /tmp/wkhtmltox.pkg "$DOWNLOAD_URL"
-        
-        print_status "Installing wkhtmltopdf package..."
-        sudo installer -pkg /tmp/wkhtmltox.pkg -target /
-        
-        # Clean up
-        rm -f /tmp/wkhtmltox.pkg
-        print_success "wkhtmltopdf installed via direct download"
-    fi
-else
-    print_success "wkhtmltopdf is already installed"
-fi
-
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║        Dependencies installed successfully! 🎉        ║${NC}"

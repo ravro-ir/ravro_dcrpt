@@ -31,8 +31,7 @@ sudo apt-get install -y \
     libxrandr-dev \
     libxinerama-dev \
     libxi-dev \
-    libssl-dev \
-    wkhtmltopdf
+    libssl-dev
 
 # Fedora/RHEL
 sudo dnf install mesa-libGL libX11 openssl-libs
@@ -66,8 +65,7 @@ sudo apt-get install -y \
     libxinerama-dev \
     libxi-dev \
     libssl-dev \
-    pkg-config \
-    wkhtmltopdf
+    pkg-config
 
 # اجرا
 ./ravro_dcrpt_gui

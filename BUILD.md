@@ -25,28 +25,26 @@ This guide provides comprehensive instructions for building `ravro_dcrpt` from s
 
 - **OpenSSL for Windows**: [Download](https://slproweb.com/products/Win32OpenSSL.html)
   - Install to `C:\OpenSSL-Win64`
-- **wkhtmltopdf**: [Download](https://wkhtmltopdf.org/downloads.html)
-  - Install to `C:\wkhtmltox`
 
 ### Linux
 
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
-sudo apt-get install -y libssl-dev wkhtmltopdf
+sudo apt-get install -y libssl-dev
 
 # Fedora/RHEL
-sudo dnf install -y openssl-devel wkhtmltopdf
+sudo dnf install -y openssl-devel
 
 # Arch Linux
-sudo pacman -S openssl wkhtmltopdf
+sudo pacman -S openssl
 ```
 
 ### macOS
 
 ```bash
 # Using Homebrew
-brew install openssl wkhtmltopdf
+brew install openssl
 ```
 
 ---
@@ -63,9 +61,9 @@ cd ravro_dcrpt
 ### 2. Set Environment Variables
 
 ```powershell
-$env:PATH="C:/OpenSSL-Win64/bin;C:/wkhtmltox/bin;$env:PATH"
-$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include -IC:/wkhtmltox/include"
-$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -LC:/wkhtmltox/lib -L/C:/wkhtmltox/bin -lssl -lcrypto -lws2_32 -lcrypt32 -lwkhtmltox"
+$env:PATH="C:/OpenSSL-Win64/bin;$env:PATH"
+$env:CGO_CFLAGS="-IC:/OpenSSL-Win64/include"
+$env:CGO_LDFLAGS="-LC:/OpenSSL-Win64/lib/VC/x64/MD -lssl -lcrypto -lws2_32 -lcrypt32"
 ```
 
 ### 3. Build
@@ -102,10 +100,10 @@ cd ravro_dcrpt
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
-sudo apt-get install -y libssl-dev wkhtmltopdf
+sudo apt-get install -y libssl-dev
 
 # Arch Linux
-sudo pacman -S openssl wkhtmltopdf
+sudo pacman -S openssl
 ```
 
 ### 3. Build
@@ -138,7 +136,7 @@ cd ravro_dcrpt
 ### 2. Install Dependencies
 
 ```bash
-brew install openssl wkhtmltopdf
+brew install openssl
 ```
 
 ### 3. Set Environment Variables
@@ -264,12 +262,6 @@ Test-Path C:\OpenSSL-Win64\lib\VC\x64\MD\libcrypto.lib
 go build -ldflags="-s -w -H windowsgui" -o ravro_dcrpt_gui.exe ./cmd/gui
 ```
 
-**Problem:** `wkhtmltox.dll not found` at runtime
-
-**Solution:** Either:
-1. Add `C:\wkhtmltox\bin` to your PATH
-2. Copy `wkhtmltox.dll` to the same directory as the executable
-
 ---
 
 ### Linux
@@ -285,13 +277,6 @@ sudo apt-get install libssl-dev
 sudo dnf install openssl-devel
 ```
 
-**Problem:** `wkhtmltopdf: command not found`
-
-**Solution:** Install wkhtmltopdf:
-```bash
-sudo apt-get install wkhtmltopdf
-```
-
 ---
 
 ### macOS
@@ -303,14 +288,6 @@ sudo apt-get install wkhtmltopdf
 export PKG_CONFIG_PATH=$(brew --prefix openssl)/lib/pkgconfig
 export CGO_CFLAGS="-I$(brew --prefix openssl)/include"
 export CGO_LDFLAGS="-L$(brew --prefix openssl)/lib"
-```
-
-**Problem:** wkhtmltopdf not working on macOS
-
-**Solution:** Make sure wkhtmltopdf is installed and in PATH:
-```bash
-brew install wkhtmltopdf
-which wkhtmltopdf  # Should show the path
 ```
 
 ---
@@ -333,15 +310,14 @@ After building, distribute these files together:
 - `ravro_dcrpt.exe` or `ravro_dcrpt_gui.exe`
 - `libcrypto-3-x64.dll` (from `C:\OpenSSL-Win64\bin`)
 - `libssl-3-x64.dll` (from `C:\OpenSSL-Win64\bin`)
-- `wkhtmltox.dll` (from `C:\wkhtmltox\bin`)
 
 **Linux:**
 - `ravro_dcrpt` or `ravro_dcrpt_gui`
-- Users need to install: `libssl` and `wkhtmltopdf`
+- Users need to install: `libssl`
 
 **macOS:**
 - `ravro_dcrpt` or `ravro_dcrpt_gui`
-- Users need to install: `brew install openssl wkhtmltopdf`
+- Users need to install: `brew install openssl`
 
 ---
 

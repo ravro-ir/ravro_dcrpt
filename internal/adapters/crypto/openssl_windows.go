@@ -1,5 +1,5 @@
-//go:build windows
-// +build windows
+//go:build windows && opensslcgo
+// +build windows,opensslcgo
 
 package crypto
 

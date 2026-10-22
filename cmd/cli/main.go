@@ -37,7 +37,7 @@ func main() {
 var rootCmd = &cobra.Command{
 	Use:   "ravro_dcrpt",
 	Short: "Ravro Report Decryption Tool",
-	Long: `A versatile tool for decrypting and converting Ravro platform bug bounty reports to PDF.
+	Long: `A versatile tool for decrypting and converting Ravro platform bug bounty reports to HTML.
 Pure Go implementation with cross-platform support.`,
 	Version: version,
 	Run:     runDecrypt,
@@ -71,10 +71,10 @@ func runDecrypt(cmd *cobra.Command, args []string) {
 	// Initialize services
 	storageService := storage.NewFileSystemService()
 	cryptoService := crypto.NewOpenSSLCGOService() // Using OpenSSL CGO for native PKCS7 decryption
-	pdfGenerator := pdfgen.NewWKHTMLToPDFGenerator()
+	htmlGenerator := pdfgen.NewHTMLGenerator()
 
 	decryptService := decrypt.NewService(cryptoService, storageService)
-	reportService := report.NewService(decryptService, pdfGenerator, storageService)
+	reportService := report.NewService(decryptService, htmlGenerator, storageService)
 
 	// Find and validate key
 	actualKeyPath, err := findKey(storageService, keyPath)
@@ -208,6 +208,6 @@ func displayResults(results []*report.ProcessResult) {
 		successCount, failCount, len(results))
 
 	if successCount > 0 {
-		fmt.Printf("✨ PDFs generated in: %s\n", outputDir)
+		fmt.Printf("✨ HTML reports generated in: %s\n", outputDir)
 	}
 }

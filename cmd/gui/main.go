@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -25,7 +26,7 @@ type GUI struct {
 	inputEntry  *widget.Entry
 	outputEntry *widget.Entry
 	keyEntry    *widget.Entry
-	logText     *widget.Entry
+	logView     *terminalLog
 	progressBar *widget.ProgressBar
 	processBtn  *widget.Button
 
@@ -54,10 +55,10 @@ func main() {
 func (g *GUI) setupServices() {
 	storageService := storage.NewFileSystemService()
 	cryptoService := crypto.NewOpenSSLCGOService() // Using OpenSSL CGO for native PKCS7 decryption
-	pdfGenerator := pdfgen.NewWKHTMLToPDFGenerator()
+	htmlGenerator := pdfgen.NewHTMLGenerator()
 
 	decryptService := decrypt.NewService(cryptoService, storageService)
-	reportService := report.NewService(decryptService, pdfGenerator, storageService)
+	reportService := report.NewService(decryptService, htmlGenerator, storageService)
 
 	g.storageService = storageService.(*storage.FileSystemService)
 	g.decryptService = decryptService
@@ -134,13 +135,7 @@ func (g *GUI) setupUI() {
 	g.progressBar = widget.NewProgressBar()
 	g.progressBar.Hide()
 
-	// Log/Output area
-	g.logText = widget.NewMultiLineEntry()
-	g.logText.SetPlaceHolder("Output will appear here...")
-	g.logText.Disable()
-
-	logScroll := container.NewScroll(g.logText)
-	logScroll.SetMinSize(fyne.NewSize(0, 200))
+	g.logView = newTerminalLog()
 
 	// Buttons
 	g.processBtn = widget.NewButton("🚀 Start Processing", g.processReports)
@@ -169,23 +164,23 @@ func (g *GUI) setupUI() {
 		),
 		nil,
 		nil,
-		logScroll,
+		g.logView,
 	)
 
 	g.window.SetContent(content)
 }
 
 func (g *GUI) log(message string) {
-	current := g.logText.Text
-	if current != "" {
-		current += "\n"
+	if g.logView == nil {
+		return
 	}
-	g.logText.SetText(current + message)
-	g.logText.CursorRow = len(g.logText.Text)
+	g.logView.Append(message)
 }
 
 func (g *GUI) clearLog() {
-	g.logText.SetText("")
+	if g.logView != nil {
+		g.logView.Clear()
+	}
 }
 
 func (g *GUI) initDirectories() {
@@ -205,7 +200,7 @@ func (g *GUI) initDirectories() {
 	g.log("📝 Next steps:")
 	g.log("   1. Place your private key in the 'key/' directory")
 	g.log("   2. Place encrypted reports (.zip or .ravro) in 'encrypt/' directory")
-	g.log("   3. Click 'Start Processing' to decrypt and generate PDFs")
+	g.log("   3. Click 'Start Processing' to decrypt and generate HTML reports")
 
 	dialog.ShowInformation("Success", "Directories initialized successfully!", g.window)
 }
@@ -252,6 +247,16 @@ func (g *GUI) processReports() {
 	// Disable button during processing
 	g.processBtn.Disable()
 	defer g.processBtn.Enable()
+	defer func() {
+		if rec := recover(); rec != nil {
+			buf := make([]byte, 4096)
+			n := runtime.Stack(buf, false)
+			err := fmt.Errorf("processing crashed: %v\n%s", rec, buf[:n])
+			g.log(fmt.Sprintf("❌ %v", err))
+			g.progressBar.Hide()
+			dialog.ShowError(err, g.window)
+		}
+	}()
 
 	g.clearLog()
 	g.progressBar.SetValue(0)
@@ -330,7 +335,7 @@ func (g *GUI) processReports() {
 		successCount, failCount, len(results)))
 
 	if successCount > 0 {
-		g.log(fmt.Sprintf("✨ PDFs generated in: %s", outputDir))
+		g.log(fmt.Sprintf("✨ HTML reports generated in: %s", outputDir))
 	}
 
 	g.progressBar.SetValue(1.0) // Set to 100% when complete

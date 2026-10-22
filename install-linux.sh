@@ -76,14 +76,6 @@ case "$OS" in
             libssl-dev \
             libssl3 \
             pkg-config
-        
-        print_status "Installing wkhtmltopdf..."
-        if ! command -v wkhtmltopdf &> /dev/null; then
-            sudo apt-get install -y wkhtmltopdf
-            print_success "wkhtmltopdf installed"
-        else
-            print_success "wkhtmltopdf already installed"
-        fi
         ;;
         
     fedora|rhel|centos|rocky|almalinux)
@@ -100,14 +92,6 @@ case "$OS" in
             libXxf86vm-devel \
             openssl-devel \
             pkgconfig
-        
-        print_status "Installing wkhtmltopdf..."
-        if ! command -v wkhtmltopdf &> /dev/null; then
-            sudo dnf install -y wkhtmltopdf
-            print_success "wkhtmltopdf installed"
-        else
-            print_success "wkhtmltopdf already installed"
-        fi
         ;;
         
     arch|manjaro)
@@ -124,14 +108,6 @@ case "$OS" in
             libxxf86vm \
             openssl \
             pkgconf
-        
-        print_status "Installing wkhtmltopdf..."
-        if ! command -v wkhtmltopdf &> /dev/null; then
-            sudo pacman -S --noconfirm wkhtmltopdf
-            print_success "wkhtmltopdf installed"
-        else
-            print_success "wkhtmltopdf already installed"
-        fi
         ;;
         
     opensuse*|sles)
@@ -148,14 +124,6 @@ case "$OS" in
             libXxf86vm-devel \
             libopenssl-devel \
             pkg-config
-        
-        print_status "Installing wkhtmltopdf..."
-        if ! command -v wkhtmltopdf &> /dev/null; then
-            sudo zypper install -y wkhtmltopdf
-            print_success "wkhtmltopdf installed"
-        else
-            print_success "wkhtmltopdf already installed"
-        fi
         ;;
         
     *)
@@ -165,7 +133,6 @@ case "$OS" in
         echo "  - OpenSSL development libraries"
         echo "  - X11 development libraries (libX11, libXcursor, libXrandr, libXinerama, libXi, libXxf86vm)"
         echo "  - Mesa/OpenGL libraries"
-        echo "  - wkhtmltopdf"
         exit 1
         ;;
 esac

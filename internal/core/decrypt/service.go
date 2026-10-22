@@ -34,9 +34,7 @@ func (s *Service) DecryptReport(reportPath string, privateKeyPath string) (*mode
 
 	var reportFile string
 	for _, file := range ravroFiles {
-		// Must be in /report/ directory and named data.ravro
-		if (strings.Contains(file, "/report/") || strings.Contains(file, "\\report\\")) &&
-			(strings.HasSuffix(file, "/data.ravro") || strings.HasSuffix(file, "\\data.ravro")) {
+		if IsReportPayloadFile(file) {
 			reportFile = file
 			break
 		}
@@ -52,25 +50,32 @@ func (s *Service) DecryptReport(reportPath string, privateKeyPath string) (*mode
 		return nil, fmt.Errorf("failed to decrypt report: %w", err)
 	}
 
-	// Parse JSON
-	var report models.Report
-	if err := json.Unmarshal(decrypted, &report); err != nil {
+	report, _, err := ParseReportJSON(decrypted)
+	if err != nil {
 		return nil, fmt.Errorf("failed to parse report JSON: %w", err)
 	}
 
-	// Load additional report info if exists
 	infoFiles, _ := s.storage.ListFiles(reportPath, "report_info.json")
 	if len(infoFiles) > 0 {
 		infoData, err := s.storage.ReadFile(infoFiles[0])
 		if err == nil {
-			var info models.InfoReport
-			if json.Unmarshal(infoData, &info) == nil {
-				report.ReportInfo = info
+			if info, err := ParseReportInfoJSON(infoData); err == nil {
+				MergeReportInfo(report, info)
 			}
 		}
 	}
 
-	return &report, nil
+	commentFiles, _ := s.storage.ListFiles(reportPath, "comments.json")
+	if len(commentFiles) > 0 {
+		commentData, err := s.storage.ReadFile(commentFiles[0])
+		if err == nil {
+			if comments, err := ParseCommentsJSON(commentData); err == nil {
+				report.Comments = comments
+			}
+		}
+	}
+
+	return report, nil
 }
 
 // SaveDecryptedJSON saves decrypted JSON for debugging
@@ -115,9 +120,7 @@ func (s *Service) DecryptJudgment(reportPath string, privateKeyPath string) (*mo
 
 	var judgmentFile string
 	for _, file := range ravroFiles {
-		// Must be in /judgment/ directory and named data.ravro
-		if (strings.Contains(file, "/judgment/") || strings.Contains(file, "\\judgment\\")) &&
-			(strings.HasSuffix(file, "/data.ravro") || strings.HasSuffix(file, "\\data.ravro")) {
+		if IsJudgmentPayloadFile(file) {
 			judgmentFile = file
 			break
 		}
@@ -153,23 +156,18 @@ func (s *Service) DecryptAmendment(reportPath string, privateKeyPath string) ([]
 	var amendments []models.Amendment
 
 	for _, file := range ravroFiles {
-		// Must be in /amendment*/ directory and named data.ravro
-		if (strings.Contains(file, "/amendment") || strings.Contains(file, "\\amendment")) &&
-			(strings.HasSuffix(file, "/data.ravro") || strings.HasSuffix(file, "\\data.ravro")) {
-			// Decrypt the amendment file
-			decrypted, err := s.decryptFile(file, privateKeyPath)
-			if err != nil {
-				continue // Skip files that can't be decrypted
-			}
-
-			// Parse JSON
-			var amendment models.Amendment
-			if err := json.Unmarshal(decrypted, &amendment); err != nil {
-				continue // Skip files that can't be parsed
-			}
-
-			amendments = append(amendments, amendment)
+		if !IsAmendmentPayloadFile(file) {
+			continue
 		}
+		decrypted, err := s.decryptFile(file, privateKeyPath)
+		if err != nil {
+			continue
+		}
+		amendment, err := ParseAmendmentJSON(decrypted)
+		if err != nil {
+			continue
+		}
+		amendments = append(amendments, *amendment)
 	}
 
 	return amendments, nil
@@ -216,8 +214,7 @@ func (s *Service) DecryptAttachments(reportPath string, privateKeyPath string, o
 	}
 
 	for _, file := range ravroFiles {
-		// Skip data.ravro files (already processed)
-		if strings.HasSuffix(file, "/data.ravro") || strings.HasSuffix(file, "\\data.ravro") {
+		if IsStructuredDataFile(file) {
 			continue
 		}
 
@@ -256,6 +253,26 @@ func (s *Service) DecryptAttachments(reportPath string, privateKeyPath string, o
 		}
 	}
 
+	return nil
+}
+
+// CopyReportSidecars copies plaintext ZIP files needed for HTML (e.g. sha1_checksum.txt).
+func (s *Service) CopyReportSidecars(reportPath string, outputPath string) error {
+	for _, name := range []string{"sha1_checksum.txt"} {
+		candidates := []string{
+			filepath.Join(reportPath, name),
+			filepath.Join(reportPath, "report", name),
+		}
+		for _, src := range candidates {
+			if !s.storage.FileExists(src) {
+				continue
+			}
+			if err := s.storage.CopyFile(src, filepath.Join(outputPath, name)); err != nil {
+				return err
+			}
+			break
+		}
+	}
 	return nil
 }
 

@@ -1,6 +1,6 @@
 # Ravro Decryption Tool
 
-A versatile Go-based tool for decrypting and converting Ravro platform bug bounty reports to PDF.
+A versatile Go-based tool for decrypting and converting Ravro platform bug bounty reports to standalone HTML.
 
 ## 🚀 Introduction
 
@@ -17,7 +17,7 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
 
 ### Core Features
 - 🔐 **PKCS7 Decryption** using OpenSSL (CGO-based for native performance)
-- 📄 **PDF Generation** with wkhtmltopdf (beautiful, styled reports)
+- 📄 **HTML export** using the frontend report template (standalone, styled reports)
 - 🗝️ **Multi-key support** for different organizations
 - 🔄 **Batch processing** - multiple reports in one go
 - 📦 **ZIP extraction** - automatic handling of compressed reports
@@ -34,13 +34,14 @@ A versatile Go-based tool for decrypting and converting Ravro platform bug bount
   - JSON export support
   - Colored output and progress indicators
 
-### PDF Features
+### HTML Features
 - 📅 **Persian Date Conversion** - Automatic Gregorian to Shamsi (Jalali) conversion
 - 💰 **Formatted Amounts** - Thousand separators for rewards (e.g., 10,500,000 ریال)
 - 📎 **Attachment Tables** - Beautiful tables showing attachment files with types
 - 🎨 **Modern Design** - Clean, professional styling with Vazirmatn font
 - 🌐 **RTL Support** - Full right-to-left layout for Persian content
 - ⚖️ **Conditional Sections** - Judge information shown only when available
+- 🧬 **Dual report schema** - Legacy flat JSON and backend-api v2 envelopes (`schemaVersion`) share one HTML template
 
 ## 🛠️ Installation
 
@@ -84,7 +85,6 @@ powershell -ExecutionPolicy Bypass -File "install-windows.ps1"
 - Install Chocolatey (if not present)
 - Try to install OpenSSL from multiple sources (versions 3.4.0, 3.3.2, 3.3.1, 3.3.0, 3.2.0, 3.1.0)
 - Fallback to Chocolatey if direct download fails
-- Install wkhtmltopdf for PDF generation
 - Automatically configure system PATH
 
 ### Download Application
@@ -134,7 +134,7 @@ ravro_dcrpt/
 ├── internal/                     # Internal packages
 │   ├── adapters/                # Interface implementations
 │   │   ├── crypto/              # PKCS7 decryption (OpenSSL CGO)
-│   │   ├── pdfgen/              # PDF generation (wkhtmltopdf)
+│   │   ├── pdfgen/              # HTML report export (frontend template)
 │   │   └── storage/             # File system operations
 │   ├── core/                    # Business logic
 │   │   ├── decrypt/             # Decryption service
@@ -153,18 +153,21 @@ ravro_dcrpt/
 .
 ├── decrypt/                     # Output directory
 │   └── ir2025-02-27-0055/
-│       ├── company__id__hunter.pdf    # Generated PDF report
+│       ├── company__id__hunter.html   # Generated HTML report
 │       ├── report/              # Decrypted report data
 │       └── amendment-1/         # Decrypted attachments
 ├── encrypt/                     # Input directory
 │   ├── ir2025-02-27-0055.zip    # Compressed report
 │   └── ir2025-02-27-0055/       # Or extracted report folder
 │       ├── report/
-│       │   └── data.ravro       # Encrypted report
-│       ├── judgment-1/
-│       │   └── data.ravro       # Encrypted judgment
-│       └── amendment-1/
-│           └── screenshot.ravro # Encrypted attachment
+│       │   └── data.ravro       # Encrypted report (v1 flat or v2 envelope)
+│       ├── comments.json        # Optional (new ZIP layout)
+│       ├── judgment/
+│       │   └── data.ravro       # Encrypted judgment (legacy, optional)
+│       ├── amendment-1/         # Management spelling
+│       │   └── data.ravro
+│       └── ammendment-1/        # backend-api spelling
+│           └── data.com.ravro   # Company-side extra payload
 └── key/                         # Private keys directory
     └── COMPANY-PRIVATEKEY.txt   # Private key file
 ```
@@ -188,15 +191,15 @@ Simply double-click `ravro_dcrpt_gui` to launch the graphical interface.
 1. Click "📁 Initialize Directories" to create `encrypt/`, `decrypt/`, and `key/` folders (first time only)
 2. Click "Browse" next to each field to select:
    - **Input Directory**: Your encrypted reports folder or specific report
-   - **Output Directory**: Where PDFs will be saved
+   - **Output Directory**: Where HTML reports will be saved
    - **Private Key**: Your `.pem` or `.txt` key file
 3. (Optional) Click "🔍 Validate Key" to verify your key
-4. Click "🚀 Start Processing" to decrypt and generate PDFs
+4. Click "🚀 Start Processing" to decrypt and generate HTML reports
 5. Check the log area for detailed progress and any errors
 
-### 📄 Generated PDF Features
+### 📄 Generated HTML Features
 
-The generated PDF reports include:
+The generated HTML reports include:
 
 **✅ Report Information:**
 - Report ID and submission date (Persian calendar)
@@ -245,9 +248,9 @@ This project is built with:
 - **OpenSSL** - PKCS7 encryption/decryption via CGO
 - **go.mozilla.org/pkcs7** - Pure Go PKCS7 support (fallback)
 
-**PDF Generation:**
-- **wkhtmltopdf** - HTML to PDF conversion with WebKit rendering
-- **html/template** - Go's built-in template engine
+**HTML export:**
+- **html/template-equivalent renderer** - Frontend report template ported to Go
+- Embedded Vazirmatn font for offline viewing
 
 **GUI Framework:**
 - **Fyne v2** - Cross-platform GUI toolkit (Pure Go)
@@ -285,13 +288,9 @@ make build
 
 ### 🍎 macOS Special Notes
 
-Due to recent changes in Homebrew, `wkhtmltopdf` has been deprecated. Use our special installation script:
+Use the macOS build script so OpenSSL CGO flags are set correctly:
 
 ```bash
-# Install wkhtmltopdf for macOS
-./install_wkhtmltopdf_macos.sh
-
-# Then build the project
 ./build_macos.sh
 ```
 
