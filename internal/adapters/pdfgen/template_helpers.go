@@ -34,6 +34,15 @@ type cvssResolved struct {
 	vector       string
 }
 
+const sectionChevronSVG = `<svg class="section-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`
+
+func collapsibleSection(headHTML, bodyHTML string) string {
+	return fmt.Sprintf(`<details class="section" open>
+    <summary class="section-head">%s%s</summary>
+    <div class="section-body">%s</div>
+  </details>`, headHTML, sectionChevronSVG, bodyHTML)
+}
+
 func buildReportHTML(report *models.Report, judgment *models.Judgment, amendments []models.Amendment, outputDir string) string {
 	slug := report.Slug
 	title := report.Title
@@ -172,43 +181,12 @@ func buildReportHTML(report *models.Report, judgment *models.Judgment, amendment
 
     %s
     %s
+
     %s
 
-    <div class="section">
-      <div class="section-head">
-        <div class="section-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <span class="section-title">%s</span>
-      </div>
-      <div class="section-body">
-        %s
-      </div>
-    </div>
+    %s
 
-    <div class="section">
-      <div class="section-head">
-        <div class="section-icon">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </div>
-        <span class="section-title">%s</span>
-      </div>
-      <div class="section-body">
-        <div class="text-block md-content">%s</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <div class="section-icon" style="background:rgba(34,197,94,.1);color:#4ade80;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <span class="section-title">%s</span>
-      </div>
-      <div class="section-body">
-        <div class="text-block md-content">%s</div>
-      </div>
-    </div>
+    %s
 
     %s
     %s
@@ -249,12 +227,20 @@ func buildReportHTML(report *models.Report, judgment *models.Judgment, amendment
 		esc(labelIPs), esc(formatList(report.Ips)),
 		renderExportInfoCells(report.ReportInfo.Export),
 		esc(labelURLs), urls,
-		renderRulesSection(report.ReportInfo.Export.Target.Rules),
 		renderTimelineSection(report.ReportInfo.Export.Timeline),
 		renderAppealSection(report.ReportInfo.Export.Appeal),
-		esc(labelCVSSSection), renderCVSSTable(report, judgment),
-		esc(labelScenario), formatMarkdownHTML(report.Scenario),
-		esc(labelSolution), formatMarkdownHTML(solutionText(report)),
+		collapsibleSection(`<div class="section-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <span class="section-title">`+esc(labelCVSSSection)+`</span>`, renderCVSSTable(report, judgment)),
+		collapsibleSection(`<div class="section-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <span class="section-title">`+esc(labelScenario)+`</span>`, `<div class="text-block md-content">`+formatMarkdownHTML(report.Scenario)+`</div>`),
+		collapsibleSection(`<div class="section-icon" style="background:rgba(34,197,94,.1);color:#4ade80;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <span class="section-title">`+esc(labelSolution)+`</span>`, `<div class="text-block md-content">`+formatMarkdownHTML(solutionText(report))+`</div>`),
 		renderAmendments(amendments, outputDir),
 		renderAttachments(resolveReportAttachments(outputDir, report.ReportInfo.Details.Attachments)),
 		renderComments(report.Comments),
@@ -681,22 +667,18 @@ func renderAttachmentCards(attachments []resolvedAttachment) string {
 
 func renderAttachments(attachments []resolvedAttachment) string {
 	countLabel := strings.ReplaceAll(labelAttachmentsCount, "%count%", strconv.Itoa(len(attachments)))
-	return fmt.Sprintf(`<div class="section">
-    <div class="section-head">
-      <div class="section-icon" style="background:rgba(249,115,22,.1);color:#fb923c;">
+	return collapsibleSection(
+		fmt.Sprintf(`<div class="section-icon" style="background:rgba(249,115,22,.1);color:#fb923c;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
       </div>
       <span class="section-title">%s</span>
-      <span class="section-count">%s</span>
-    </div>
-    <div class="section-body">
-      <div class="attachments-grid">%s</div>
+      <span class="section-count">%s</span>`, esc(labelAttachmentsTitle), esc(countLabel)),
+		fmt.Sprintf(`<div class="attachments-grid">%s</div>
       <div class="attachments-note">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         %s
-      </div>
-    </div>
-  </div>`, esc(labelAttachmentsTitle), esc(countLabel), renderAttachmentCards(attachments), esc(labelAttachmentsNote))
+      </div>`, renderAttachmentCards(attachments), esc(labelAttachmentsNote)),
+	)
 }
 
 func commentRoleClass(role string) string {
@@ -752,16 +734,14 @@ func renderComments(comments []models.Comment) string {
         </div>
       </div>`, esc(avatarInitial(nickname)), esc(nickname), commentRoleClass(c.By.Role), esc(roleLabel), timeLabel, formatMarkdownHTML(message))
 	}
-	return fmt.Sprintf(`<div class="section">
-    <div class="section-head">
-      <div class="section-icon" style="background:rgba(148,163,184,.08);color:#94a3b8;">
+	return collapsibleSection(
+		fmt.Sprintf(`<div class="section-icon" style="background:rgba(148,163,184,.08);color:#94a3b8;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </div>
       <span class="section-title">%s</span>
-      <span class="section-count">%s</span>
-    </div>
-    <div class="section-body">%s</div>
-  </div>`, esc(labelCommentsTitle), esc(countLabel), items.String())
+      <span class="section-count">%s</span>`, esc(labelCommentsTitle), esc(countLabel)),
+		items.String(),
+	)
 }
 
 func renderAmendments(amendments []models.Amendment, outputDir string) string {
@@ -811,16 +791,14 @@ func renderAmendments(amendments []models.Amendment, outputDir string) string {
         %s
       </div>`, esc(labelAmendmentNumber), i+1, timeLabel, stageHTML, esc(labelAmendmentExplanation), formatMarkdownHTML(content), attachmentHTML)
 	}
-	return fmt.Sprintf(`<div class="section">
-    <div class="section-head">
-      <div class="section-icon" style="background:rgba(168,85,247,.1);color:#c084fc;">
+	return collapsibleSection(
+		fmt.Sprintf(`<div class="section-icon" style="background:rgba(168,85,247,.1);color:#c084fc;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       </div>
       <span class="section-title">%s</span>
-      <span class="section-count">%s</span>
-    </div>
-    <div class="section-body">%s</div>
-  </div>`, esc(labelAmendmentsTitle), esc(countLabel), items.String())
+      <span class="section-count">%s</span>`, esc(labelAmendmentsTitle), esc(countLabel)),
+		items.String(),
+	)
 }
 
 func themeToggleScript() string {

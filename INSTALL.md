@@ -92,13 +92,9 @@ sudo apt-get install -y \
 ### دانلود و نصب
 
 ```bash
-# برای Intel Macs
-wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-amd64.tar.gz
-tar -xzf ravro_dcrpt-darwin-amd64.tar.gz
-
-# برای Apple Silicon (M1/M2/M3)
-wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-arm64.tar.gz
-tar -xzf ravro_dcrpt-darwin-arm64.tar.gz
+# یک فایل برای Apple Silicon و Intel
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-universal.tar.gz
+tar -xzf ravro_dcrpt-darwin-universal.tar.gz
 
 # انتقال به Applications
 mv "Ravro Decryption Tool.app" /Applications/

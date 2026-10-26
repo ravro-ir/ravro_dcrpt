@@ -84,6 +84,7 @@ func (g *GUI) setupUI() {
 				g.inputEntry.SetText(uri.Path())
 			}
 		}, g.window)
+		setBrowseLocation(fd, g.inputEntry.Text)
 		fd.Resize(fyne.NewSize(1000, 700))
 		fd.Show()
 	})
@@ -101,6 +102,7 @@ func (g *GUI) setupUI() {
 				g.outputEntry.SetText(uri.Path())
 			}
 		}, g.window)
+		setBrowseLocation(fd, g.outputEntry.Text)
 		fd.Resize(fyne.NewSize(1000, 700))
 		fd.Show()
 	})
@@ -118,6 +120,7 @@ func (g *GUI) setupUI() {
 				g.keyEntry.SetText(uri.URI().Path())
 			}
 		}, g.window)
+		setBrowseLocation(fd, g.keyEntry.Text)
 		fd.Resize(fyne.NewSize(1000, 700))
 		fd.Show()
 	})

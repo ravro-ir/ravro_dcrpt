@@ -135,15 +135,9 @@ jobs:
           retention-days: 7
 
   build-macos:
-    name: Build macOS
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: macos-13
-            arch: amd64
-          - os: macos-latest
-            arch: arm64
+    name: Build macOS Universal
+    runs-on: macos-latest
+    timeout-minutes: 90
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -154,88 +148,14 @@ jobs:
           go-version: '1.23'
           cache: true
 
-      - name: Install macOS dependencies
-        run: |
-          # Install OpenSSL
-          if ! brew list openssl@3 &>/dev/null; then
-            brew install openssl@3
-          else
-            echo "OpenSSL@3 is already installed"
-          fi
+      - name: Build universal macOS app
+        run: ./build_macos.sh
 
-      - name: Set OpenSSL environment variables (Intel)
-        if: matrix.arch == 'amd64'
-        run: |
-          OPENSSL_PREFIX="/usr/local/opt/openssl@3"
-          echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-          echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
-          echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
-
-      - name: Set OpenSSL environment variables (Apple Silicon)
-        if: matrix.arch == 'arm64'
-        run: |
-          OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
-          echo "PKG_CONFIG_PATH=$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-          echo "CGO_CFLAGS=-I$OPENSSL_PREFIX/include" >> $GITHUB_ENV
-          echo "CGO_LDFLAGS=-L$OPENSSL_PREFIX/lib -lssl -lcrypto" >> $GITHUB_ENV
-
-      - name: Install Go dependencies
-        run: |
-          go mod download
-          go mod tidy
-
-      - name: Build GUI for macOS
-        run: |
-          CGO_ENABLED=1 \
-          go build -ldflags="-s -w" \
-          -o build/ravro_dcrpt_gui-${{ matrix.arch }} \
-          ./cmd/gui
-
-      - name: Create app bundle (for GUI)
-        run: |
-          mkdir -p "build/Ravro Decryption Tool.app/Contents/MacOS"
-          mkdir -p "build/Ravro Decryption Tool.app/Contents/Resources"
-          
-          cp build/ravro_dcrpt_gui-${{ matrix.arch }} "build/Ravro Decryption Tool.app/Contents/MacOS/ravro_dcrpt_gui"
-          
-          # Create Info.plist
-          cat > "build/Ravro Decryption Tool.app/Contents/Info.plist" << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>CFBundleExecutable</key>
-              <string>ravro_dcrpt_gui</string>
-              <key>CFBundleIdentifier</key>
-              <string>com.ravro.decryption</string>
-              <key>CFBundleName</key>
-              <string>Ravro Decryption Tool</string>
-              <key>CFBundlePackageType</key>
-              <string>APPL</string>
-              <key>CFBundleShortVersionString</key>
-              <string>2.0.0</string>
-              <key>CFBundleVersion</key>
-              <string>1</string>
-              <key>LSMinimumSystemVersion</key>
-              <string>11.0</string>
-              <key>NSHighResolutionCapable</key>
-              <true/>
-          </dict>
-          </plist>
-          EOF
-
-      - name: Create tarball
-        run: |
-          cd build
-          tar -czf ravro_dcrpt-darwin-${{ matrix.arch }}.tar.gz \
-            "Ravro Decryption Tool.app"
-          cd ..
-
-      - name: Upload artifacts
+      - name: Upload universal artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-${{ matrix.arch }}
-          path: build/ravro_dcrpt-darwin-${{ matrix.arch }}.tar.gz
+          name: macos-universal
+          path: build/ravro_dcrpt-darwin-universal.tar.gz
           retention-days: 7
 
   build-windows:
@@ -418,8 +338,7 @@ jobs:
           files: |
             artifacts/linux-amd64/*.tar.gz
             artifacts/kali-linux-amd64/*.tar.gz
-            artifacts/macos-amd64/*.tar.gz
-            artifacts/macos-arm64/*.tar.gz
+            artifacts/macos-universal/*.tar.gz
             artifacts/windows-amd64/*.zip
           draft: false
           prerelease: false

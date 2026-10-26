@@ -252,23 +252,6 @@ func renderExportInfoCells(exported models.ReportInfoExport) string {
 	return strings.Join(cells, "")
 }
 
-func renderRulesSection(rules string) string {
-	if strings.TrimSpace(rules) == "" {
-		return ""
-	}
-	return fmt.Sprintf(`<div class="section">
-    <div class="section-head">
-      <div class="section-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
-      <span class="section-title">%s</span>
-    </div>
-    <div class="section-body">
-      <div class="text-block md-content">%s</div>
-    </div>
-  </div>`, esc(labelRulesTitle), formatMarkdownHTML(rules))
-}
-
 func renderTimelineSection(timeline []models.ReportInfoTimelineEntry) string {
 	if len(timeline) == 0 {
 		return ""
@@ -286,7 +269,7 @@ func renderTimelineSection(timeline []models.ReportInfoTimelineEntry) string {
 		}
 		arrow := ""
 		if fromLabel != "" && toLabel != "" {
-			arrow = " → "
+			arrow = " ← "
 		}
 		timeHTML := ""
 		if timeLabel != "" {
@@ -300,17 +283,13 @@ func renderTimelineSection(timeline []models.ReportInfoTimelineEntry) string {
 	if items.Len() == 0 {
 		return ""
 	}
-	return fmt.Sprintf(`<div class="section">
-    <div class="section-head">
-      <div class="section-icon" style="background:rgba(56,189,248,.1);color:#38bdf8;">
+	return collapsibleSection(
+		fmt.Sprintf(`<div class="section-icon" style="background:rgba(56,189,248,.1);color:#38bdf8;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
-      <span class="section-title">%s</span>
-    </div>
-    <div class="section-body">
-      <div class="timeline-list">%s</div>
-    </div>
-  </div>`, esc(labelTimelineTitle), items.String())
+      <span class="section-title">%s</span>`, esc(labelTimelineTitle)),
+		fmt.Sprintf(`<div class="timeline-list">%s</div>`, items.String()),
+	)
 }
 
 func appealTypeLabel(role string) string {
@@ -359,16 +338,12 @@ func renderAppealSection(appeal *models.ReportInfoAppeal) string {
 	if status != "" {
 		count = fmt.Sprintf(`<span class="section-count">%s</span>`, esc(status))
 	}
-	return fmt.Sprintf(`<div class="section">
-    <div class="section-head">
-      <div class="section-icon" style="background:rgba(244,63,94,.1);color:#fb7185;">
+	return collapsibleSection(
+		fmt.Sprintf(`<div class="section-icon" style="background:rgba(244,63,94,.1);color:#fb7185;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
       </div>
       <span class="section-title">%s</span>
-      %s
-    </div>
-    <div class="section-body">
-      <div class="appeal-grid">%s</div>
-    </div>
-  </div>`, esc(labelAppealTitle), count, strings.Join(rows, ""))
+      %s`, esc(labelAppealTitle), count),
+		fmt.Sprintf(`<div class="appeal-grid">%s</div>`, strings.Join(rows, "")),
+	)
 }

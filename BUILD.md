@@ -126,6 +126,8 @@ go build -ldflags="-s -w" -o ravro_dcrpt_gui ./cmd/gui
 
 ## Building on macOS
 
+`./build_macos.sh` produces one app for both Macs. It compiles OpenSSL for `arm64` and `x86_64`, links both statically, and merges the slices with `lipo`. Run it on the Intel Mac or on Apple Silicon; the other architecture is cross-compiled. The first build takes several minutes. The app does not need Homebrew OpenSSL on the machine that runs it.
+
 ### 1. Clone Repository
 
 ```bash
@@ -136,32 +138,21 @@ cd ravro_dcrpt
 ### 2. Install Dependencies
 
 ```bash
-brew install openssl
+xcode-select --install
+brew install go
 ```
 
-### 3. Set Environment Variables
+### 3. Build
 
 ```bash
-export PKG_CONFIG_PATH=$(brew --prefix openssl)/lib/pkgconfig
-export CGO_CFLAGS="-I$(brew --prefix openssl)/include"
-export CGO_LDFLAGS="-L$(brew --prefix openssl)/lib"
-```
-
-### 4. Build
-
-**Build CLI:**
-```bash
-go build -ldflags="-s -w" -o ravro_dcrpt ./cmd/cli
-```
-
-**Build GUI:**
-```bash
-go build -ldflags="-s -w" -o ravro_dcrpt_gui ./cmd/gui
+./build_macos.sh
 ```
 
 ### Output Files
-- `ravro_dcrpt` - CLI application
-- `ravro_dcrpt_gui` - GUI application
+- `build/ravro_dcrpt` - universal CLI
+- `build/ravro_dcrpt_gui` - universal GUI
+- `build/Ravro Decryption Tool.app` - double-clickable app
+- `build/ravro_dcrpt-darwin-universal.tar.gz` - the file to copy to either Mac
 
 ---
 
@@ -316,8 +307,8 @@ After building, distribute these files together:
 - Users need to install: `libssl`
 
 **macOS:**
-- `ravro_dcrpt` or `ravro_dcrpt_gui`
-- Users need to install: `brew install openssl`
+- `Ravro Decryption Tool.app` from `ravro_dcrpt-darwin-universal.tar.gz`
+- Runs on Intel and Apple Silicon. OpenSSL is linked into the binary.
 
 ---
 

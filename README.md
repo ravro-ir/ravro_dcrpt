@@ -99,19 +99,14 @@ chmod +x ravro_dcrpt_gui
 ./ravro_dcrpt_gui
 ```
 
-**macOS (Intel):**
+**macOS (Apple Silicon and Intel, one download):**
 ```bash
-wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-amd64.tar.gz
-tar -xzf ravro_dcrpt-darwin-amd64.tar.gz
+wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-universal.tar.gz
+tar -xzf ravro_dcrpt-darwin-universal.tar.gz
 open "Ravro Decryption Tool.app"
 ```
 
-**macOS (Apple Silicon):**
-```bash
-wget https://github.com/ravro-ir/ravro_dcrpt/releases/latest/download/ravro_dcrpt-darwin-arm64.tar.gz
-tar -xzf ravro_dcrpt-darwin-arm64.tar.gz
-open "Ravro Decryption Tool.app"
-```
+This one file contains both the Intel and Apple Silicon slices. OpenSSL is linked into the app, so the other Mac does not need a separate OpenSSL install.
 
 **Windows:**
 ```powershell

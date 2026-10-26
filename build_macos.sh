@@ -1,77 +1,238 @@
 #!/bin/bash
 
-# Build script for macOS
-# This script handles OpenSSL linking issues on macOS
+# Build one macOS app that runs on Intel (x86_64) and Apple Silicon (arm64).
+#
+# OpenSSL is compiled from source for both architectures and linked statically,
+# then the two program slices are merged with lipo. The resulting app does not
+# need a Homebrew OpenSSL on the Mac that runs it.
 
-set -e
+set -euo pipefail
 
-echo "🍺 Building Ravro Decryption Tool for macOS..."
-
-# Check if Homebrew is installed
-if ! command -v brew &> /dev/null; then
-    echo "❌ Homebrew is not installed. Please install it first:"
-    echo "   /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+if [[ "$(uname -s)" != "Darwin" ]]; then
+    echo "This script must be run on macOS."
     exit 1
 fi
 
-# Check if OpenSSL is installed
-if ! brew list openssl &> /dev/null; then
-    echo "📦 Installing OpenSSL via Homebrew..."
-    brew install openssl
-else
-    echo "✅ OpenSSL is already installed"
-fi
+OPENSSL_VERSION="3.5.1"
+OPENSSL_URL="https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz"
+DEPLOYMENT_TARGET="13.0"
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+BUILD_DIR="$ROOT/build"
+SRC_DIR="$BUILD_DIR/src"
 
-# Set OpenSSL paths for both Intel and Apple Silicon Macs
-if [[ $(uname -m) == "arm64" ]]; then
-    # Apple Silicon Mac
-    OPENSSL_PREFIX="/opt/homebrew"
-    OPENSSL_VERSION_PATH="/opt/homebrew/Cellar/openssl@3"
-else
-    # Intel Mac
-    OPENSSL_PREFIX="/usr/local"
-    OPENSSL_VERSION_PATH="/usr/local/Cellar/openssl@3"
-fi
+native_goarch() {
+    case "$(uname -m)" in
+        arm64) echo arm64 ;;
+        x86_64) echo amd64 ;;
+        *)
+            echo "Unsupported architecture: $(uname -m)" >&2
+            exit 1
+            ;;
+    esac
+}
 
-# Find the exact OpenSSL version path
-if [ -d "$OPENSSL_VERSION_PATH" ]; then
-    OPENSSL_EXACT_PATH=$(find "$OPENSSL_VERSION_PATH" -maxdepth 1 -type d -name "*.*.*" | head -1)
-    if [ -n "$OPENSSL_EXACT_PATH" ]; then
-        OPENSSL_PREFIX="$OPENSSL_EXACT_PATH"
+clang_arch() {
+    case "$1" in
+        arm64) echo arm64 ;;
+        amd64) echo x86_64 ;;
+        *)
+            echo "Unsupported Go arch: $1" >&2
+            exit 1
+            ;;
+    esac
+}
+
+openssl_target() {
+    case "$1" in
+        arm64) echo darwin64-arm64 ;;
+        amd64) echo darwin64-x86_64 ;;
+        *)
+            echo "Unsupported Go arch: $1" >&2
+            exit 1
+            ;;
+    esac
+}
+
+fetch_openssl_source() {
+    local origin="$SRC_DIR/openssl-${OPENSSL_VERSION}"
+    local tarball="$SRC_DIR/openssl-${OPENSSL_VERSION}.tar.gz"
+
+    mkdir -p "$SRC_DIR"
+    if [[ ! -f "$tarball" ]]; then
+        echo "Downloading OpenSSL ${OPENSSL_VERSION}..."
+        curl -fL --retry 3 -o "$tarball" "$OPENSSL_URL"
     fi
-fi
+    if [[ ! -d "$origin" ]]; then
+        tar -xzf "$tarball" -C "$SRC_DIR"
+    fi
+}
 
-echo "🔧 Using OpenSSL from: $OPENSSL_PREFIX"
+build_static_openssl() {
+    local goarch="$1"
+    local prefix="$BUILD_DIR/openssl-${goarch}"
+    local crypto="$prefix/lib/libcrypto.a"
+    local ssl="$prefix/lib/libssl.a"
 
-# Set environment variables with proper paths
-export PKG_CONFIG_PATH="$OPENSSL_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
-export CGO_CFLAGS="-I$OPENSSL_PREFIX/include"
-export CGO_LDFLAGS="-L$OPENSSL_PREFIX/lib -lssl -lcrypto"
+    if [[ -f "$crypto" && -f "$ssl" ]]; then
+        echo "Using existing static OpenSSL for ${goarch}: ${prefix}"
+        return 0
+    fi
 
-# Set macOS deployment target to match OpenSSL version
-export MACOSX_DEPLOYMENT_TARGET="14.0"
+    fetch_openssl_source
 
-# Alternative: Try with current system version
-# export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f1-2)
+    local origin="$SRC_DIR/openssl-${OPENSSL_VERSION}"
+    local work="$SRC_DIR/openssl-${OPENSSL_VERSION}-${goarch}"
+    local target extra=()
+    target="$(openssl_target "$goarch")"
+    if [[ "$goarch" != "$(native_goarch)" ]]; then
+        extra+=(no-asm)
+    fi
 
-# Disable CGO for pure Go build (fallback option)
-# export CGO_ENABLED=0
+    echo "Building static OpenSSL ${OPENSSL_VERSION} for ${goarch} (${target})..."
+    rm -rf "$work" "$prefix"
+    cp -a "$origin" "$work"
+    (
+        cd "$work"
+        ./Configure "$target" no-shared no-zlib no-tests "${extra[@]+"${extra[@]}"}" \
+            --prefix="$prefix" \
+            --libdir=lib \
+            -mmacosx-version-min="$DEPLOYMENT_TARGET"
+        make -j"$(sysctl -n hw.ncpu)" build_libs
+    )
 
-# Create build directory
-mkdir -p build
+    mkdir -p "$prefix/lib" "$prefix/include"
+    cp "$work/libssl.a" "$work/libcrypto.a" "$prefix/lib/"
+    rm -rf "$prefix/include/openssl"
+    cp -R "$work/include/openssl" "$prefix/include/openssl"
 
-echo "🔨 Building CLI..."
-go build -ldflags="-s -w" -o build/ravro_dcrpt ./cmd/cli
+    local info
+    info="$(lipo -info "$crypto")"
+    case "$goarch" in
+        arm64) [[ "$info" == *arm64* ]] || { echo "OpenSSL archive is not arm64: $info"; exit 1; } ;;
+        amd64) [[ "$info" == *x86_64* ]] || { echo "OpenSSL archive is not x86_64: $info"; exit 1; } ;;
+    esac
+}
 
-echo "🔨 Building GUI..."
-go build -ldflags="-s -w" -o build/ravro_dcrpt_gui ./cmd/gui
+build_slice() {
+    local goarch="$1"
+    local prefix="$BUILD_DIR/openssl-${goarch}"
+    local arch sdk
+    arch="$(clang_arch "$goarch")"
+    sdk="$(xcrun --sdk macosx --show-sdk-path)"
 
-echo "✅ Build completed successfully!"
-echo ""
-echo "📁 Built files:"
-echo "   - build/ravro_dcrpt (CLI)"
-echo "   - build/ravro_dcrpt_gui (GUI)"
-echo ""
-echo "🚀 To run:"
-echo "   ./build/ravro_dcrpt --help"
-echo "   ./build/ravro_dcrpt_gui"
+    echo "Building ravro_dcrpt darwin/${goarch}..."
+    env \
+        CGO_ENABLED=1 \
+        GOOS=darwin \
+        GOARCH="$goarch" \
+        CC="clang -arch ${arch}" \
+        SDKROOT="$sdk" \
+        MACOSX_DEPLOYMENT_TARGET="$DEPLOYMENT_TARGET" \
+        CGO_CFLAGS="-arch ${arch} -isysroot ${sdk} -mmacosx-version-min=${DEPLOYMENT_TARGET} -I${prefix}/include" \
+        CGO_LDFLAGS="-arch ${arch} -isysroot ${sdk} -mmacosx-version-min=${DEPLOYMENT_TARGET} ${prefix}/lib/libssl.a ${prefix}/lib/libcrypto.a -framework Security -framework CoreFoundation" \
+        go build -ldflags="-s -w" -o "$BUILD_DIR/ravro_dcrpt-${goarch}" ./cmd/cli
+
+    env \
+        CGO_ENABLED=1 \
+        GOOS=darwin \
+        GOARCH="$goarch" \
+        CC="clang -arch ${arch}" \
+        SDKROOT="$sdk" \
+        MACOSX_DEPLOYMENT_TARGET="$DEPLOYMENT_TARGET" \
+        CGO_CFLAGS="-arch ${arch} -isysroot ${sdk} -mmacosx-version-min=${DEPLOYMENT_TARGET} -I${prefix}/include" \
+        CGO_LDFLAGS="-arch ${arch} -isysroot ${sdk} -mmacosx-version-min=${DEPLOYMENT_TARGET} ${prefix}/lib/libssl.a ${prefix}/lib/libcrypto.a -framework Security -framework CoreFoundation" \
+        go build -ldflags="-s -w" -o "$BUILD_DIR/ravro_dcrpt_gui-${goarch}" ./cmd/gui
+}
+
+assert_static_openssl() {
+    local binary="$1"
+    local arch="$2"
+    local libs
+    libs="$(otool -arch "$arch" -L "$binary")"
+    if grep -E 'libssl|libcrypto|openssl' <<<"$libs" >/dev/null; then
+        echo "OpenSSL is still dynamically linked in ${binary} (${arch}):"
+        echo "$libs"
+        exit 1
+    fi
+}
+
+write_app_bundle() {
+    local binary="$1"
+    local app="$BUILD_DIR/Ravro Decryption Tool.app"
+
+    rm -rf "$app"
+    mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
+    cp "$binary" "$app/Contents/MacOS/ravro_dcrpt_gui"
+    chmod +x "$app/Contents/MacOS/ravro_dcrpt_gui"
+
+    cat > "$app/Contents/Info.plist" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>ravro_dcrpt_gui</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.ravro.decryption</string>
+    <key>CFBundleName</key>
+    <string>Ravro Decryption Tool</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>2.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>${DEPLOYMENT_TARGET}</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
+EOF
+}
+
+echo "Building one macOS app for Intel and Apple Silicon..."
+
+for cmd in curl clang go lipo otool xcrun make perl; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "Missing required tool: $cmd"
+        if [[ "$cmd" == "clang" || "$cmd" == "make" || "$cmd" == "xcrun" ]]; then
+            echo "Install Xcode Command Line Tools: xcode-select --install"
+        elif [[ "$cmd" == "go" ]]; then
+            echo "Install Go 1.23 or newer: brew install go"
+        fi
+        exit 1
+    fi
+done
+
+cd "$ROOT"
+mkdir -p "$BUILD_DIR"
+
+for goarch in arm64 amd64; do
+    build_static_openssl "$goarch"
+    build_slice "$goarch"
+done
+
+lipo -create \
+    "$BUILD_DIR/ravro_dcrpt-arm64" \
+    "$BUILD_DIR/ravro_dcrpt-amd64" \
+    -output "$BUILD_DIR/ravro_dcrpt"
+lipo -create \
+    "$BUILD_DIR/ravro_dcrpt_gui-arm64" \
+    "$BUILD_DIR/ravro_dcrpt_gui-amd64" \
+    -output "$BUILD_DIR/ravro_dcrpt_gui"
+chmod +x "$BUILD_DIR/ravro_dcrpt" "$BUILD_DIR/ravro_dcrpt_gui"
+
+assert_static_openssl "$BUILD_DIR/ravro_dcrpt_gui" arm64
+assert_static_openssl "$BUILD_DIR/ravro_dcrpt_gui" x86_64
+
+write_app_bundle "$BUILD_DIR/ravro_dcrpt_gui"
+tar -czf "$BUILD_DIR/ravro_dcrpt-darwin-universal.tar.gz" -C "$BUILD_DIR" "Ravro Decryption Tool.app"
+
+echo
+echo "Universal binary:"
+lipo -info "$BUILD_DIR/ravro_dcrpt_gui"
+echo
+echo "Package: build/ravro_dcrpt-darwin-universal.tar.gz"
+echo "This file runs on Intel Macs (x86_64) and Apple Silicon (arm64)."
+echo "Run: open \"build/Ravro Decryption Tool.app\""

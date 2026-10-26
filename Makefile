@@ -114,6 +114,9 @@ build-windows-gui: ## Build GUI for Windows using fyne-cross
 	fyne-cross windows -arch=amd64 -app-id=ir.ravro.dcrpt ./cmd/gui
 	@echo "✅ Windows GUI built in: fyne-cross/dist/windows-amd64/"
 
+build-macos: ## Build one macOS app for Intel and Apple Silicon
+	./build_macos.sh
+
 build-macos-cli: ## Build CLI for macOS
 	@echo "🔨 Building CLI for macOS..."
 	@mkdir -p build

@@ -235,6 +235,21 @@ const reportHTMLStyles = `
       border-bottom: 1px solid var(--border-subtle);
       background: rgba(255,255,255,.015);
     }
+    summary.section-head {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    summary.section-head::-webkit-details-marker,
+    summary.section-head::marker { display: none; content: none; }
+    details.section:not([open]) > summary.section-head { border-bottom: none; }
+    .section-chevron {
+      flex-shrink: 0;
+      margin-inline-start: 8px;
+      color: var(--text-tertiary);
+      transition: transform .15s ease;
+    }
+    details.section[open] > summary .section-chevron { transform: rotate(180deg); }
     .section-icon {
       width: 28px; height: 28px;
       border-radius: 7px;
@@ -247,6 +262,7 @@ const reportHTMLStyles = `
       font-size: 13px;
       font-weight: 600;
       color: var(--text-primary);
+      flex: 1;
     }
     .section-count {
       margin-inline-start: auto;
@@ -603,6 +619,9 @@ const reportHTMLStyles = `
     }
     @media print {
       .no-print { display: none !important; }
+      details.section { display: block; }
+      details.section > .section-body { display: block !important; }
+      .section-chevron { display: none; }
       body { background: #fff; color: #000; padding: 0; font-size: 12px; }
       .card { border: 1px solid #ddd; border-radius: 0; margin: 0; max-width: 100%; }
       :root {
