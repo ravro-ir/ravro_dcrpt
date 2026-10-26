@@ -298,9 +298,7 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed release notes and version history.
 
 GNU General Public License, version 3
 
-## 👥 Author
+## 👥 Support
 
-Ramin Farajpour Cami
-- Email: ramin.blackhat@gmail.com
-- Alternate Email: farajpour@ravro.ir
+- Email: support@ravro.ir
 
